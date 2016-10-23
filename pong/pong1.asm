@@ -26,6 +26,7 @@ score1     .rs 1  ; player 1 score, 0-15
 score2     .rs 1  ; player 2 score, 0-15
 ;paddle1y   .rs 1  ; paddle 1 vertical position
 paddle1sprites .rs 2 ; paddle 1 sprites
+paddle1ytopsprites .rs 1; paddle 1 sprites y pos used as offset from paddle1ytop
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
@@ -292,18 +293,29 @@ MoveBallDown:
   STA ballup         ;;bounce, ball now moving down
 MoveBallDownDone:
 
-MovePaddleUp:
-  ;;if up button pressed
-  ;;  if paddle top > top wall
-  ;;    move paddle top and bottom up
-MovePaddleUpDone:
-
+MovePaddle:
+  LDA buttons1
+  ORA #%11110011; up or down button mask
+  CMP #%11110011 ; if the up or down buttin is not pressed then skip 
+  BEQ MovePaddleDone 
+  ;we must have up or down pressed
+  LDA buttons1
+  AND #%00001000 ; up mask
+  CMP #%00001000
+  BNE MovePaddleDown
+  LDA paddle1ytop
+  SEC
+  SBC #$03
+  STA paddle1ytop
+  JMP MovePaddleDone
 MovePaddleDown:
-  ;;if down button pressed
-  ;;  if paddle bottom < bottom wall
-  ;;    move paddle top and bottom down
-MovePaddleDownDone:
-  
+  LDA paddle1ytop
+  CLC
+  ADC #03
+  STA paddle1ytop
+MovePaddleDone:
+
+ 
 CheckPaddleCollision:
   ;;if ball x < paddle1x
   ;;  if ball y > paddle y top
@@ -329,10 +341,8 @@ UpdateSprites:
   LDA ballx
   STA $0203
   ;--------------------------
-  LDA buttons1
-  ORA #%11110011; up or down button mask
-  CMP #%11110011 ; if the up or down buttin is not pressed then skip 
-  BEQ AllSpritesUpDone 
+  LDA #$00
+  STA paddle1ytopsprites 
 ;set low order byte 04 to mem location paddlesprites
   LDA #$04
   STA paddle1sprites
@@ -340,23 +350,16 @@ UpdateSprites:
 ;set high order byte 02 to mem location paddlesprites + 1  
   LDA #$02
   STA paddle1sprites, Y
+  LDA #$00
 
    AllSpritesUp:
   LDY #$00; this is set to 0 to allow indirect addressing
-  ;we must have up or down pressed
-  LDA buttons1
-  AND #%00001000 ; up mask
-  CMP #%00001000
-  BNE MoveDown
-  LDA [paddle1sprites], Y
-  SEC
-  SBC #$01
-  STA [paddle1sprites], Y
-  JMP MoveDone
-MoveDown:
-  LDA [paddle1sprites], Y
-  CLC
-  ADC #01
+  LDA paddle1ytop
+  ;------
+
+  ADC paddle1ytopsprites
+
+  ;------
   STA [paddle1sprites], Y
 MoveDone:
   INX
@@ -368,6 +371,11 @@ MoveDone:
   LDA paddle1sprites, Y
   ADC #$00
   STA paddle1sprites, Y
+
+  LDA paddle1ytopsprites
+  ADC #$08
+  STA paddle1ytopsprites
+
   CPX #$04
   BNE AllSpritesUp
 AllSpritesUpDone:

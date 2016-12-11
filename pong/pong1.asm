@@ -27,6 +27,7 @@ score2     .rs 1  ; player 2 score, 0-15
 ;paddle1y   .rs 1  ; paddle 1 vertical position
 paddle1sprites .rs 2 ; paddle 1 sprites
 paddle1ytopsprites .rs 1; paddle 1 sprites y pos used as offset from paddle1ytop
+paddle1ybot .rs 1
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
@@ -37,7 +38,7 @@ TOPWALL        = $20
 BOTTOMWALL     = $E0
 LEFTWALL       = $04
   
-PADDLE1X       = $08  ; horizontal position for paddles, doesnt move
+PADDLE1X       = $08  ; horizontal position for paddles, doesnt move. TODO using this as paddle1 surface x pos. Change so this is not a constant.
 PADDLE2X       = $F0
 PADDLELENGTH   = $04
 ;;;;;;;;;;;;;;;;;;
@@ -315,12 +316,28 @@ MovePaddleDown:
   STA paddle1ytop
 MovePaddleDone:
 
+  LDA paddle1ytop
+  ADC #$20
+  STA paddle1ybot
  
 CheckPaddleCollision:
-  ;;if ball x < paddle1x
+  LDA ballx
+  CMP #PADDLE1X
+  BCS CheckPaddleCollisionDone
+  LDA bally
+  CMP paddle1ytop
+  BCC CheckPaddleCollisionDone 
+  LDA bally
+  CMP paddle1ybot
+  BCS CheckPaddleCollisionDone  
+;;if ball x < paddle1x
   ;;  if ball y > paddle y top
   ;;    if ball y < paddle y bottom
   ;;      bounce, ball now moving left
+  LDA #$01
+  STA ballright
+  LDA #$00
+  STA ballleft
 CheckPaddleCollisionDone:
 
   JMP GameEngineDone
@@ -329,7 +346,7 @@ CheckPaddleCollisionDone:
  
  
 UpdateSprites:
-  LDA  bally  ;;update all ball sprite info
+  LDA bally  ;;update all ball sprite info
   STA $0200
   
   LDA #$45
@@ -340,32 +357,38 @@ UpdateSprites:
   
   LDA ballx
   STA $0203
-  ;--------------------------
+ 
+  ;TODO fix this nasty bodge to get x position of paddle at 0 
+  LDA #$00
+  STA $0207
+  STA $020B
+  STA $020F
+  STA $0213
+
+
+  ;reset paddle1ysprites to 0
   LDA #$00
   STA paddle1ytopsprites 
 ;set low order byte 04 to mem location paddlesprites
   LDA #$04
   STA paddle1sprites
-  LDY #$01 ;set offset into y register
-;set high order byte 02 to mem location paddlesprites + 1  
+  ;set high order byte 02 to mem location paddlesprites + 1  
   LDA #$02
+  LDY #$01 ;set offset into y register
+
   STA paddle1sprites, Y
   LDA #$00
 
    AllSpritesUp:
   LDY #$00; this is set to 0 to allow indirect addressing
   LDA paddle1ytop
-  ;------
-
-  ADC paddle1ytopsprites
-
-  ;------
+  ADC paddle1ytopsprites; add paddle1ytop srpites (offset) to paddle1ytop to get y pos of current sprite
   STA [paddle1sprites], Y
 MoveDone:
   INX
   LDA paddle1sprites
   CLC
-  ADC #$04
+  ADC #$04; paddle sprites are stroed consecutively, 4 bytes per sprite, so we add 4 to get the y pos of the next sprite
   STA paddle1sprites
   LDY #$01
   LDA paddle1sprites, Y
@@ -373,10 +396,10 @@ MoveDone:
   STA paddle1sprites, Y
 
   LDA paddle1ytopsprites
-  ADC #$08
+  ADC #$08; we want the sprites to be separated by a vertical distance of 8px
   STA paddle1ytopsprites
 
-  CPX #$04
+  CPX #$04; finish the paddle sprite update when we have updated all 4 sprites comprising the paddle
   BNE AllSpritesUp
 AllSpritesUpDone:
   ;;update paddle sprites

@@ -24,9 +24,8 @@ buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 buttons2   .rs 1  ; player 2 gamepad buttons, one bit per button
 score1     .rs 1  ; player 1 score, 0-15
 score2     .rs 1  ; player 2 score, 0-15
-;paddle1y   .rs 1  ; paddle 1 vertical position
-paddle1sprites .rs 2 ; paddle 1 sprites
-paddle1ytopsprites .rs 1; paddle 1 sprites y pos used as offset from paddle1ytop
+mvpTileYMemLoc .rs 2 ; MovePaddleSprites param - mem location of y position of tile
+mvpY .rs 1; MovePaddleSprites param - y position
 paddle1ybot .rs 1
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
@@ -41,6 +40,8 @@ LEFTWALL       = $04
 PADDLE1X       = $08  ; horizontal position for paddles, doesnt move. TODO using this as paddle1 surface x pos. Change so this is not a constant.
 PADDLE2X       = $F0
 PADDLELENGTH   = $04
+;TOPPADDLETILEYPOSMEMLOCHIGH = $02 ;high byte of the mem location of y pos of top paddle tile
+;TOPPADDLETILEYPOSMEMLOCLOW = $04  ;low byte of the mem location of y pos of top paddle tile   
 ;;;;;;;;;;;;;;;;;;
 
 
@@ -365,43 +366,48 @@ UpdateSprites:
   STA $020F
   STA $0213
 
-
-  ;reset paddle1ysprites to 0
-  LDA #$00
-  STA paddle1ytopsprites 
-;set low order byte 04 to mem location paddlesprites
+ 
+;set init Paddle y pos mem location to 0204
   LDA #$04
-  STA paddle1sprites
+  STA mvpTileYMemLoc
   ;set high order byte 02 to mem location paddlesprites + 1  
   LDA #$02
   LDY #$01 ;set offset into y register
-
-  STA paddle1sprites, Y
-  LDA #$00
-
-   AllSpritesUp:
-  LDY #$00; this is set to 0 to allow indirect addressing
+  STA mvpTileYMemLoc, Y
+;set init y pos to paddleytop calcualted in game engine move
   LDA paddle1ytop
-  ADC paddle1ytopsprites; add paddle1ytop srpites (offset) to paddle1ytop to get y pos of current sprite
-  STA [paddle1sprites], Y
-MoveDone:
-  INX
-  LDA paddle1sprites
+  STA mvpY
+
+;subroutine (kind of)
+; moves a tile to a specified y position
+;param1: mvpY - the y position to place the paddle tile
+;param2 mvpTileYMemLoc - the mem loc of y position of tile to move.
+  MovePaddleSprites:
+  ;set new tile y position
+  LDY #$00; this is set to 0 to allow indirect addressing
+  LDA mvpY 
+  STA [mvpTileYMemLoc], Y
+
+  ;move to next mem loc of y position of tile
+  LDA mvpTileYMemLoc
   CLC
   ADC #$04; paddle sprites are stroed consecutively, 4 bytes per sprite, so we add 4 to get the y pos of the next sprite
-  STA paddle1sprites
+  STA mvpTileYMemLoc
   LDY #$01
-  LDA paddle1sprites, Y
+  LDA mvpTileYMemLoc, Y
   ADC #$00
-  STA paddle1sprites, Y
+  STA mvpTileYMemLoc, Y
 
-  LDA paddle1ytopsprites
+  ;increase y position
+  LDA mvpY
   ADC #$08; we want the sprites to be separated by a vertical distance of 8px
-  STA paddle1ytopsprites
+  STA mvpY
 
-  CPX #$04; finish the paddle sprite update when we have updated all 4 sprites comprising the paddle
-  BNE AllSpritesUp
-AllSpritesUpDone:
+  ; finish the paddle sprite update when we have updated all 4 sprites comprising the paddle
+  INX
+  CPX #$04 
+  BNE MovePaddleSprites
+MovePaddleSpritesDone:
   ;;update paddle sprites
   RTS
  

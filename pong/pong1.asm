@@ -27,6 +27,7 @@ score2     .rs 1  ; player 2 score, 0-15
 mvpTileYMemLoc .rs 2 ; MovePaddleSprites param - mem location of y position of tile
 mvpY .rs 1; MovePaddleSprites param - y position
 paddle1ybot .rs 1
+bckgrndtlmemloc .rs 2
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
@@ -103,7 +104,60 @@ LoadPalettesLoop:
   BNE LoadPalettesLoop  ; Branch to LoadPalettesLoop if compare was Not Equal to zero
                         ; if compare was equal to 32, keep going down
 
-
+LoadBackground:
+  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA #$20
+  STA $2006             ; write the high byte of $2000 address
+  LDA #$00
+  STA $2006             ; write the low byte of $2000 address
+  LDX #$00              ; start out at 0
+;LoadBackgroundLoop:
+;  LDA background, x     ; load data from address (background + the value in x)
+;  STA $2007             ; write to PPU
+;  INX                   ; X = X + 1
+;  CPX #$FF              ; Compare X to hex $80, decimal 128 - copying 128 bytes
+;  BNE LoadBackgroundLoop  ; Branch to LoadBackgroundLoop if compare was Not Equal to zero
+                        ; if compare was equal to 128, keep going down
+ 
+  LDA #low(background)
+  STA bckgrndtlmemloc
+  LDA #high(background)
+  LDY #$01
+  STA bckgrndtlmemloc, Y
+  LDX #$00 
+LoadBackgroundLoopOuter:
+  LDY #0
+LoadBackgroundLoopInner:
+  LDA [bckgrndtlmemloc], Y
+  STA $2007
+  INY ; the zero flag is set if the resukt is zero
+  BNE LoadBackgroundLoopInner ; we can use the conditional branch here as INY affects the zero flag
+  INX
+  CPX #$02
+  BEQ LoadBackgroundLoopEnd
+  LDY #$01
+  LDA bckgrndtlmemloc, Y
+  CLC
+  ADC #$01
+  STA bckgrndtlmemloc, Y
+  BNE LoadBackgroundLoopOuter
+LoadBackgroundLoopEnd:
+             
+              
+LoadAttribute:
+  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA #$23
+  STA $2006             ; write the high byte of $23C0 address
+  LDA #$C0
+  STA $2006             ; write the low byte of $23C0 address
+  LDX #$00              ; start out at 0
+LoadAttributeLoop:
+  LDA attribute, x      ; load data from address (attribute + the value in x)
+  STA $2007             ; write to PPU
+  INX                   ; X = X + 1
+  CPX #$10              ; Compare X to hex $08, decimal 8 - copying 8 bytes
+  BNE LoadAttributeLoop  ; Branch to LoadAttributeLoop if compare was Not Equal to zero
+                        ; if compare was equal to 128, keep going down
   
 
 
@@ -466,6 +520,59 @@ sprites:
   .db $88, $86, $00, $04   ;sprite 2
   .db $90, $86, $00, $04   ;sprite 3
   .db $98, $86, $00, $04   ;sprite 4
+
+background:
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;all sky
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 2
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;all sky
+
+  .db $24,$24,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;row 3
+  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;some brick tops
+
+  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;row 4
+  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;brick bottoms
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 5 
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 6
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 7 
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 8
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 9
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 10
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 11
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 12
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 13
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 14
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 15
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 16
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+attribute:
+  .db %01010000, %01010000, %01010000, %01010000, %01010000, %01010000, %01010000, %01010000
+  .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
 
 
 

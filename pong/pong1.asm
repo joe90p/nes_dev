@@ -111,14 +111,7 @@ LoadBackground:
   LDA #$00
   STA $2006             ; write the low byte of $2000 address
   LDX #$00              ; start out at 0
-;LoadBackgroundLoop:
-;  LDA background, x     ; load data from address (background + the value in x)
-;  STA $2007             ; write to PPU
-;  INX                   ; X = X + 1
-;  CPX #$FF              ; Compare X to hex $80, decimal 128 - copying 128 bytes
-;  BNE LoadBackgroundLoop  ; Branch to LoadBackgroundLoop if compare was Not Equal to zero
-                        ; if compare was equal to 128, keep going down
- 
+
   LDA #low(background)
   STA bckgrndtlmemloc
   LDA #high(background)
@@ -127,14 +120,20 @@ LoadBackground:
   LDX #$00 
 LoadBackgroundLoopOuter:
   LDY #0
-LoadBackgroundLoopInner:
+LoadBackgroundLoopInner: 
+  ;check if we have reached the end of the loop determined by the value of the looop counter
+  ; the loop counter is tored in x and y registers, y= low byte of loop counter, x= high byte of loop counter
+  CPX #$03
+  BNE Incrementer
+  CPY #$C0
+  BNE Incrementer
+  JMP LoadBackgroundLoopEnd
+Incrementer:
   LDA [bckgrndtlmemloc], Y
   STA $2007
-  INY ; the zero flag is set if the resukt is zero
+  INY ; the zero flag is set if the resukt is zero 
   BNE LoadBackgroundLoopInner ; we can use the conditional branch here as INY affects the zero flag
   INX
-  CPX #$02
-  BEQ LoadBackgroundLoopEnd
   LDY #$01
   LDA bckgrndtlmemloc, Y
   CLC
@@ -155,7 +154,7 @@ LoadAttributeLoop:
   LDA attribute, x      ; load data from address (attribute + the value in x)
   STA $2007             ; write to PPU
   INX                   ; X = X + 1
-  CPX #$10              ; Compare X to hex $08, decimal 8 - copying 8 bytes
+  CPX #$40              ; Compare X to hex $08, decimal 8 - copying 8 bytes
   BNE LoadAttributeLoop  ; Branch to LoadAttributeLoop if compare was Not Equal to zero
                         ; if compare was equal to 128, keep going down
   
@@ -570,9 +569,62 @@ background:
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 16
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
 
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 17
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 18
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 19
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 20
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 21
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 22
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 23
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 24
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 25
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 26
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 27
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 28
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+
+  .db $24,$24,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;row 29
+  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$47  ;;end brick bottom
+
+  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;row 30
+  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;end brick bottom
+
+
+
 attribute:
   .db %01010000, %01010000, %01010000, %01010000, %01010000, %01010000, %01010000, %01010000
   .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
+  .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
+  .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
+  .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
+  .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
+  .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
+  .db %00000100, %00000101, %00000101, %00000101, %00000101, %00000101, %00000101, %01010101
+
+
+
 
 
 

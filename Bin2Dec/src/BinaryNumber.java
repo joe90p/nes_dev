@@ -1,7 +1,13 @@
+/*
+ * Binary representation of 8 bit number
+ */
 public class BinaryNumber
 {
+	/*
+	 * boolean array (length 8) representing bits. 
+	 * bool at index 0=2^7, 1=2^6,..., 7=2^0
+	 */
 	private boolean[] _number;
-	//private boolean _carryOver;
 	
 	public BinaryNumber()
 	{
@@ -103,8 +109,4 @@ public class BinaryNumber
 		return new String(charArray);
 	}
 	
-	//public boolean CarryOver()
-	//{
-	//	return _carryOver;
-	//}
 }

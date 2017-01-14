@@ -6,9 +6,57 @@ public class bintodec {
 	private static BinaryNumber[] binaryTable;
 	public static void main(String[] args)
 	{
+		SetBinaryTable();
 		int input = Integer.parseInt(args[0]);
-		BinaryNumber tempBinary = BinaryNumber.ConvertFromInt(input);
+		BinaryNumber inputBinary = BinaryNumber.ConvertFromInt(input);
 		
+		BinaryNumber[] decimalResult = new BinaryNumber[3]; 
+		decimalResult[0] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
+		decimalResult[1] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
+		decimalResult[2] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
+		
+		for(int i=0; i < 8; i++)
+		{
+			int y = 0;
+			carryOver = inputBinary.ShiftLeft(carryOver);
+			for(int j=0; j < 3; j++)
+			{
+				if(j<2)
+				{
+					y = decimalResult[j].ConvertToInt();
+					decimalResult[j] = binaryTable[y].GetCopy();
+				}
+				carryOver = decimalResult[j].ShiftLeft(carryOver);
+			}
+			System.out.print("Pass ");
+			System.out.print(i);
+			System.out.print(": ");
+			for(int j=2; j >= 0; j--)
+			{
+				System.out.print(decimalResult[j].ConvertToInt());
+			}
+			System.out.print("\n");
+		}
+		System.out.println("----------------");
+		System.out.println("----------------");
+		System.out.println("Final Result:");
+		for(int i=2; i >= 0; i--)
+		{
+			System.out.print(decimalResult[i].ConvertToInt());
+		}
+		System.out.print("\n");
+		System.out.println("----------------");
+		System.out.println("----------------");
+	}
+	
+	/*
+	 * Set Binary table
+	 * Used to determine behaviour when multiplying decimal number representation by 2.
+	 * The value of array entry  shifted left one position is equal to the index * 2, when the index * 2 will exceed
+	 * 10 a 1 is placed in the 0th bit of the pre-shifted number. 
+	 */
+	private static void SetBinaryTable()
+	{
 		binaryTable = new BinaryNumber[10];
 		binaryTable[0] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
 		binaryTable[1] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, true});
@@ -20,37 +68,6 @@ public class bintodec {
 		binaryTable[7] = new BinaryNumber(new boolean[]{ true, false, false, false, false, false, true, false});
 		binaryTable[8] = new BinaryNumber(new boolean[]{ true, false, false, false, false, false, true, true});
 		binaryTable[9] = new BinaryNumber(new boolean[]{ true, false, false, false, false, true, false, false});
-		
-		//BinaryNumber tempBinary = new BinaryNumber(new boolean[]{ false, false, false, true, false, false, false, false});
-		
-		BinaryNumber[] decimalResult = new BinaryNumber[3]; 
-		decimalResult[0] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
-		decimalResult[1] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
-		decimalResult[2] = new BinaryNumber(new boolean[]{ false, false, false, false, false, false, false, false});
-		
-		for(int i=0; i < 8; i++)
-		{
-			int y = 0;
-			carryOver = tempBinary.ShiftLeft(carryOver);
-			
-			
-			y = decimalResult[0].ConvertToInt();
-			decimalResult[0] = binaryTable[y].GetCopy();
-			carryOver = decimalResult[0].ShiftLeft(carryOver);
-			
-			y = decimalResult[1].ConvertToInt();
-			decimalResult[1] = binaryTable[y].GetCopy();
-			carryOver = decimalResult[1].ShiftLeft(carryOver);
-			
-			carryOver = decimalResult[2].ShiftLeft(carryOver);
-		}
-		for(int i=2; i >= 0; i--)
-		{
-			System.out.print(decimalResult[i].ConvertToInt());
-		}
-		
-		
-		
 	}
 }
 

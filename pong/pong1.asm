@@ -392,6 +392,11 @@ CheckPaddleCollision:
   STA ballright
   LDA #$00
   STA ballleft
+;increase score on bat hit
+  LDA score1
+  CLC
+  ADC #$01
+  STA score1
 CheckPaddleCollisionDone:
 
   JMP GameEngineDone
@@ -468,6 +473,18 @@ MovePaddleSpritesDone:
 DrawScore:
   ;;draw score on screen using background tiles
   ;;or using many sprites
+  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA #$20
+  STA $2006             ; write the high byte of background score address
+  LDA #$1D
+  STA $2006             ; write the low byte of background score address
+  LDX #$00              ; start out at 0
+DrawScoreLoop:
+  INX
+  LDA #$02
+  STA $2007
+  CPX #$03
+  BNE DrawScoreLoop   
   RTS
  
  
@@ -514,12 +531,14 @@ palette:
   .db $22,$0F,$27,$17,  $22,$36,$17,$0F,  $22,$30,$21,$0F,  $22,$27,$17,$0F
 sprites:
      ;vert tile attr horiz
-  .db $80, $32, $00, $80   ;sprite 0
-  .db $80, $85, $00, $04   ;sprite 1
-  .db $88, $86, $00, $04   ;sprite 2
-  .db $90, $86, $00, $04   ;sprite 3
-  .db $98, $86, $00, $04   ;sprite 4
-
+  .db $80, $32, $00, $80   ;sprite 0 ball
+  .db $80, $85, $00, $04   ;sprite 1 paddle top
+  .db $88, $86, $00, $04   ;sprite 2 paddle middle
+  .db $90, $86, $00, $04   ;sprite 3 paddle middle
+  .db $98, $86, $00, $04   ;sprite 4 paddle bottom
+;  .db $00, $00, $00, $40   ;score 100s
+;  .db $00, $00, $00, $50   ;score 10s
+;  .db $00, $00, $00, $60   ;score 1s
 background:
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;all sky

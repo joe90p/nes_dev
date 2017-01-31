@@ -28,6 +28,8 @@ mvpTileYMemLoc .rs 2 ; MovePaddleSprites param - mem location of y position of t
 mvpY .rs 1; MovePaddleSprites param - y position
 paddle1ybot .rs 1
 bckgrndtlmemloc .rs 2
+decimalResult .rs 3
+tempBinary .rs 1
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
@@ -308,6 +310,10 @@ MoveBallLeft:
   LDA #$00
   STA ballleft         ;;bounce, ball now moving right
   ;;in real game, give point to player 2, reset ball
+  ;LDA score1
+  ;CLC
+  ;ADC #$01
+  ;STA score1
 MoveBallLeftDone:
 
 
@@ -397,12 +403,34 @@ CheckPaddleCollision:
   CLC
   ADC #$01
   STA score1
+  LDA score1
+  STA tempBinary
+  JSR BinaryToDecimal
 CheckPaddleCollisionDone:
 
   JMP GameEngineDone
  
  
- 
+BinaryToDecimal:
+  lda #$00
+  sta decimalResult+0
+  sta decimalResult+1
+  sta decimalResult+2
+  ldx #$08
+BitLoop:
+  asl tempBinary
+  ldy decimalResult+0
+  lda BinTable, y
+  rol a
+  sta decimalResult+0
+  ldy decimalResult+1
+  lda BinTable, y
+  rol a
+  sta decimalResult+1
+  rol decimalResult+2
+  dex
+  bne BitLoop
+  rts 
  
 UpdateSprites:
   LDA bally  ;;update all ball sprite info
@@ -478,12 +506,12 @@ DrawScore:
   STA $2006             ; write the high byte of background score address
   LDA #$1D
   STA $2006             ; write the low byte of background score address
-  LDX #$00              ; start out at 0
+  LDX #$03              ; start out at 0
 DrawScoreLoop:
-  INX
-  LDA #$02
+  DEX
+  LDA decimalResult,X
   STA $2007
-  CPX #$03
+  CPX #$00
   BNE DrawScoreLoop   
   RTS
  
@@ -642,7 +670,8 @@ attribute:
   .db %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010100
   .db %00000100, %00000101, %00000101, %00000101, %00000101, %00000101, %00000101, %01010101
 
-
+BinTable:
+  .db $00, $01, $02, $03, $04, $80, $81, $82, $83, $84
 
 
 

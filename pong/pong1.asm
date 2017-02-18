@@ -24,6 +24,7 @@ buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 buttons2   .rs 1  ; player 2 gamepad buttons, one bit per button
 score1     .rs 1  ; player 1 score, 0-15
 score2     .rs 1  ; player 2 score, 0-15
+lives1     .rs 1  ; player 1 lives
 mvpTileYMemLoc .rs 2 ; MovePaddleSprites param - mem location of y position of tile
 mvpY .rs 1; MovePaddleSprites param - y position
 paddle1ybot .rs 1
@@ -179,7 +180,9 @@ LoadAttributeLoop:
   LDA #$02
   STA ballspeedx
   STA ballspeedy
-
+;set starting lives
+  LDA #$03
+  STA lives1
 
 ;;:Set starting game state
   LDA #STATEPLAYING
@@ -211,7 +214,7 @@ NMI:
   STA $4014       ; set the high byte (02) of the RAM address, start the transfer
 
   JSR DrawScore
-
+  JSR DrawLives
   ;;This is the PPU clean up section, so rendering the next frame starts properly.
   LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
   STA $2000
@@ -386,10 +389,10 @@ CheckPaddleCollision:
   BCS CheckPaddleCollisionDone
   LDA bally
   CMP paddle1ytop
-  BCC CheckPaddleCollisionDone 
+  BCC PaddleMiss;CheckPaddleCollisionDone 
   LDA bally
   CMP paddle1ybot
-  BCS CheckPaddleCollisionDone  
+  BCS PaddleMiss;CheckPaddleCollisionDone  
 ;;if ball x < paddle1x
   ;;  if ball y > paddle y top
   ;;    if ball y < paddle y bottom
@@ -406,6 +409,11 @@ CheckPaddleCollision:
   LDA score1
   STA tempBinary
   JSR BinaryToDecimal
+  JMP CheckPaddleCollisionDone
+PaddleMiss:
+  ;LDA lives1
+  INC lives1
+  ;STA lives1
 CheckPaddleCollisionDone:
 
   JMP GameEngineDone
@@ -515,7 +523,23 @@ DrawScoreLoop:
   BNE DrawScoreLoop   
   RTS
  
- 
+ DrawLives:
+  ;;draw lives on screen using background tiles
+  ;;or using many sprites
+  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA #$20
+  STA $2006             ; write the high byte of background score address
+  LDA #$08
+  STA $2006             ; write the low byte of background score address
+  ;LDX #$03              ; start out at 0
+;DrawLivesLoop:
+  ;DEX
+  LDA lives1 ;decimalResult,X
+  STA $2007
+  ;CPX #$00
+  ;BNE DrawLivesLoop   
+  RTS
+
  
 ReadController1:
   LDA #$01
@@ -568,8 +592,8 @@ sprites:
 ;  .db $00, $00, $00, $50   ;score 10s
 ;  .db $00, $00, $00, $60   ;score 1s
 background:
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;all sky
+  .db $24,$24,$15,$12,$1F,$0E,$1C,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
+  .db $24,$24,$24,$24,$24,$24,$24,$1C,$0C,$18,$1B,$0E,$24,$24,$24,$24  ;;all sky
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 2
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;all sky

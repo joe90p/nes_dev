@@ -181,7 +181,7 @@ LoadAttributeLoop:
   STA ballspeedx
   STA ballspeedy
 ;set starting lives
-  LDA #$03
+  LDA #$0A
   STA lives1
 
 ;;:Set starting game state
@@ -411,9 +411,12 @@ CheckPaddleCollision:
   JSR BinaryToDecimal
   JMP CheckPaddleCollisionDone
 PaddleMiss:
-  ;LDA lives1
-  INC lives1
-  ;STA lives1
+  DEC lives1
+  LDA #$50
+  STA bally
+  
+  LDA #$80
+  STA ballx
 CheckPaddleCollisionDone:
 
   JMP GameEngineDone

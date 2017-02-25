@@ -185,7 +185,7 @@ LoadAttributeLoop:
   STA lives1
 
 ;;:Set starting game state
-  LDA #STATEPLAYING
+  LDA #STATETITLE
   STA gamestate
 
   LDX #$00                ; start out at 0
@@ -212,9 +212,17 @@ NMI:
   STA $2003       ; set the low byte (00) of the RAM address
   LDA #$02
   STA $4014       ; set the high byte (02) of the RAM address, start the transfer
-
+  
+  ;LDA gamestate
+  ;CMP #STATETITLE
+  ;BNE DrawPlayData
+  JSR DrawTitle
+  ;JMP DrawingDone
+;DrawPlayData:
   JSR DrawScore
   JSR DrawLives
+
+DrawingDone:
   ;;This is the PPU clean up section, so rendering the next frame starts properly.
   LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
   STA $2000
@@ -260,6 +268,13 @@ EngineTitle:
   ;;  set starting paddle/ball position
   ;;  go to Playing State
   ;;  turn screen on
+
+  LDA buttons1
+  AND #%00010000; start button mask
+  CMP #%00010000 ; if the up or down buttin is not pressed then skip 
+  BNE GameEngineDone
+  LDA #STATEPLAYING
+  STA gamestate
   JMP GameEngineDone
 
 ;;;;;;;;; 
@@ -508,7 +523,30 @@ MovePaddleSpritesDone:
   ;;update paddle sprites
   RTS
  
- 
+DrawTitle:
+  ;;draw score on screen using background tiles
+  ;;or using many sprites
+  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA #$22
+  STA $2006             ; write the high byte of background score address
+  LDA #$0B
+  STA $2006             ; write the low byte of background score address
+  LDX #$00              ; start out at 0
+DrawTitleLoop:
+  LDA gamestate
+  CMP #STATEPLAYING
+  BNE LoadTitleTile
+  LDA #$24
+  JMP LoadTitleTileDone
+LoadTitleTile:
+  LDA title,X
+LoadTitleTileDone: 
+  STA $2007
+  INX
+  CPX #$09
+  BNE DrawTitleLoop   
+  RTS
+
 DrawScore:
   ;;draw score on screen using background tiles
   ;;or using many sprites
@@ -517,7 +555,7 @@ DrawScore:
   STA $2006             ; write the high byte of background score address
   LDA #$1D
   STA $2006             ; write the low byte of background score address
-  LDX #$03              ; start out at 0
+  LDX #$03             ; start out at 0
 DrawScoreLoop:
   DEX
   LDA decimalResult,X
@@ -581,6 +619,8 @@ ReadController2Loop:
   
   .bank 1
   .org $E000
+title:
+  .db $19 ,$18 ,$17 ,$10 ,$12 ,$17 ,$0A ,$15 ,$0D
 palette:
   .db $22,$29,$1A,$0F,  $22,$36,$17,$0F,  $22,$30,$21,$0F,  $22,$27,$17,$0F   ;;background palette
   .db $22,$0F,$27,$17,  $22,$36,$17,$0F,  $22,$30,$21,$0F,  $22,$27,$17,$0F

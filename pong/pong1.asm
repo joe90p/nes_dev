@@ -31,6 +31,7 @@ paddle1ybot .rs 1
 bckgrndtlmemloc .rs 2
 decimalResult .rs 3
 tempBinary .rs 1
+buttonStateCache .rs 1
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
@@ -271,7 +272,11 @@ EngineTitle:
 
   LDA buttons1
   AND #%00010000; start button mask
-  CMP #%00010000 ; if the up or down buttin is not pressed then skip 
+  CMP #%00010000 ; if the start button is pressed
+  BNE GameEngineDone 
+  LDA buttonStateCache
+  ORA #%11101111; start button mask
+  CMP #%11101111 ; if the start button was pressed 
   BNE GameEngineDone
   LDA #STATEPLAYING
   STA gamestate
@@ -290,7 +295,18 @@ EngineGameOver:
 ;;;;;;;;;;;
  
 EnginePlaying:
-
+  LDA buttons1
+  AND #%00010000; start button mask
+  CMP #%00010000 ; if the start button is pressed 
+  BNE ButtonCheckDone
+  LDA buttonStateCache
+  ORA #%11101111; start button mask
+  CMP #%11101111 ; if the start button was pressed 
+  BNE ButtonCheckDone
+  LDA #STATETITLE 
+  STA gamestate
+  JMP GameEngineDone
+ButtonCheckDone:
 MoveBallRight:
   LDA ballright
   BEQ MoveBallRightDone   ;;if ballright=0, skip this section
@@ -583,6 +599,8 @@ DrawScoreLoop:
 
  
 ReadController1:
+  LDA buttons1
+  STA buttonStateCache
   LDA #$01
   STA $4016
   LDA #$00

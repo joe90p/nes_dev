@@ -182,7 +182,7 @@ LoadAttributeLoop:
   STA ballspeedx
   STA ballspeedy
 ;set starting lives
-  LDA #$0A
+  LDA #$08
   STA lives1
 
 ;;:Set starting game state
@@ -217,7 +217,7 @@ NMI:
   ;LDA gamestate
   ;CMP #STATETITLE
   ;BNE DrawPlayData
-  JSR DrawTitle
+  JSR DrawInfo
   ;JMP DrawingDone
 ;DrawPlayData:
   JSR DrawScore
@@ -290,11 +290,39 @@ EngineGameOver:
   ;;  load title screen
   ;;  go to Title State
   ;;  turn screen on 
+
+
+  LDA buttons1
+  AND #%00010000; start button mask
+  CMP #%00010000 ; if the start button is pressed
+  BNE GameEngineDone 
+  LDA buttonStateCache
+  ORA #%11101111; start button mask
+  CMP #%11101111 ; if the start button was pressed 
+  BNE GameEngineDone
+  LDA #STATETITLE
+  STA gamestate
+  LDA #$08
+  STA lives1
+  LDA #$00
+  STA paddle1ytop
+  LDA #$00
+  STA score1
+  JSR BinaryToDecimal
   JMP GameEngineDone
  
 ;;;;;;;;;;;
  
 EnginePlaying:
+  LDA lives1
+  CMP #$00
+  BNE LivesCheckDone
+  LDA #STATEGAMEOVER
+  STA gamestate
+  JMP GameEngineDone
+
+LivesCheckDone:
+
   LDA buttons1
   AND #%00010000; start button mask
   CMP #%00010000 ; if the start button is pressed 
@@ -539,7 +567,7 @@ MovePaddleSpritesDone:
   ;;update paddle sprites
   RTS
  
-DrawTitle:
+DrawInfo:
   ;;draw score on screen using background tiles
   ;;or using many sprites
   LDA $2002             ; read PPU status to reset the high/low latch
@@ -551,8 +579,13 @@ DrawTitle:
 DrawTitleLoop:
   LDA gamestate
   CMP #STATEPLAYING
-  BNE LoadTitleTile
+  BNE LoadInfoText
   LDA #$24
+  JMP LoadTitleTileDone
+LoadInfoText:
+  CMP #STATEGAMEOVER
+  BNE LoadTitleTile
+  LDA gameover,X
   JMP LoadTitleTileDone
 LoadTitleTile:
   LDA title,X
@@ -639,6 +672,8 @@ ReadController2Loop:
   .org $E000
 title:
   .db $19 ,$18 ,$17 ,$10 ,$12 ,$17 ,$0A ,$15 ,$0D
+gameover:
+  .db $10, $0A, $16, $0E, $24, $18, $1F, $0E, $1B 
 palette:
   .db $22,$29,$1A,$0F,  $22,$36,$17,$0F,  $22,$30,$21,$0F,  $22,$27,$17,$0F   ;;background palette
   .db $22,$0F,$27,$17,  $22,$36,$17,$0F,  $22,$30,$21,$0F,  $22,$27,$17,$0F

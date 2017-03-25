@@ -37,10 +37,13 @@ STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
 STATEGAMEOVER  = $02  ; displaying game over screen
   
-RIGHTWALL      = $F4  ; when ball reaches one of these, do something
-TOPWALL        = $20
+RIGHTWALL      = $F8  ; when ball reaches one of these, do something
+TOPWALL        = $1F
 BOTTOMWALL     = $E0
 LEFTWALL       = $04
+BALLWIDTH      = $08
+BALLLENGTH     = $08
+
   
 PADDLE1X       = $08  ; horizontal position for paddles, doesnt move. TODO using this as paddle1 surface x pos. Change so this is not a constant.
 PADDLE2X       = $F0
@@ -345,12 +348,19 @@ MoveBallRight:
   STA ballx
 
   LDA ballx
+  ADC #BALLWIDTH
+  SBC #$01
+  ADC ballspeedx
   CMP #RIGHTWALL
   BCC MoveBallRightDone      ;;if ball x < right wall, still on screen, skip next section
+  ;here the first pixel to the right of the ball coincides with the leftmost pixel of the wall 
   LDA #$00
   STA ballright
   LDA #$01
   STA ballleft         ;;bounce, ball now moving left
+  ;LDA #STATETITLE
+  ;STA gamestate
+  JMP MoveBallLeftDone  
   ;;in real game, give point to player 1, reset ball
 MoveBallRightDone:
 
@@ -372,10 +382,6 @@ MoveBallLeft:
   LDA #$00
   STA ballleft         ;;bounce, ball now moving right
   ;;in real game, give point to player 2, reset ball
-  ;LDA score1
-  ;CLC
-  ;ADC #$01
-  ;STA score1
 MoveBallLeftDone:
 
 
@@ -388,13 +394,21 @@ MoveBallUp:
   SBC ballspeedy        ;;bally position = bally - ballspeedy
   STA bally
 
-  LDA bally
-  CMP #TOPWALL
-  BCS MoveBallUpDone      ;;if ball y > top wall, still on screen, skip next section
+  LDA #TOPWALL
+  ADC ballspeedy
+  SBC #$01
+  CMP bally
+  BCS BounceDown    ;; if bally -ballyspeed <= topwall then bounce ball
+  JMP MoveBallDownDone
+BounceDown:
+
   LDA #$01
   STA balldown
   LDA #$00
   STA ballup         ;;bounce, ball now moving down
+  ;LDA #STATETITLE
+  ;STA gamestate
+  JMP MoveBallDownDone
 MoveBallUpDone:
 
 
@@ -406,14 +420,17 @@ MoveBallDown:
   CLC
   ADC ballspeedy        ;;bally position = bally + ballspeedy
   STA bally
-
   LDA bally
+  ADC #BALLLENGTH
+  ADC ballspeedy
   CMP #BOTTOMWALL
   BCC MoveBallDownDone      ;;if ball y < bottom wall, still on screen, skip next section
   LDA #$00
   STA balldown
   LDA #$01
   STA ballup         ;;bounce, ball now moving down
+  ;LDA #STATETITLE
+  ;STA gamestate
 MoveBallDownDone:
 
 MovePaddle:
@@ -468,6 +485,8 @@ CheckPaddleCollision:
   LDA score1
   STA tempBinary
   JSR BinaryToDecimal
+  ;LDA #STATETITLE
+  ;STA gamestate
   JMP CheckPaddleCollisionDone
 PaddleMiss:
   DEC lives1
@@ -506,11 +525,11 @@ UpdateSprites:
   LDA bally  ;;update all ball sprite info
   STA $0200
   
-  LDA #$45
-  STA $0201
+  ;LDA #$
+  ;STA $0201
   
-  LDA #$01
-  STA $0202
+  ;LDA #$01
+  ;STA $0202
   
   LDA ballx
   STA $0203
@@ -679,11 +698,11 @@ palette:
   .db $22,$0F,$27,$17,  $22,$36,$17,$0F,  $22,$30,$21,$0F,  $22,$27,$17,$0F
 sprites:
      ;vert tile attr horiz
-  .db $80, $32, $00, $80   ;sprite 0 ball
+  .db $80, $85, $00, $80   ;sprite 0 ball
   .db $80, $85, $00, $04   ;sprite 1 paddle top
   .db $88, $86, $00, $04   ;sprite 2 paddle middle
   .db $90, $86, $00, $04   ;sprite 3 paddle middle
-  .db $98, $86, $00, $04   ;sprite 4 paddle bottom
+  .db $98, $86, $00, $F9   ;sprite 4 paddle bottom
 ;  .db $00, $00, $00, $40   ;score 100s
 ;  .db $00, $00, $00, $50   ;score 10s
 ;  .db $00, $00, $00, $60   ;score 1s

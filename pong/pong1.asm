@@ -19,6 +19,7 @@ ballright  .rs 1  ; 1 = ball moving right
 ballspeedx .rs 1  ; ball horizontal speed per frame
 ballspeedy .rs 1  ; ball vertical speed per frame
 paddle1ytop   .rs 1  ; player 1 paddle top vertical position
+paddle2ytop   .rs 1  ; player 2 paddle top vertical position
 paddle2ybot   .rs 1  ; player 2 paddle bottom vertical position
 buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 buttons2   .rs 1  ; player 2 gamepad buttons, one bit per button
@@ -37,7 +38,7 @@ STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
 STATEGAMEOVER  = $02  ; displaying game over screen
   
-RIGHTWALL      = $F8  ; when ball reaches one of these, do something
+RIGHTWALL      = $FF  ; when ball reaches one of these, do something
 TOPWALL        = $1F
 BOTTOMWALL     = $E0
 LEFTWALL       = $04
@@ -197,7 +198,7 @@ PositionSprite:
   LDA sprites, x 
   STA $0200, x
   INX
-  CPX #$14
+  CPX #$24
   BNE PositionSprite
               
   LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -455,9 +456,36 @@ MovePaddleDown:
   STA paddle1ytop
 MovePaddleDone:
 
+MovePaddle2:
+  LDA buttons2
+  ORA #%11110011; up or down button mask
+  CMP #%11110011 ; if the up or down buttin is not pressed then skip 
+  BEQ MovePaddle2Done 
+  ;we must have up or down pressed
+  LDA buttons2
+  AND #%00001000 ; up mask
+  CMP #%00001000
+  BNE MovePaddle2Down
+  LDA paddle2ytop
+  SEC
+  SBC #$03
+  STA paddle2ytop
+  JMP MovePaddle2Done
+MovePaddle2Down:
+  LDA paddle2ytop
+  CLC
+  ADC #03
+  STA paddle2ytop
+MovePaddle2Done:
+
+
   LDA paddle1ytop
   ADC #$20
   STA paddle1ybot
+
+  LDA paddle2ytop
+  ADC #$20
+  STA paddle2ybot
  
 CheckPaddleCollision:
   LDA ballx
@@ -541,7 +569,7 @@ UpdateSprites:
   STA $020F
   STA $0213
 
- 
+MovePaddleSpritesPaddle1: 
 ;set init Paddle y pos mem location to 0204
   LDA #$04
   STA mvpTileYMemLoc
@@ -552,12 +580,29 @@ UpdateSprites:
 ;set init y pos to paddleytop calcualted in game engine move
   LDA paddle1ytop
   STA mvpY
+  JSR MovePaddleSprites
+
+MovePaddleSpritesPaddle2: 
+;set init Paddle y pos mem location to 02014
+  LDA #$14
+  STA mvpTileYMemLoc
+  ;set high order byte 02 to mem location paddlesprites + 1  
+  LDA #$02
+  LDY #$01 ;set offset into y register
+  STA mvpTileYMemLoc, Y
+;set init y pos to paddleytop calcualted in game engine move
+  LDA paddle2ytop
+  STA mvpY
+  JSR MovePaddleSprites
+
+  ;;update paddle sprites
+  RTS
 
 ;subroutine (kind of)
 ; moves a tile to a specified y position
 ;param1: mvpY - the y position to place the paddle tile
 ;param2 mvpTileYMemLoc - the mem loc of y position of tile to move.
-  MovePaddleSprites:
+MovePaddleSprites:
   ;set new tile y position
   LDY #$00; this is set to 0 to allow indirect addressing
   LDA mvpY 
@@ -583,8 +628,8 @@ UpdateSprites:
   CPX #$04 
   BNE MovePaddleSprites
 MovePaddleSpritesDone:
-  ;;update paddle sprites
   RTS
+
  
 DrawInfo:
   ;;draw score on screen using background tiles
@@ -703,6 +748,7 @@ sprites:
   .db $88, $86, $00, $04   ;sprite 2 paddle middle
   .db $90, $86, $00, $04   ;sprite 3 paddle middle
   .db $98, $86, $00, $F9   ;sprite 4 paddle bottom
+  .db $80, $85, $00, $80   ;sprite 1 paddle2 top
 ;  .db $00, $00, $00, $40   ;score 100s
 ;  .db $00, $00, $00, $50   ;score 10s
 ;  .db $00, $00, $00, $60   ;score 1s
@@ -716,86 +762,86 @@ background:
   .db $24,$24,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;row 3
   .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;some brick tops
 
-  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;row 4
-  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;brick bottoms
+  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;row 4
+  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;brick bottoms
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 5 
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 6
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 7 
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 8
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 9
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 10
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 11
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 12
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 13
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 14
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 15
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 16
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 17
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 18
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 19
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 20
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 21
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24 ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 22
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 23
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 24
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24 ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 25
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 26
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 27
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 28
-  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$47  ;;end brick bottom
+  .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;row 29
-  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$47  ;;end brick bottom
+  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$24  ;;end brick bottom
 
-  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;row 30
-  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;end brick bottom
+  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;row 30
+  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;end brick bottom
 
 
 

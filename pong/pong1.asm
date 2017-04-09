@@ -569,7 +569,7 @@ UpdateSprites:
   STA $020F
   STA $0213
 
-MovePaddleSpritesPaddle1: 
+;MovePaddleSpritesPaddle1: 
 ;set init Paddle y pos mem location to 0204
   LDA #$04
   STA mvpTileYMemLoc
@@ -582,6 +582,7 @@ MovePaddleSpritesPaddle1:
   STA mvpY
   JSR MovePaddleSprites
 
+  LDX #$00
 MovePaddleSpritesPaddle2: 
 ;set init Paddle y pos mem location to 02014
   LDA #$14
@@ -627,7 +628,7 @@ MovePaddleSprites:
   INX
   CPX #$04 
   BNE MovePaddleSprites
-MovePaddleSpritesDone:
+
   RTS
 
  
@@ -747,11 +748,13 @@ sprites:
   .db $80, $85, $00, $04   ;sprite 1 paddle top
   .db $88, $86, $00, $04   ;sprite 2 paddle middle
   .db $90, $86, $00, $04   ;sprite 3 paddle middle
-  .db $98, $86, $00, $F9   ;sprite 4 paddle bottom
-  .db $80, $85, $00, $80   ;sprite 1 paddle2 top
-;  .db $00, $00, $00, $40   ;score 100s
-;  .db $00, $00, $00, $50   ;score 10s
-;  .db $00, $00, $00, $60   ;score 1s
+  .db $98, $86, $00, $04   ;sprite 4 paddle bottom
+  .db $80, $85, $00, $F9   ;sprite 1 paddle2 top
+  .db $80, $86, $00, $F9   ;sprite 2 paddle2 top
+  .db $80, $86, $00, $F9   ;sprite 3 paddle2 top
+  .db $80, $86, $00, $F9   ;sprite 4 paddle2 top
+
+
 background:
   .db $24,$24,$15,$12,$1F,$0E,$1C,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
   .db $24,$24,$24,$24,$24,$24,$24,$1C,$0C,$18,$1B,$0E,$24,$24,$24,$24  ;;all sky
@@ -760,10 +763,10 @@ background:
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;all sky
 
   .db $24,$24,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;row 3
-  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;some brick tops
+  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$24,$24  ;;some brick tops
 
-  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;row 4
-  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;brick bottoms
+  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;row 4
+  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24,$24  ;;brick bottoms
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 5 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
@@ -838,10 +841,10 @@ background:
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;end brick bottom
 
   .db $24,$24,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45  ;;row 29
-  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$24  ;;end brick bottom
+  .db $45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$45,$24,$24  ;;end brick bottom
 
-  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;row 30
-  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24  ;;end brick bottom
+  .db $24,$24,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47  ;;row 30
+  .db $47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$47,$24,$24  ;;end brick bottom
 
 
 

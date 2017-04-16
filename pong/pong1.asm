@@ -57,7 +57,7 @@ BALLLENGTH     = $08
 
   
 PADDLE1X       = $08  ; horizontal position for paddles, doesnt move. TODO using this as paddle1 surface x pos. Change so this is not a constant.
-PADDLE2X       = $F0
+PADDLE2X       = $F8
 PADDLELENGTH   = $04
 ;TOPPADDLETILEYPOSMEMLOCHIGH = $02 ;high byte of the mem location of y pos of top paddle tile
 ;TOPPADDLETILEYPOSMEMLOCLOW = $04  ;low byte of the mem location of y pos of top paddle tile   
@@ -497,9 +497,9 @@ MovePaddle2Done:
   ADC #$20
   STA paddle2ybot
 
-
-   
-  ;rectleftx
+;call check region collision for paddle1
+  LDA #$00 
+  STA rectleftx
   LDA #PADDLE1X
   STA rectrightx 
   LDA paddle1ytop
@@ -510,12 +510,16 @@ MovePaddle2Done:
   STA pointx 
   LDA bally
   STA pointy 
-
   JSR CheckRegionCollision
+;check region collision for paddle2
   LDA inrect
+  AND #$01
   CMP #$01
+  BEQ Paddle1CollisionCheckDone
+  LDA inrect
+  AND #%00001010
+  CMP #%00000010
   BNE Paddle1Miss
-  
   LDA #$01
   STA ballright
   LDA #$00
@@ -530,38 +534,99 @@ MovePaddle2Done:
   JSR BinaryToDecimal
   JMP Paddle1CollisionCheckDone
 Paddle1Miss:
+  DEC lives1
+  LDA #$50
+  STA bally 
+  LDA #$80
+  STA ballx 
+Paddle1CollisionCheckDone:
+
+
+;call check region collision for paddle2
+  LDA #PADDLE2X
+  STA rectleftx
+  LDA #$FF
+  STA rectrightx 
+  LDA paddle2ytop
+  STA recttopy 
+  LDA paddle2ybot
+  STA rectbottomy 
+  LDA ballx
+  ADC #BALLWIDTH
+  STA pointx 
+  LDA bally
+  STA pointy 
+  JSR CheckRegionCollision
+;check region collision for paddle2
   LDA inrect
-  CMP #$02
-  BEQ Paddle1CollisionCheckDone
+  AND #%00000100
+  CMP #%00000100
+  BNE Paddle2CollisionCheckDone
+  LDA inrect
+  AND #%00001010
+  CMP #%00000010
+  BNE Paddle2Miss
+  LDA #$00
+  STA ballright
+  LDA #$01
+  STA ballleft
+;increase score on bat hit
+  LDA score1
+  CLC
+  ADC #$01
+  STA score1
+  LDA score1
+  STA tempBinary
+  JSR BinaryToDecimal
+  JMP Paddle2CollisionCheckDone
+Paddle2Miss:
   DEC lives1
   LDA #$50
   STA bally 
   LDA #$80
   STA ballx 
 
-Paddle1CollisionCheckDone: 
+Paddle2CollisionCheckDone: 
 
   JMP GameEngineDone
 
 ;checks that a given point is inside a rectangle
+; inrect returns param 01234567
+; 7 point is to right of rectrightx
+; 6 point is further down than recttopy
+; 5 point is to right of rectleftx
+; 4 point is further down rectbottomy
 CheckRegionCollision:
-  LDA #$02
+  LDA #$00
   STA inrect
+RectRightPointToRightCheck:
   LDA pointx
   CMP rectrightx
-  BCS CheckRegionCollisionDone
+  BCC RectTopPointFurtherDownCheck
+  LDA inrect
+  ORA #%00000001
+  STA inrect
+RectTopPointFurtherDownCheck:
   LDA pointy
   CMP recttopy
-  BCC RegionMiss
+  BCC RectLeftPointToRightCheck
+  LDA inrect
+  ORA #%00000010
+  STA inrect
+RectLeftPointToRightCheck: 
+  LDA pointx
+  CMP rectleftx
+  BCC RectBotPointFurtherDownCheck
+  LDA inrect
+  ORA #%00000100
+  STA inrect
+RectBotPointFurtherDownCheck:
   LDA pointy
   CMP rectbottomy
-  BCS RegionMiss  
-  LDA #$01
+  BCC CheckRegionCollisionDone
+  LDA inrect
+  ORA #%00001000
   STA inrect
-  JMP CheckRegionCollisionDone
-RegionMiss:
-  LDA #$00
-  STA inrect 
 CheckRegionCollisionDone:
   RTS 
  

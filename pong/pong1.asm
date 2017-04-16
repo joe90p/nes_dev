@@ -33,6 +33,16 @@ bckgrndtlmemloc .rs 2
 decimalResult .rs 3
 tempBinary .rs 1
 buttonStateCache .rs 1
+;collision detection params
+rectleftx .rs 1
+rectrightx .rs 1
+recttopy .rs 1
+rectbottomy .rs 1
+pointx .rs 1
+pointy .rs 1
+;collision detection return
+inrect .rs 1
+
 ;; DECLARE SOME CONSTANTS HERE
 STATETITLE     = $00  ; displaying title screen
 STATEPLAYING   = $01  ; move paddles/ball, check for collisions
@@ -486,21 +496,26 @@ MovePaddle2Done:
   LDA paddle2ytop
   ADC #$20
   STA paddle2ybot
- 
-CheckPaddleCollision:
+
+
+   
+  ;rectleftx
+  LDA #PADDLE1X
+  STA rectrightx 
+  LDA paddle1ytop
+  STA recttopy 
+  LDA paddle1ybot
+  STA rectbottomy 
   LDA ballx
-  CMP #PADDLE1X
-  BCS CheckPaddleCollisionDone
+  STA pointx 
   LDA bally
-  CMP paddle1ytop
-  BCC PaddleMiss;CheckPaddleCollisionDone 
-  LDA bally
-  CMP paddle1ybot
-  BCS PaddleMiss;CheckPaddleCollisionDone  
-;;if ball x < paddle1x
-  ;;  if ball y > paddle y top
-  ;;    if ball y < paddle y bottom
-  ;;      bounce, ball now moving left
+  STA pointy 
+
+  JSR CheckRegionCollision
+  LDA inrect
+  CMP #$01
+  BNE Paddle1Miss
+  
   LDA #$01
   STA ballright
   LDA #$00
@@ -513,20 +528,42 @@ CheckPaddleCollision:
   LDA score1
   STA tempBinary
   JSR BinaryToDecimal
-  ;LDA #STATETITLE
-  ;STA gamestate
-  JMP CheckPaddleCollisionDone
-PaddleMiss:
+  JMP Paddle1CollisionCheckDone
+Paddle1Miss:
+  LDA inrect
+  CMP #$02
+  BEQ Paddle1CollisionCheckDone
   DEC lives1
   LDA #$50
-  STA bally
-  
+  STA bally 
   LDA #$80
-  STA ballx
-CheckPaddleCollisionDone:
+  STA ballx 
+
+Paddle1CollisionCheckDone: 
 
   JMP GameEngineDone
- 
+
+;checks that a given point is inside a rectangle
+CheckRegionCollision:
+  LDA #$02
+  STA inrect
+  LDA pointx
+  CMP rectrightx
+  BCS CheckRegionCollisionDone
+  LDA pointy
+  CMP recttopy
+  BCC RegionMiss
+  LDA pointy
+  CMP rectbottomy
+  BCS RegionMiss  
+  LDA #$01
+  STA inrect
+  JMP CheckRegionCollisionDone
+RegionMiss:
+  LDA #$00
+  STA inrect 
+CheckRegionCollisionDone:
+  RTS 
  
 BinaryToDecimal:
   lda #$00

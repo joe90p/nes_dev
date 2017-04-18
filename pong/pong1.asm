@@ -25,6 +25,8 @@ buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 buttons2   .rs 1  ; player 2 gamepad buttons, one bit per button
 score1     .rs 1  ; player 1 score, 0-15
 score2     .rs 1  ; player 2 score, 0-15
+decimalScore1 .rs 3
+decimalScore2 .rs 3
 lives1     .rs 1  ; player 1 lives
 mvpTileYMemLoc .rs 2 ; MovePaddleSprites param - mem location of y position of tile
 mvpY .rs 1; MovePaddleSprites param - y position
@@ -228,14 +230,8 @@ NMI:
   LDA #$02
   STA $4014       ; set the high byte (02) of the RAM address, start the transfer
   
-  ;LDA gamestate
-  ;CMP #STATETITLE
-  ;BNE DrawPlayData
-  JSR DrawInfo
-  ;JMP DrawingDone
-;DrawPlayData:
+  JSR DrawInfo 
   JSR DrawScore
-  JSR DrawLives
 
 DrawingDone:
   ;;This is the PPU clean up section, so rendering the next frame starts properly.
@@ -320,22 +316,29 @@ EngineGameOver:
   STA lives1
   LDA #$00
   STA paddle1ytop
+  STA paddle2ytop
   LDA #$00
   STA score1
-  JSR BinaryToDecimal
+  STA score2
+  JSR BinaryToDecimal 
+  JSR DrawScore
   JMP GameEngineDone
  
 ;;;;;;;;;;;
  
 EnginePlaying:
-  LDA lives1
-  CMP #$00
-  BNE LivesCheckDone
+  LDA score1
+  CMP #$03
+  BEQ PlayerWon
+  LDA score2
+  CMP #$03
+  BNE ScoreCheckDone
+PlayerWon:
   LDA #STATEGAMEOVER
   STA gamestate
   JMP GameEngineDone
 
-LivesCheckDone:
+ScoreCheckDone:
 
   LDA buttons1
   AND #%00010000; start button mask
@@ -524,17 +527,28 @@ MovePaddle2Done:
   STA ballright
   LDA #$00
   STA ballleft
-;increase score on bat hit
-  LDA score1
-  CLC
-  ADC #$01
-  STA score1
-  LDA score1
-  STA tempBinary
-  JSR BinaryToDecimal
+;
   JMP Paddle1CollisionCheckDone
 Paddle1Miss:
-  DEC lives1
+;increase score of other player
+  LDA score2
+  CLC
+  ADC #$01
+  STA score2
+  LDA score2
+  STA tempBinary
+  JSR BinaryToDecimal
+
+  LDX #$03             ; start out at 0
+CopyScore2Loop:
+  DEX
+  LDA decimalResult,X
+  STA decimalScore2,X
+  CPX #$00
+  BNE CopyScore2Loop
+
+
+ ;reset ball position 
   LDA #$50
   STA bally 
   LDA #$80
@@ -570,7 +584,10 @@ Paddle1CollisionCheckDone:
   STA ballright
   LDA #$01
   STA ballleft
-;increase score on bat hit
+
+  JMP Paddle2CollisionCheckDone
+Paddle2Miss:
+;increase other players score
   LDA score1
   CLC
   ADC #$01
@@ -578,9 +595,15 @@ Paddle1CollisionCheckDone:
   LDA score1
   STA tempBinary
   JSR BinaryToDecimal
-  JMP Paddle2CollisionCheckDone
-Paddle2Miss:
-  DEC lives1
+
+  LDX #$03             ; start out at 0
+CopyScore1Loop:
+  DEX
+  LDA decimalResult,X
+  STA decimalScore1,X
+  CPX #$00
+  BNE CopyScore1Loop
+
   LDA #$50
   STA bally 
   LDA #$80
@@ -771,30 +794,37 @@ DrawScore:
   STA $2006             ; write the high byte of background score address
   LDA #$1D
   STA $2006             ; write the low byte of background score address
+  
+;  LDA score2 
+;  STA $2007
+
   LDX #$03             ; start out at 0
-DrawScoreLoop:
+DrawScore2Loop:
   DEX
-  LDA decimalResult,X
+  LDA decimalScore2,X
   STA $2007
   CPX #$00
-  BNE DrawScoreLoop   
-  RTS
+  BNE DrawScore2Loop 
  
- DrawLives:
   ;;draw lives on screen using background tiles
   ;;or using many sprites
   LDA $2002             ; read PPU status to reset the high/low latch
   LDA #$20
   STA $2006             ; write the high byte of background score address
-  LDA #$08
+  LDA #$06
   STA $2006             ; write the low byte of background score address
-  ;LDX #$03              ; start out at 0
-;DrawLivesLoop:
-  ;DEX
-  LDA lives1 ;decimalResult,X
+
+
+
+  LDX #$03             ; start out at 0
+DrawScore1Loop:
+  DEX
+  LDA decimalScore1,X
   STA $2007
-  ;CPX #$00
-  ;BNE DrawLivesLoop   
+  CPX #$00
+  BNE DrawScore1Loop 
+
+   
   RTS
 
  
@@ -858,7 +888,7 @@ sprites:
 
 
 background:
-  .db $24,$24,$15,$12,$1F,$0E,$1C,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
+  .db $1C,$0C,$18,$1B,$0E,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 1
   .db $24,$24,$24,$24,$24,$24,$24,$1C,$0C,$18,$1B,$0E,$24,$24,$24,$24  ;;all sky
 
   .db $24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24  ;;row 2

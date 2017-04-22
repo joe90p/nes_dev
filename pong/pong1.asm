@@ -56,7 +56,7 @@ BOTTOMWALL     = $E0
 LEFTWALL       = $04
 BALLWIDTH      = $08
 BALLLENGTH     = $08
-
+PADDLEYSTART   = $64
   
 PADDLE1X       = $08  ; horizontal position for paddles, doesnt move. TODO using this as paddle1 surface x pos. Change so this is not a constant.
 PADDLE2X       = $F8
@@ -200,7 +200,10 @@ LoadAttributeLoop:
 ;set starting lives
   LDA #$08
   STA lives1
-
+;set starting paddle position
+  LDA #PADDLEYSTART
+  STA paddle1ytop
+  STA paddle2ytop
 ;;:Set starting game state
   LDA #STATETITLE
   STA gamestate
@@ -314,13 +317,20 @@ EngineGameOver:
   STA gamestate
   LDA #$08
   STA lives1
-  LDA #$00
+  LDA #PADDLEYSTART
   STA paddle1ytop
   STA paddle2ytop
   LDA #$00
   STA score1
   STA score2
-  JSR BinaryToDecimal 
+  LDX #$03             ; start out at 0
+ZeroDecimalScoreLoop:
+  DEX
+  STA decimalScore1,X 
+  STA decimalScore2,X
+  CPX #$00
+  BNE ZeroDecimalScoreLoop
+
   JSR DrawScore
   JMP GameEngineDone
  

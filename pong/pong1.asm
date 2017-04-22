@@ -36,12 +36,15 @@ decimalResult .rs 3
 tempBinary .rs 1
 buttonStateCache .rs 1
 ;collision detection params
-rectleftx .rs 1
-rectrightx .rs 1
-recttopy .rs 1
-rectbottomy .rs 1
-pointx .rs 1
-pointy .rs 1
+rect1leftx .rs 1
+rect1rightx .rs 1
+rect1topy .rs 1
+rect1bottomy .rs 1
+rect2leftx .rs 1
+rect2rightx .rs 1
+rect2topy .rs 1
+rect2bottomy .rs 1
+
 ;collision detection return
 inrect .rs 1
 
@@ -61,6 +64,7 @@ PADDLEYSTART   = $64
 PADDLE1X       = $08  ; horizontal position for paddles, doesnt move. TODO using this as paddle1 surface x pos. Change so this is not a constant.
 PADDLE2X       = $F8
 PADDLELENGTH   = $04
+WINSCORE       = $0A
 ;TOPPADDLETILEYPOSMEMLOCHIGH = $02 ;high byte of the mem location of y pos of top paddle tile
 ;TOPPADDLETILEYPOSMEMLOCLOW = $04  ;low byte of the mem location of y pos of top paddle tile   
 ;;;;;;;;;;;;;;;;;;
@@ -338,10 +342,10 @@ ZeroDecimalScoreLoop:
  
 EnginePlaying:
   LDA score1
-  CMP #$03
+  CMP #WINSCORE
   BEQ PlayerWon
   LDA score2
-  CMP #$03
+  CMP #WINSCORE
   BNE ScoreCheckDone
 PlayerWon:
   LDA #STATEGAMEOVER
@@ -512,32 +516,41 @@ MovePaddle2Done:
 
 ;call check region collision for paddle1
   LDA #$00 
-  STA rectleftx
+  STA rect1leftx
   LDA #PADDLE1X
-  STA rectrightx 
+  STA rect1rightx 
   LDA paddle1ytop
-  STA recttopy 
+  STA rect1topy 
   LDA paddle1ybot
-  STA rectbottomy 
+  STA rect1bottomy 
   LDA ballx
-  STA pointx 
+  STA rect2leftx 
+  ADC #BALLWIDTH
+  STA rect2rightx
   LDA bally
-  STA pointy 
+  STA rect2topy
+  ADC #BALLWIDTH
+  STA rect2bottomy 
   JSR CheckRegionCollision
-;check region collision for paddle2
+;check region collision for paddle1
   LDA inrect
   AND #$01
-  CMP #$01
+  CMP #$00
   BEQ Paddle1CollisionCheckDone
   LDA inrect
-  AND #%00001010
-  CMP #%00000010
-  BNE Paddle1Miss
+  AND #%00001100
+  CMP #%00000000
+  BEQ Paddle1Miss
   LDA #$01
   STA ballright
   LDA #$00
   STA ballleft
-;
+
+
+
+
+
+
   JMP Paddle1CollisionCheckDone
 Paddle1Miss:
 ;increase score of other player
@@ -563,39 +576,55 @@ CopyScore2Loop:
   STA bally 
   LDA #$80
   STA ballx 
+
+
+
+
 Paddle1CollisionCheckDone:
 
 
 ;call check region collision for paddle2
   LDA #PADDLE2X
-  STA rectleftx
-  LDA #$FF
-  STA rectrightx 
+  STA rect1leftx
+  LDA #$FE
+  STA rect1rightx 
   LDA paddle2ytop
-  STA recttopy 
+  STA rect1topy 
   LDA paddle2ybot
-  STA rectbottomy 
+  STA rect1bottomy 
   LDA ballx
+  STA rect2leftx
   ADC #BALLWIDTH
-  STA pointx 
+  
+  STA rect2rightx 
   LDA bally
-  STA pointy 
+  STA rect2topy
+  ADC #BALLWIDTH
+  STA rect2bottomy 
   JSR CheckRegionCollision
 ;check region collision for paddle2
   LDA inrect
-  AND #%00000100
-  CMP #%00000100
+  AND #%00000010
+  CMP #%00000010
   BNE Paddle2CollisionCheckDone
   LDA inrect
-  AND #%00001010
-  CMP #%00000010
-  BNE Paddle2Miss
+  AND #%00001100
+  CMP #%00000000
+  BEQ Paddle2Miss
   LDA #$00
   STA ballright
   LDA #$01
   STA ballleft
 
+
+
+
+
+
+
+
   JMP Paddle2CollisionCheckDone
+
 Paddle2Miss:
 ;increase other players score
   LDA score1
@@ -618,44 +647,55 @@ CopyScore1Loop:
   STA bally 
   LDA #$80
   STA ballx 
-
 Paddle2CollisionCheckDone: 
 
   JMP GameEngineDone
 
-;checks that a given point is inside a rectangle
+;checks that rect1 collides with rect2
 ; inrect returns param 01234567
-; 7 point is to right of rectrightx
-; 6 point is further down than recttopy
-; 5 point is to right of rectleftx
-; 4 point is further down rectbottomy
+; 7 rect1leftx <= rect2leftx <= rect1rightx
+; 6 rect1leftx <= rect2righttx <= rect1rightx
+; 5 rect1topy <= rect2topy <= rect1bottomy
+; 4 rect1topy <= rect2bottomy <= rect1bottomy
 CheckRegionCollision:
   LDA #$00
   STA inrect
-RectRightPointToRightCheck:
-  LDA pointx
-  CMP rectrightx
-  BCC RectTopPointFurtherDownCheck
+Rect2LeftInRect1Check:
+  LDA rect2leftx
+  CMP rect1leftx
+  BCC Rect2RightInRect1
+  LDA rect1rightx
+  CMP rect2leftx
+  BCC Rect2RightInRect1
   LDA inrect
   ORA #%00000001
   STA inrect
-RectTopPointFurtherDownCheck:
-  LDA pointy
-  CMP recttopy
-  BCC RectLeftPointToRightCheck
+Rect2RightInRect1:
+  LDA rect2rightx
+  CMP rect1leftx
+  BCC Rect2TopInRect1
+  LDA rect1rightx
+  CMP rect2rightx
+  BCC Rect2TopInRect1
   LDA inrect
   ORA #%00000010
   STA inrect
-RectLeftPointToRightCheck: 
-  LDA pointx
-  CMP rectleftx
-  BCC RectBotPointFurtherDownCheck
+Rect2TopInRect1: 
+  LDA rect2topy
+  CMP rect1topy
+  BCC Rect2BottomInRect1
+  LDA rect1bottomy
+  CMP rect2topy
+  BCC Rect2BottomInRect1
   LDA inrect
   ORA #%00000100
   STA inrect
-RectBotPointFurtherDownCheck:
-  LDA pointy
-  CMP rectbottomy
+Rect2BottomInRect1:
+  LDA rect2bottomy
+  CMP rect1topy
+  BCC CheckRegionCollisionDone
+  LDA rect1bottomy
+  CMP rect2bottomy
   BCC CheckRegionCollisionDone
   LDA inrect
   ORA #%00001000
@@ -891,10 +931,10 @@ sprites:
   .db $88, $86, $00, $04   ;sprite 2 paddle middle
   .db $90, $86, $00, $04   ;sprite 3 paddle middle
   .db $98, $86, $00, $04   ;sprite 4 paddle bottom
-  .db $80, $85, $00, $F9   ;sprite 1 paddle2 top
-  .db $80, $86, $00, $F9   ;sprite 2 paddle2 top
-  .db $80, $86, $00, $F9   ;sprite 3 paddle2 top
-  .db $80, $86, $00, $F9   ;sprite 4 paddle2 top
+  .db $80, $85, $00, $F8   ;sprite 1 paddle2 top
+  .db $80, $86, $00, $F8   ;sprite 2 paddle2 top
+  .db $80, $86, $00, $F8   ;sprite 3 paddle2 top
+  .db $80, $86, $00, $F8   ;sprite 4 paddle2 top
 
 
 background:

@@ -44,6 +44,7 @@ rect2leftx .rs 1
 rect2rightx .rs 1
 rect2topy .rs 1
 rect2bottomy .rs 1
+ballresetdelay .rs 1
 
 ;collision detection return
 inrect .rs 1
@@ -335,7 +336,8 @@ ZeroDecimalScoreLoop:
   CPX #$00
   BNE ZeroDecimalScoreLoop
 
-  JSR DrawScore
+  JSR DrawScore 
+
   JMP GameEngineDone
  
 ;;;;;;;;;;;
@@ -366,6 +368,25 @@ ScoreCheckDone:
   STA gamestate
   JMP GameEngineDone
 ButtonCheckDone:
+
+  LDA ballresetdelay
+  AND #%10000000
+  CMP #%10000000
+  BNE PlayingDelayDone
+  LDA ballresetdelay
+  AND #%01111111
+  CMP #$40
+  BCC PlayingDelayIncrease
+  LDA #$00
+  STA ballresetdelay
+  JMP PlayingDelayDone
+PlayingDelayIncrease:
+  LDA ballresetdelay
+  ADC #$01
+  STA ballresetdelay
+  JMP MoveBallDownDone
+PlayingDelayDone:
+
 MoveBallRight:
   LDA ballright
   BEQ MoveBallRightDone   ;;if ballright=0, skip this section
@@ -577,7 +598,8 @@ CopyScore2Loop:
   LDA #$80
   STA ballx 
 
-
+  LDA #%10000000
+  STA ballresetdelay
 
 
 Paddle1CollisionCheckDone:
@@ -647,6 +669,10 @@ CopyScore1Loop:
   STA bally 
   LDA #$80
   STA ballx 
+
+  LDA #%10000000
+  STA ballresetdelay
+
 Paddle2CollisionCheckDone: 
 
   JMP GameEngineDone

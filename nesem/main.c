@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 void load_rom();
-char* ines_file_contents;
-char* cpu_memory;
+unsigned char* ines_file_contents;
+unsigned char* cpu_memory;
 void run_rom();
 
 
@@ -41,14 +41,27 @@ void load_rom()
 
 void run_rom()
 {
-  int reset_index = cpu_memory[0xfffc]<<8 | cpu_memory[0xfffd]>>8;
-  reset_index &= 0x0000ffff;
-  
+  unsigned short program_counter = cpu_memory[0xfffc]<<8 | cpu_memory[0xfffd]>>8;
   printf("first 3 bytes at RESET\n"); 
 
   for(int j=0; j < 3; j++)
   {
-    printf("%02x\n", cpu_memory[reset_index + j]);
+    printf("%02x\n", cpu_memory[program_counter + j]);
+  }
+
+  for(int k=0; k < 5; k++)
+  {
+    switch(cpu_memory[program_counter])
+    {
+      case 0x00d8:
+        printf("%02x: CLD\n", program_counter);
+        program_counter++;
+        break;
+      case 0x00a2:
+        printf("%02x: LDX %02x\n", program_counter, cpu_memory[program_counter+1]);
+        program_counter+=2;
+        break;
+    } 
   } 
 } 
    

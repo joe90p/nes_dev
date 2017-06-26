@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
   
   fclose(nes_file_ptr); 
   load_rom();
-  run_rom(); 
+  run_rom();
   return 0;
 }
 

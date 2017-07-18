@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
   cpu = malloc(sizeof(struct NES_CPU)); 
   FILE* nes_file_ptr;
   int nes_file_length; 
-  nes_file_ptr = fopen("/home/phil/test.nes", "r");
+  nes_file_ptr = fopen(argv[0], "r");
   fseek(nes_file_ptr,0,SEEK_END);
   nes_file_length = ftell(nes_file_ptr);  
   ines_file_contents = malloc(nes_file_length);

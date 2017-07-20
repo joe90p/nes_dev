@@ -61,10 +61,19 @@ void load_rom()
 
 void ADC_update_status_register(unsigned char oldA)
 {
-  cpu->status|=cpu->A&128;
-  cpu->status|=((cpu->A&128)^(oldA&128))>>1;
-  cpu->status|=(cpu->A==0)<<1;
-  cpu->status|=((cpu->A&128)^(oldA&128))>>7;
+  //cpu->status|=cpu->A&128;
+  //cpu->status|=((cpu->A&128)^(oldA&128))>>1;
+  //cpu->status|=(cpu->A==0)<<1;
+  //cpu->status|=((cpu->A&128)^(oldA&128))>>7;
+  if(cpu->A >= oldA)
+  {
+    cpu->status&=~1;
+  }
+  else
+  {
+    cpu->status|=1;
+  }
+  
 
 }
 

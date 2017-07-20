@@ -60,9 +60,36 @@ void test_get_absolute_address_Y()
 
 
 /*
-void test_get_zeropage_address(unsigned char get_address_input);
-void test_get_zeropage_X_address(unsigned char get_address_input);
+void ADC_update_status_register(unsigned char oldA)
+{
+  cpu->status|=cpu->A&128;
+  cpu->status|=((cpu->A&128)^(oldA&128))>>1;
+  cpu->status|=(cpu->A==0)<<1;
+  cpu->status|=((cpu->A&128)^(oldA&128))>>7;
+
+}
 */
+
+void ADC_overflow_status_flagged()
+{
+  printf("test test_ADC_overflow_status_flagged ");
+  cpu->status=0;
+  cpu->A=3;
+  char overflow_flag = 1;
+  ADC_update_status_register(250);
+  char expect_overflow = cpu->status;
+  ADC_update_status_register(2);
+  char not_expect_overflow = cpu->status; 
+  if((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag)
+  {
+    printf("PASSED\n");
+  }
+  else
+  {
+    printf("FAILED\n");
+  }
+
+}
 void test_get_indexed_indirect_X()
 {
   printf("test test_get_indexed_indirect_X ");
@@ -102,6 +129,8 @@ int main(int argc, char* argv[])
   test_get_absolute_address_Y();
   test_get_indexed_indirect_X();
   test_get_indirect_indexed_Y();
+  ADC_overflow_status_flagged();
+
 }
 
 

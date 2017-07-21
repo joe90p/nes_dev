@@ -15,11 +15,9 @@ void load_test_rom()
   cpu->Y = 5;
 }
 
-void test_get_absolute_address()
+void assert(char bool_result)
 {
-  printf("test test_get_absolute_address ");
-  unsigned short address = get_absolute_address(0x21, 0x45);
-  if(address==0x2145)
+   if(bool_result)
   {
     printf("PASSED\n");
   }
@@ -27,82 +25,36 @@ void test_get_absolute_address()
   {
     printf("FAILED\n");
   }
+
+}
+void test_get_absolute_address()
+{
+  printf("test test_get_absolute_address ");
+  unsigned short address = get_absolute_address(0x21, 0x45);
+  assert(address==0x2145);
 }
 
 void test_get_absolute_address_X()
 {
   printf("test test_get_absolute_address_X ");
   unsigned short address = get_absolute_address_X(0x21, 0x45);
-  if(address==0x2148)
-  {
-    printf("PASSED\n");
-  }
-  else
-  {
-    printf("FAILED\n");
-  }
+  assert(address==0x2148);
 }
 
 void test_get_absolute_address_Y()
 {
   printf("test test_get_absolute_address_Y ");
   unsigned short address = get_absolute_address_Y(0x21, 0x45);
-  if(address==0x214a)
-  {
-    printf("PASSED\n");
-  }
-  else
-  {
-    printf("FAILED\n");
-  }
+  assert(address==0x214a);
 }
 
 
-
-/*
-void ADC_update_status_register(unsigned char oldA)
-{
-  cpu->status|=cpu->A&128;
-  cpu->status|=((cpu->A&128)^(oldA&128))>>1;
-  cpu->status|=(cpu->A==0)<<1;
-  cpu->status|=((cpu->A&128)^(oldA&128))>>7;
-
-}
-*/
-
-void ADC_overflow_status_flagged()
-{
-  printf("test test_ADC_overflow_status_flagged ");
-  cpu->status=0;
-  cpu->A=3;
-  char overflow_flag = 1;
-  ADC_update_status_register(250);
-  char expect_overflow = cpu->status;
-  ADC_update_status_register(2);
-  char not_expect_overflow = cpu->status; 
-  if((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag)
-  {
-    printf("PASSED\n");
-  }
-  else
-  {
-    printf("FAILED\n");
-  }
-
-}
 void test_get_indexed_indirect_X()
 {
   printf("test test_get_indexed_indirect_X ");
   cpu->cpu_memory[0x4A]=0x83;
   unsigned short address = get_indexed_indirect_X(0x47);
-  if(address==0x0083)
-  {
-    printf("PASSED\n");
-  }
-  else
-  {
-    printf("FAILED\n");
-  }    
+  assert(address==0x0083);
 }
 
 void test_get_indirect_indexed_Y()
@@ -110,14 +62,32 @@ void test_get_indirect_indexed_Y()
   printf("test test_getindirect_indexed_Y ");
   cpu->cpu_memory[0x23]=0x87;
   unsigned short address = get_indirect_indexed_Y(0x23);
-  if(address==0x008C)
-  {
-    printf("PASSED\n");
-  }
-  else
-  {
-    printf("FAILED\n");
-  }
+  assert(address==0x008C);
+}
+
+void ADC_overflow_status_flagged()
+{
+  printf("test ADC_overflow_status_flagged "); 
+  cpu->A=3;
+  char overflow_flag = 1;
+  ADC_update_status_register(250);
+  char expect_overflow = cpu->status;
+  ADC_update_status_register(2);
+  char not_expect_overflow = cpu->status; 
+  assert((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag); 
+}
+
+void ADC_zero_status_flagged()
+{
+  printf("test ADC_zero_status_flagged "); 
+  cpu->A=0;
+  char zero_flag = 2;
+  ADC_update_status_register(5);
+  char expect_zero = cpu->status;
+  cpu->A=1;
+  ADC_update_status_register(5);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
 }
 
 int main(int argc, char* argv[])
@@ -130,7 +100,6 @@ int main(int argc, char* argv[])
   test_get_indexed_indirect_X();
   test_get_indirect_indexed_Y();
   ADC_overflow_status_flagged();
+  ADC_zero_status_flagged();
 
 }
-
-

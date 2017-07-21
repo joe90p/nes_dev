@@ -73,8 +73,14 @@ void ADC_update_status_register(unsigned char oldA)
   {
     cpu->status|=1;
   }
-  
-
+  if(cpu->A!=0)
+  {
+    cpu->status&=~2;
+  }
+  else
+  {
+    cpu->status|=2;
+  } 
 }
 
 void run_rom()

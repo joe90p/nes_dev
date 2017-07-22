@@ -4,7 +4,7 @@
 struct NES_CPU
 {
   unsigned char* cpu_memory;
-  unsigned char A;
+  signed char A;
   unsigned char X;
   unsigned char Y;
   unsigned char status;

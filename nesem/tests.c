@@ -65,16 +65,16 @@ void test_get_indirect_indexed_Y()
   assert(address==0x008C);
 }
 
-void ADC_overflow_status_flagged()
+void ADC_carry_status_flagged()
 {
-  printf("test ADC_overflow_status_flagged "); 
+  printf("test ADC_carry_status_flagged "); 
   cpu->A=3;
-  char overflow_flag = 1;
+  char carry_flag = 1;
   ADC_update_status_register(250);
-  char expect_overflow = cpu->status;
+  char expect_carry = cpu->status;
   ADC_update_status_register(2);
-  char not_expect_overflow = cpu->status; 
-  assert((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag); 
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
 }
 
 void ADC_zero_status_flagged()
@@ -90,6 +90,31 @@ void ADC_zero_status_flagged()
   assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
 }
 
+void ADC_overflow_status_flagged()
+{
+  printf("test ADC_carry_status_flagged "); 
+  cpu->A=3;
+  char overflow_flag = 64;
+  ADC_update_status_register(250);
+  char expect_overflow = cpu->status;
+  ADC_update_status_register(2);
+  char not_expect_overflow = cpu->status; 
+  assert((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag); 
+}
+
+void ADC_negative_status_flagged()
+{
+  printf("test ADC_negative_status_flagged "); 
+  cpu->A=-1;
+  char negative_flag = 128;
+  ADC_update_status_register(2);
+  char expect_negative = cpu->status;
+  cpu->A=1; 
+  ADC_update_status_register(2);
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -99,7 +124,8 @@ int main(int argc, char* argv[])
   test_get_absolute_address_Y();
   test_get_indexed_indirect_X();
   test_get_indirect_indexed_Y();
-  ADC_overflow_status_flagged();
+  ADC_carry_status_flagged();
   ADC_zero_status_flagged();
-
+  ADC_overflow_status_flagged();
+  ADC_negative_status_flagged();
 }

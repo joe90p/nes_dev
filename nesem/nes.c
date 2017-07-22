@@ -59,28 +59,29 @@ void load_rom()
   cpu->cpu_memory=cpu_memory;
 }
 
+void switch_status_flag(char flag, char switch_on)
+{
+  if(switch_on)
+  {
+    cpu->status|=flag;
+  }
+  else
+  {
+    cpu->status&=~flag;
+  }
+}
+
 void ADC_update_status_register(unsigned char oldA)
 {
-  //cpu->status|=cpu->A&128;
-  //cpu->status|=((cpu->A&128)^(oldA&128))>>1;
-  //cpu->status|=(cpu->A==0)<<1;
-  //cpu->status|=((cpu->A&128)^(oldA&128))>>7;
-  if(cpu->A >= oldA)
-  {
-    cpu->status&=~1;
-  }
-  else
-  {
-    cpu->status|=1;
-  }
-  if(cpu->A!=0)
-  {
-    cpu->status&=~2;
-  }
-  else
-  {
-    cpu->status|=2;
-  } 
+  char carry_flag=1;
+  char zero_flag=2;
+  char overflow_flag=64;
+  char negative_flag=128;
+
+  switch_status_flag(carry_flag,cpu->A < oldA);
+  switch_status_flag(zero_flag,cpu->A == 0);
+  switch_status_flag(negative_flag,cpu->A < 0);
+  switch_status_flag(overflow_flag,cpu->A < oldA); 
 }
 
 void run_rom()

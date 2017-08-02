@@ -115,6 +115,30 @@ void ADC_negative_status_flagged()
   assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
 }
 
+void ADC_get_expected_overflow()
+{
+  printf("ADC_get_expected_overflow ");
+  cpu->A=126;
+  ADC(3,2); 
+  assert(cpu->A==-127);
+}
+
+void ADC_get_expected_happy_path()
+{
+  printf("ADC_get_expected_happy_path ");
+  cpu->A=126;
+  ADC(1,2); 
+  assert(cpu->A==127);
+}
+
+void ADC_get_expected_program_counter()
+{
+  printf("ADC_get_expected_program_counter "); 
+  cpu->PC=0;
+  ADC(0,3); 
+  assert(cpu->PC==3);
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -128,4 +152,7 @@ int main(int argc, char* argv[])
   ADC_zero_status_flagged();
   ADC_overflow_status_flagged();
   ADC_negative_status_flagged();
+  ADC_get_expected_overflow();
+  ADC_get_expected_happy_path();
+  ADC_get_expected_program_counter();
 }

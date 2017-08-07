@@ -102,16 +102,75 @@ void run_rom()
     printf("%02x\n", cpu->cpu_memory[cpu->PC + j]);
   }
   //unsigned char oldA;
+  char opcode_context_mask = 3;
+  char opcode_mask = 224;
+  char addressing_mode_mask = 28;
+  char program_counter_increment;
   unsigned short address;
   for(int k=0; k < 5; k++)
   {
     //oldA = cpu->A;
+    char current_opcode = cpu->cpu_memory[cpu->PC];
+    char opcode_context = current_opcode&opcode_context_mask;
+    char opcode = current_opcode&opcode_mask;
+    char addressing_mode = current_opcode&addressing_mode_mask;
+    switch(opcode_context)
+    {
+      case 1:
+        switch(addressing_mode)
+        {
+          case 0:
+            //(zero page,X);
+            address = get_indexed_indirect_X(cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 2;
+            break;
+          case 1:
+            //zero page
+            address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 2;
+          case 2:
+            //immediate
+            address = cpu->PC + 1;
+            program_counter_increment = 2;
+          case 3:
+            //absolute
+            address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 3;
+          case 4:
+            //(zero page),Y
+            address = get_indirect_indexed_Y(cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 2;
+          case 5:
+            //zero page,X
+            address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 2;
+          case 6:
+            //absolute,Y
+            address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 3; 
+          case 7:
+            //absolute,X
+            address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 3;
+        }
+        switch(opcode)
+        {
+          case 3:
+            ADC(cpu->cpu_memory[address], program_counter_increment);
+        }
+         
+      
+    }
+        
 
+ 
     switch(cpu->cpu_memory[cpu->PC])
     {
+      /*
       case 0x0069:
         printf("%02x: ADC #$%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
-        ADC(cpu->cpu_memory[cpu->PC+1], 2); 
+        ADC(cpu->cpu_memory[cpu->PC+1], 2);
+         
         break;
       case 0x0065:
         printf("%02x: ADC $%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
@@ -148,6 +207,7 @@ void run_rom()
         address = get_indirect_indexed_Y(cpu->cpu_memory[cpu->PC + 1]);        
         ADC(cpu->cpu_memory[address],2);
         break;
+        */
       case 0x00d8:
         printf("%02x: CLD\n", cpu->PC);
         cpu->PC++;

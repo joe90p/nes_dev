@@ -145,6 +145,10 @@ void check_adc_print()
   cpu->cpu_memory[0xfffc]=0; 
   cpu->cpu_memory[0xfffd]=0;
   cpu->cpu_memory[0]=0x69;
+  cpu->cpu_memory[1]=0xA1;
+  cpu->cpu_memory[2]=0x6D;
+  cpu->cpu_memory[3]=0xA2;
+  cpu->cpu_memory[4]=0xA3;
   run_rom();
 }
 

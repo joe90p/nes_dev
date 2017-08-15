@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
@@ -92,6 +93,7 @@ void ADC(unsigned char toAdd, unsigned char pc_increment)
   cpu->PC+=pc_increment;
 }
 
+
 void run_rom()
 {
   cpu->PC = cpu->cpu_memory[0xfffc]<<8 | cpu->cpu_memory[0xfffd]>>8;
@@ -113,8 +115,7 @@ void run_rom()
     char opcode_context = current_opcode&opcode_context_mask;
     char opcode = (current_opcode&opcode_mask)>>5;
     char addressing_mode = (current_opcode&addressing_mode_mask)>>2;
-
-//    printf("%02x: ADC #$%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
+    char oldPC = cpu->PC;
     char* address_mode_info = (char*)malloc(10 * sizeof(char));
     char* opcode_info = (char*)malloc(10 * sizeof(char));
     switch(opcode_context)
@@ -144,7 +145,7 @@ void run_rom()
             //absolute
             address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 3;
-            sprintf(address_mode_info,"$%02x%02x)", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC+1]);
+            sprintf(address_mode_info,"$%02x%02x", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC+1]);
             break;
           case 4:
             //(zero page),Y
@@ -175,59 +176,19 @@ void run_rom()
         {
           case 3:
             ADC(cpu->cpu_memory[address], program_counter_increment);
-            opcode_info = "ADC";
+            strcpy(opcode_info, "ADC");
             break;
         }
         // print out opcode info
-        printf("%02x: %s %s", cpu->PC, opcode_info, address_mode_info);      
+        printf("%02x: %s %s\n", oldPC, opcode_info, address_mode_info);      
     }
-        
-
+    //clear string memory
+    free(opcode_info);  
+    free(address_mode_info);
  
     switch(cpu->cpu_memory[cpu->PC])
     {
-      /*
-      case 0x0069:
-        printf("%02x: ADC #$%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
-        ADC(cpu->cpu_memory[cpu->PC+1], 2);
-         
-        break;
-      case 0x0065:
-        printf("%02x: ADC $%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
-        address = get_zeropage_address(cpu->cpu_memory[cpu->PC +1]);
-        ADC(cpu->cpu_memory[address],2);
-        break;
-      case 0x0075:
-        printf("%02x: ADC $%02x,X\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
-        address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
-        ADC(cpu->cpu_memory[address],2);
-        break;
-     case 0x006d:
-        printf("%02x: ADC $%02x%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC+1]);
-        address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-        ADC(cpu->cpu_memory[address],3);
-        break;
-      case 0x007d:
-        printf("%02x: ADC $%02x%02x,X\n", cpu->PC, cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC+1]);
-        address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-        ADC(cpu->cpu_memory[address],3);
-        break; 
-      case 0x0079:
-        printf("%02x: ADC $%02x%02x,Y\n", cpu->PC, cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC+1]);
-        address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-        ADC(cpu->cpu_memory[address],3);
-        break;
-      case 0x0061:
-        printf("%02x: ADC ($%02x,X)\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]);        
-        address = get_indexed_indirect_X(cpu->cpu_memory[cpu->PC + 1]);
-        ADC(cpu->cpu_memory[address], 2);
-        break;
-      case 0x0071:
-        printf("%02x: ADC ($%02x),Y\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
-        address = get_indirect_indexed_Y(cpu->cpu_memory[cpu->PC + 1]);        
-        ADC(cpu->cpu_memory[address],2);
-        break;
-        */
+      
       case 0x00d8:
         printf("%02x: CLD\n", cpu->PC);
         cpu->PC++;

@@ -109,11 +109,10 @@ void run_rom()
   unsigned short address;
   for(int k=0; k < 5; k++)
   {
-    //oldA = cpu->A;
     char current_opcode = cpu->cpu_memory[cpu->PC];
     char opcode_context = current_opcode&opcode_context_mask;
-    char opcode = current_opcode&opcode_mask;
-    char addressing_mode = current_opcode&addressing_mode_mask;
+    char opcode = (current_opcode&opcode_mask)>>5;
+    char addressing_mode = (current_opcode&addressing_mode_mask)>>2;
     switch(opcode_context)
     {
       case 1:

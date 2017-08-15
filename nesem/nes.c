@@ -179,9 +179,7 @@ void run_rom()
             break;
         }
         // print out opcode info
-        printf("%02x: %s %s", cpu->PC, opcode_info, address_mode_info);
-         
-      
+        printf("%02x: %s %s", cpu->PC, opcode_info, address_mode_info);      
     }
         
 

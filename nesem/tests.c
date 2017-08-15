@@ -139,6 +139,15 @@ void ADC_get_expected_program_counter()
   assert(cpu->PC==3);
 }
 
+void check_adc_print()
+{
+  cpu->PC=0;
+  cpu->cpu_memory[0xfffc]=0; 
+  cpu->cpu_memory[0xfffd]=0;
+  cpu->cpu_memory[0]=0x69;
+  run_rom();
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -155,4 +164,5 @@ int main(int argc, char* argv[])
   ADC_get_expected_overflow();
   ADC_get_expected_happy_path();
   ADC_get_expected_program_counter();
+  check_adc_print();
 }

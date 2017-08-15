@@ -113,6 +113,10 @@ void run_rom()
     char opcode_context = current_opcode&opcode_context_mask;
     char opcode = (current_opcode&opcode_mask)>>5;
     char addressing_mode = (current_opcode&addressing_mode_mask)>>2;
+
+//    printf("%02x: ADC #$%02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]); 
+    char* address_mode_info = (char*)malloc(10 * sizeof(char));
+    char* opcode_info = (char*)malloc(10 * sizeof(char));
     switch(opcode_context)
     {
       case 1:
@@ -122,41 +126,60 @@ void run_rom()
             //(zero page,X);
             address = get_indexed_indirect_X(cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 2;
+            sprintf(address_mode_info,"($%02x,X)", cpu->cpu_memory[cpu->PC + 1]);
             break;
           case 1:
             //zero page
             address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 2;
+            sprintf(address_mode_info,"$%02x", cpu->cpu_memory[cpu->PC + 1]);
+            break;
           case 2:
             //immediate
             address = cpu->PC + 1;
             program_counter_increment = 2;
+            sprintf(address_mode_info,"#%02x", cpu->cpu_memory[cpu->PC + 1]);
+            break;
           case 3:
             //absolute
             address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 3;
+            sprintf(address_mode_info,"$%02x%02x)", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC+1]);
+            break;
           case 4:
             //(zero page),Y
             address = get_indirect_indexed_Y(cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 2;
+            sprintf(address_mode_info,"($%02x),Y", cpu->cpu_memory[cpu->PC + 1]);
+            break;
           case 5:
             //zero page,X
             address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 2;
+            sprintf(address_mode_info,"$%02x,X", cpu->cpu_memory[cpu->PC + 1]);
+            break;
           case 6:
             //absolute,Y
             address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-            program_counter_increment = 3; 
+            program_counter_increment = 3;
+            sprintf(address_mode_info,"$%02x%02x,Y", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]); 
+            break;
           case 7:
             //absolute,X
             address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
             program_counter_increment = 3;
+            sprintf(address_mode_info,"$%02x%02x,X", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
+            break;
         }
         switch(opcode)
         {
           case 3:
             ADC(cpu->cpu_memory[address], program_counter_increment);
+            opcode_info = "ADC";
+            break;
         }
+        // print out opcode info
+        printf("%02x: %s %s", cpu->PC, opcode_info, address_mode_info);
          
       
     }

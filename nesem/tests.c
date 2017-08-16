@@ -119,7 +119,7 @@ void ADC_get_expected_overflow()
 {
   printf("ADC_get_expected_overflow ");
   cpu->A=126;
-  ADC(3,2); 
+  ADC(3); 
   assert(cpu->A==-127);
 }
 
@@ -127,16 +127,42 @@ void ADC_get_expected_happy_path()
 {
   printf("ADC_get_expected_happy_path ");
   cpu->A=126;
-  ADC(1,2); 
+  ADC(1); 
   assert(cpu->A==127);
 }
 
-void ADC_get_expected_program_counter()
+void ORA_negative_status_flagged()
 {
-  printf("ADC_get_expected_program_counter "); 
-  cpu->PC=0;
-  ADC(0,3); 
-  assert(cpu->PC==3);
+  printf("test ORA_negative_status_flagged "); 
+  cpu->A=-1;
+  char negative_flag = 128;
+  ORA_update_status_register();
+  char expect_negative = cpu->status;
+  cpu->A=1; 
+  ORA_update_status_register();
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+}
+
+void ORA_zero_status_flagged()
+{
+  printf("test ORA_zero_status_flagged "); 
+  cpu->A=0;
+  char zero_flag = 2;
+  ORA_update_status_register();
+  char expect_zero = cpu->status;
+  cpu->A=1;
+  ORA_update_status_register();
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+}
+
+void ORA_get_expected_happy_path()
+{
+  printf("test ORA_get_expected_happy_path ");
+  cpu->A=3;
+  ORA(4);
+  assert(cpu->A==7); 
 }
 
 void check_adc_print()
@@ -167,6 +193,8 @@ int main(int argc, char* argv[])
   ADC_negative_status_flagged();
   ADC_get_expected_overflow();
   ADC_get_expected_happy_path();
-  ADC_get_expected_program_counter();
+  ORA_zero_status_flagged();
+  ORA_negative_status_flagged();
+  ORA_get_expected_happy_path();
   check_adc_print();
 }

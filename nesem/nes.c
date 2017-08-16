@@ -85,12 +85,28 @@ void ADC_update_status_register(unsigned char oldA)
   switch_status_flag(overflow_flag,cpu->A < oldA); 
 }
 
-void ADC(unsigned char toAdd, unsigned char pc_increment)
+void ORA_update_status_register()
+{ 
+  char zero_flag=2;
+  char negative_flag=128;
+
+  switch_status_flag(zero_flag,cpu->A == 0);
+  switch_status_flag(negative_flag,cpu->A < 0);
+
+}
+
+void ORA(unsigned char toOr)
+{
+  unsigned char oldA = cpu->A;
+  cpu->A|=toOr;
+  ORA_update_status_register(oldA);
+ 
+}
+void ADC(unsigned char toAdd)
 {
   unsigned char oldA = cpu->A;
   cpu->A+=toAdd;
-  ADC_update_status_register(oldA);
-  cpu->PC+=pc_increment;
+  ADC_update_status_register(oldA); 
 }
 
 
@@ -115,7 +131,6 @@ void run_rom()
     char opcode_context = current_opcode&opcode_context_mask;
     char opcode = (current_opcode&opcode_mask)>>5;
     char addressing_mode = (current_opcode&addressing_mode_mask)>>2;
-    char oldPC = cpu->PC;
     char* address_mode_info = (char*)malloc(10 * sizeof(char));
     char* opcode_info = (char*)malloc(10 * sizeof(char));
     switch(opcode_context)
@@ -174,13 +189,17 @@ void run_rom()
         }
         switch(opcode)
         {
+          case 0:
+            ORA(cpu->cpu_memory[address]);
+            strcpy(opcode_info, "ORA"); 
           case 3:
-            ADC(cpu->cpu_memory[address], program_counter_increment);
+            ADC(cpu->cpu_memory[address]);
             strcpy(opcode_info, "ADC");
             break;
         }
         // print out opcode info
-        printf("%02x: %s %s\n", oldPC, opcode_info, address_mode_info);      
+        printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);      
+        cpu->PC+=program_counter_increment;
     }
     //clear string memory
     free(opcode_info);  

@@ -85,6 +85,21 @@ void ADC_update_status_register(unsigned char oldA)
   switch_status_flag(overflow_flag,cpu->A < oldA); 
 }
 
+void CMP_update_status_register(unsigned char data)
+{
+  char carry_flag=1;
+  char zero_flag=2; 
+  char negative_flag=128;
+
+  switch_status_flag(carry_flag,cpu->A >= data);
+  switch_status_flag(zero_flag,cpu->A == data);
+  switch_status_flag(negative_flag,cpu->A < data); 
+}
+
+//also applies to
+//AND
+//EOR
+//LDA
 void ORA_update_status_register()
 { 
   char zero_flag=2;
@@ -97,16 +112,41 @@ void ORA_update_status_register()
 
 void ORA(unsigned char toOr)
 {
-  unsigned char oldA = cpu->A;
   cpu->A|=toOr;
-  ORA_update_status_register(oldA);
+  ORA_update_status_register();
  
 }
+
+void AND(unsigned char toAnd)
+{
+  cpu->A&=toAnd;
+  ORA_update_status_register();
+ 
+}
+
+void EOR(unsigned char toEor)
+{
+  cpu->A^=toEor;
+  ORA_update_status_register();
+ 
+}
+
 void ADC(unsigned char toAdd)
 {
   unsigned char oldA = cpu->A;
   cpu->A+=toAdd;
   ADC_update_status_register(oldA); 
+}
+
+void STA(unsigned short address)
+{
+  cpu->cpu_memory[address]=cpu->A;
+}
+
+void LDA(unsigned char newA)
+{
+  cpu->A=newA;
+  ORA_update_status_register();
 }
 
 
@@ -191,10 +231,31 @@ void run_rom()
         {
           case 0:
             ORA(cpu->cpu_memory[address]);
-            strcpy(opcode_info, "ORA"); 
+            strcpy(opcode_info, "ORA");
+            break;
+          case 1:
+            AND(cpu->cpu_memory[address]);
+            strcpy(opcode_info, "AND");
+            break;
+          case 2:
+            EOR(cpu->cpu_memory[address]);
+            strcpy(opcode_info, "EOR");
+            break;  
           case 3:
             ADC(cpu->cpu_memory[address]);
             strcpy(opcode_info, "ADC");
+            break;
+          case 4:
+            STA(address);
+            strcpy(opcode_info, "STA");
+            break;
+          case 5:
+            LDA(cpu->cpu_memory[address]);
+            strcpy(opcode_info, "STA");
+            break;
+          case 6:
+            CMP_update_status_register(cpu->cpu_memory[address]);
+            strcpy(opcode_info, "CMP");
             break;
         }
         // print out opcode info

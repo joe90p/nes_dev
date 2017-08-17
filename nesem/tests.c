@@ -165,6 +165,76 @@ void ORA_get_expected_happy_path()
   assert(cpu->A==7); 
 }
 
+void AND_get_expected_happy_path()
+{
+  printf("test AND_get_expected_happy_path ");
+  cpu->A=8;
+  AND(4); 
+  assert(cpu->A==0); 
+}
+
+void EOR_get_expected_happy_path()
+{
+  printf("test EOR_get_expected_happy_path ");
+  cpu->A=7;
+  EOR(5); 
+  assert(cpu->A==2); 
+}
+
+void LDA_get_expected_happy_path()
+{
+  printf("test LDA_get_expected_happy_path "); 
+  unsigned char data=7; 
+  LDA(data); 
+  assert(cpu->A==data); 
+}
+
+void STA_get_expected_happy_path()
+{
+  printf("test STA_get_expected_happy_path "); 
+  unsigned char data=7;
+  unsigned short address=23;
+  cpu->A=data; 
+  STA(address);
+  assert(cpu->cpu_memory[address]==data);  
+}
+
+void CMP_carry_status_flagged()
+{
+  printf("test CMP_carry_status_flagged "); 
+  cpu->A=1;
+  char carry_flag = 1;
+  CMP_update_status_register(0);
+  char expect_carry = cpu->status;
+  CMP_update_status_register(2);
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
+}
+
+void CMP_zero_status_flagged()
+{
+  printf("test CMP_zero_status_flagged "); 
+  cpu->A=1;
+  char zero_flag = 2;
+  CMP_update_status_register(1);
+  char expect_zero = cpu->status;
+  CMP_update_status_register(0);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+}
+
+void CMP_negative_status_flagged()
+{
+  printf("test CMP_negative_status_flagged "); 
+  cpu->A=1;
+  char negative_flag = 128;
+  CMP_update_status_register(2);
+  char expect_negative = cpu->status;
+  CMP_update_status_register(0);
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+}
+
 void check_adc_print()
 {
   cpu->PC=0;
@@ -196,5 +266,12 @@ int main(int argc, char* argv[])
   ORA_zero_status_flagged();
   ORA_negative_status_flagged();
   ORA_get_expected_happy_path();
+  AND_get_expected_happy_path();
+  EOR_get_expected_happy_path();
+  LDA_get_expected_happy_path();
+  STA_get_expected_happy_path();
+  CMP_carry_status_flagged();
+  CMP_zero_status_flagged();
+  CMP_negative_status_flagged();
   check_adc_print();
 }

@@ -85,6 +85,19 @@ void ADC_update_status_register(unsigned char oldA)
   switch_status_flag(overflow_flag,cpu->A < oldA); 
 }
 
+void SBC_update_status_register(unsigned char oldA)
+{
+  char carry_flag=1;
+  char zero_flag=2;
+  char overflow_flag=64;
+  char negative_flag=128;
+
+  switch_status_flag(carry_flag,cpu->A > oldA);
+  switch_status_flag(zero_flag,cpu->A == 0);
+  switch_status_flag(negative_flag,cpu->A < 0);
+  switch_status_flag(overflow_flag,cpu->A > oldA); 
+}
+
 void CMP_update_status_register(unsigned char data)
 {
   char carry_flag=1;
@@ -132,10 +145,19 @@ void EOR(unsigned char toEor)
 }
 
 void ADC(unsigned char toAdd)
-{
+{ 
   unsigned char oldA = cpu->A;
   cpu->A+=toAdd;
+  cpu->A+=(cpu->status&1); // add carry if set
   ADC_update_status_register(oldA); 
+}
+
+void SBC(unsigned char toSubtract)
+{
+  unsigned char oldA = cpu->A;
+  cpu->A-=toSubtract;
+  cpu->A-=(cpu->status&1); // subtract carry if set
+  SBC_update_status_register(oldA); 
 }
 
 void STA(unsigned short address)
@@ -256,6 +278,10 @@ void run_rom()
           case 6:
             CMP_update_status_register(cpu->cpu_memory[address]);
             strcpy(opcode_info, "CMP");
+            break;
+          case 7:
+            SBC(cpu->cpu_memory[address]);
+            strcpy(opcode_info, "SBC");
             break;
         }
         // print out opcode info

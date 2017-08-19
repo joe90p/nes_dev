@@ -68,11 +68,11 @@ void test_get_indirect_indexed_Y()
 void ADC_carry_status_flagged()
 {
   printf("test ADC_carry_status_flagged "); 
-  cpu->A=3;
+  cpu->A=-127;
   char carry_flag = 1;
-  ADC_update_status_register(250);
+  ADC_update_status_register(127);
   char expect_carry = cpu->status;
-  ADC_update_status_register(2);
+  ADC_update_status_register(-128);
   char not_expect_carry = cpu->status; 
   assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
 }
@@ -92,7 +92,7 @@ void ADC_zero_status_flagged()
 
 void ADC_overflow_status_flagged()
 {
-  printf("test ADC_carry_status_flagged "); 
+  printf("test ADC_overflow_status_flagged "); 
   cpu->A=3;
   char overflow_flag = 64;
   ADC_update_status_register(250);
@@ -118,6 +118,7 @@ void ADC_negative_status_flagged()
 void ADC_get_expected_overflow()
 {
   printf("ADC_get_expected_overflow ");
+  cpu->status=0;
   cpu->A=126;
   ADC(3); 
   assert(cpu->A==-127);
@@ -126,9 +127,79 @@ void ADC_get_expected_overflow()
 void ADC_get_expected_happy_path()
 {
   printf("ADC_get_expected_happy_path ");
+  cpu->status=0;
   cpu->A=126;
   ADC(1); 
   assert(cpu->A==127);
+}
+
+void SBC_carry_status_flagged()
+{
+  printf("test SBC_carry_status_flagged "); 
+  cpu->A=126;
+  char carry_flag = 1;
+  SBC_update_status_register(125);
+  char expect_carry = cpu->status;
+  SBC_update_status_register(127);
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
+}
+
+void SBC_zero_status_flagged()
+{
+  printf("test SBC_zero_status_flagged "); 
+  cpu->A=0;
+  char zero_flag = 2;
+  SBC_update_status_register(5);
+  char expect_zero = cpu->status;
+  cpu->A=1;
+  SBC_update_status_register(5);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+}
+
+void SBC_overflow_status_flagged()
+{
+  printf("test SBC_overflow_status_flagged "); 
+  cpu->A=126;
+  char overflow_flag = 64;
+  SBC_update_status_register(125);
+  char expect_overflow = cpu->status;
+  SBC_update_status_register(127);
+  char not_expect_overflow = cpu->status; 
+  assert((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag); 
+}
+
+void SBC_negative_status_flagged()
+{
+  printf("test SBC_negative_status_flagged "); 
+  cpu->A=-1;
+  char negative_flag = 128;
+  SBC_update_status_register(2);
+  char expect_negative = cpu->status;
+  cpu->A=1; 
+  SBC_update_status_register(2);
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+}
+
+void SBC_get_expected_overflow()
+{
+  printf("SBC_get_expected_overflow ");
+  cpu->status=0;//clear carry flag
+  cpu->A=-128;
+  SBC(1);
+  printf("%d", cpu->A); 
+  assert(cpu->A==127);
+}
+
+void SBC_get_expected_happy_path()
+{
+  printf("SBC_get_expected_happy_path ");
+  cpu->status=0; //clear carry flag
+  cpu->A=126;
+  SBC(1); 
+  assert(cpu->A==125);
 }
 
 void ORA_negative_status_flagged()
@@ -263,6 +334,15 @@ int main(int argc, char* argv[])
   ADC_negative_status_flagged();
   ADC_get_expected_overflow();
   ADC_get_expected_happy_path();
+
+  SBC_carry_status_flagged();
+  SBC_zero_status_flagged();
+  SBC_overflow_status_flagged();
+  SBC_negative_status_flagged();
+  SBC_get_expected_overflow();
+  SBC_get_expected_happy_path();
+
+
   ORA_zero_status_flagged();
   ORA_negative_status_flagged();
   ORA_get_expected_happy_path();

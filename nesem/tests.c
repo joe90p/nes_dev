@@ -65,16 +65,124 @@ void test_get_indirect_indexed_Y()
   assert(address==0x008C);
 }
 
-void ADC_carry_status_flagged()
+void ADC_carry_status_flagged_result_less()
 {
-  printf("test ADC_carry_status_flagged "); 
-  cpu->A=-127;
+  printf("test ADC_carry_status_flagged_result_less "); 
   char carry_flag = 1;
-  ADC_update_status_register(127);
+
+  cpu->A=-125;  
+  cpu->status=0;
+  ADC_update_status_register(1);
+  char not_expect_carry = cpu->status;
+  cpu->status=0;
+  ADC_update_status_register(-1);
   char expect_carry = cpu->status;
-  ADC_update_status_register(-128);
-  char not_expect_carry = cpu->status; 
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
+  
+  cpu->status=0;
+  cpu->A=0;
+  ADC_update_status_register(1);
+  char expect_carry_2 = cpu->status;
+  
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (expect_carry_2&carry_flag)==carry_flag); 
+}
+
+void ADC_carry_status_flagged_result_greater()
+{
+  printf("test ADC_carry_status_flagged_result_greater "); 
+  char carry_flag = 1;
+
+  cpu->A=2;  
+  cpu->status=0;
+  ADC_update_status_register(1);
+  char not_expect_carry = cpu->status;
+  cpu->status=0;
+  ADC_update_status_register(-1);
+  char expect_carry = cpu->status;
+  
+  cpu->status=0;
+  cpu->A=0;
+  ADC_update_status_register(-1);
+  char expect_carry_2 = cpu->status;
+  
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (expect_carry_2&carry_flag)==carry_flag); 
+}
+
+void ADC_carry_status_flagged_result_equal()
+{
+  printf("test ADC_carry_status_flagged_result_equal "); 
+  char carry_flag = 1;
+
+  cpu->A=0;  
+  cpu->status=0;
+  ADC_update_status_register(0);
+  char not_expect_carry = cpu->status;
+ 
+  cpu->A=-2;  
+  cpu->status=0;
+  ADC_update_status_register(-2);
+  char not_expect_carry_2 = cpu->status;
+
+  assert((not_expect_carry&carry_flag)==0 && (not_expect_carry_2&carry_flag)==0); 
+}
+
+void SBC_carry_status_flagged_result_less()
+{
+  printf("test SBC_carry_status_flagged_result_less "); 
+  char carry_flag = 1;
+
+  cpu->A=-125;  
+  cpu->status=0;
+  SBC_update_status_register(1);
+  char expect_carry = cpu->status;
+  cpu->status=0;
+  SBC_update_status_register(-1);
+  char not_expect_carry = cpu->status;
+  
+  cpu->status=0;
+  cpu->A=-1;
+  SBC_update_status_register(-2);
+  char not_expect_carry_2 = cpu->status;
+  
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (not_expect_carry_2&carry_flag)==carry_flag); 
+}
+
+void SBC_carry_status_flagged_result_greater()
+{
+  printf("test SBC_carry_status_flagged_result_greater "); 
+  char carry_flag = 1;
+
+  cpu->A=2;  
+  cpu->status=0;
+  SBC_update_status_register(1);
+  char expect_carry = cpu->status;
+  cpu->status=0;
+  SBC_update_status_register(-1);
+  char not_expect_carry = cpu->status;
+  
+  cpu->status=0;
+  cpu->A=-1;
+  SBC_update_status_register(-2);
+  char expect_carry_2 = cpu->status;
+  
+  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (expect_carry_2&carry_flag)==carry_flag); 
+}
+
+void SBC_carry_status_flagged_result_equal()
+{
+  printf("test SBC_carry_status_flagged_result_equal "); 
+  char carry_flag = 1;
+
+  cpu->A=0;  
+  cpu->status=0;
+  SBC_update_status_register(0);
+  char not_expect_carry = cpu->status;
+ 
+  cpu->A=-2;  
+  cpu->status=0;
+  SBC_update_status_register(-2);
+  char not_expect_carry_2 = cpu->status;
+
+  assert((not_expect_carry&carry_flag)==0 && (not_expect_carry_2&carry_flag)==0); 
 }
 
 void ADC_zero_status_flagged()
@@ -95,7 +203,7 @@ void ADC_overflow_status_flagged()
   printf("test ADC_overflow_status_flagged "); 
   cpu->A=3;
   char overflow_flag = 64;
-  ADC_update_status_register(250);
+  ADC_update_status_register(127);
   char expect_overflow = cpu->status;
   ADC_update_status_register(2);
   char not_expect_overflow = cpu->status; 
@@ -155,7 +263,8 @@ void SBC_zero_status_flagged()
   cpu->A=1;
   SBC_update_status_register(5);
   char not_expect_zero = cpu->status; 
-  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+  assert((not_expect_zero&zero_flag)==0 && 
+           (expect_zero&zero_flag)==zero_flag); 
 }
 
 void SBC_overflow_status_flagged()
@@ -328,7 +437,13 @@ int main(int argc, char* argv[])
   test_get_absolute_address_Y();
   test_get_indexed_indirect_X();
   test_get_indirect_indexed_Y();
-  ADC_carry_status_flagged();
+  ADC_carry_status_flagged_result_less();
+  ADC_carry_status_flagged_result_greater();
+  ADC_carry_status_flagged_result_equal();
+  SBC_carry_status_flagged_result_less();
+  SBC_carry_status_flagged_result_greater();
+  SBC_carry_status_flagged_result_equal();
+
   ADC_zero_status_flagged();
   ADC_overflow_status_flagged();
   ADC_negative_status_flagged();

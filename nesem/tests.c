@@ -68,7 +68,6 @@ void test_get_indirect_indexed_Y()
 void ADC_carry_status_flagged_result_less()
 {
   printf("test ADC_carry_status_flagged_result_less "); 
-  char carry_flag = 1;
 
   cpu->A=-125;  
   cpu->status=0;
@@ -83,13 +82,12 @@ void ADC_carry_status_flagged_result_less()
   ADC_update_status_register(1);
   char expect_carry_2 = cpu->status;
   
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (expect_carry_2&carry_flag)==carry_flag); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG  &&  (expect_carry_2&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
 }
 
 void ADC_carry_status_flagged_result_greater()
 {
   printf("test ADC_carry_status_flagged_result_greater "); 
-  char carry_flag = 1;
 
   cpu->A=2;  
   cpu->status=0;
@@ -104,14 +102,13 @@ void ADC_carry_status_flagged_result_greater()
   ADC_update_status_register(-1);
   char expect_carry_2 = cpu->status;
   
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (expect_carry_2&carry_flag)==carry_flag); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG  &&  (expect_carry_2&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
 }
 
 void ADC_carry_status_flagged_result_equal()
 {
   printf("test ADC_carry_status_flagged_result_equal "); 
-  char carry_flag = 1;
-
+  
   cpu->A=0;  
   cpu->status=0;
   ADC_update_status_register(0);
@@ -122,14 +119,12 @@ void ADC_carry_status_flagged_result_equal()
   ADC_update_status_register(-2);
   char not_expect_carry_2 = cpu->status;
 
-  assert((not_expect_carry&carry_flag)==0 && (not_expect_carry_2&carry_flag)==0); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (not_expect_carry_2&NES_CARRY_FLAG)==0); 
 }
 
 void SBC_carry_status_flagged_result_less()
 {
   printf("test SBC_carry_status_flagged_result_less "); 
-  char carry_flag = 1;
-
   cpu->A=-125;  
   cpu->status=0;
   SBC_update_status_register(1);
@@ -139,18 +134,16 @@ void SBC_carry_status_flagged_result_less()
   char not_expect_carry = cpu->status;
   
   cpu->status=0;
-  cpu->A=-1;
-  SBC_update_status_register(-2);
+  cpu->A=-2;
+  SBC_update_status_register(-1);
   char not_expect_carry_2 = cpu->status;
   
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (not_expect_carry_2&carry_flag)==carry_flag); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG  &&  (not_expect_carry_2&NES_CARRY_FLAG)==0); 
 }
 
 void SBC_carry_status_flagged_result_greater()
 {
   printf("test SBC_carry_status_flagged_result_greater "); 
-  char carry_flag = 1;
-
   cpu->A=2;  
   cpu->status=0;
   SBC_update_status_register(1);
@@ -164,14 +157,12 @@ void SBC_carry_status_flagged_result_greater()
   SBC_update_status_register(-2);
   char expect_carry_2 = cpu->status;
   
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag  &&  (expect_carry_2&carry_flag)==carry_flag); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG  &&  (expect_carry_2&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
 }
 
 void SBC_carry_status_flagged_result_equal()
 {
   printf("test SBC_carry_status_flagged_result_equal "); 
-  char carry_flag = 1;
-
   cpu->A=0;  
   cpu->status=0;
   SBC_update_status_register(0);
@@ -182,45 +173,45 @@ void SBC_carry_status_flagged_result_equal()
   SBC_update_status_register(-2);
   char not_expect_carry_2 = cpu->status;
 
-  assert((not_expect_carry&carry_flag)==0 && (not_expect_carry_2&carry_flag)==0); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (not_expect_carry_2&NES_CARRY_FLAG)==0); 
 }
 
 void ADC_zero_status_flagged()
 {
   printf("test ADC_zero_status_flagged "); 
   cpu->A=0;
-  char zero_flag = 2;
+
   ADC_update_status_register(5);
   char expect_zero = cpu->status;
   cpu->A=1;
   ADC_update_status_register(5);
   char not_expect_zero = cpu->status; 
-  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
 }
 
 void ADC_overflow_status_flagged()
 {
   printf("test ADC_overflow_status_flagged "); 
   cpu->A=3;
-  char overflow_flag = 64;
+
   ADC_update_status_register(127);
   char expect_overflow = cpu->status;
   ADC_update_status_register(2);
   char not_expect_overflow = cpu->status; 
-  assert((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag); 
+  assert((not_expect_overflow&NES_OVERFLOW_FLAG)==0 && (expect_overflow&NES_OVERFLOW_FLAG)==NES_OVERFLOW_FLAG); 
 }
 
 void ADC_negative_status_flagged()
 {
   printf("test ADC_negative_status_flagged "); 
   cpu->A=-1;
-  char negative_flag = 128;
+
   ADC_update_status_register(2);
   char expect_negative = cpu->status;
   cpu->A=1; 
   ADC_update_status_register(2);
   char not_expect_negative = cpu->status; 
-  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
 void ADC_get_expected_overflow()
@@ -244,52 +235,49 @@ void ADC_get_expected_happy_path()
 void SBC_carry_status_flagged()
 {
   printf("test SBC_carry_status_flagged "); 
-  cpu->A=126;
-  char carry_flag = 1;
+  cpu->A=126; 
   SBC_update_status_register(125);
   char expect_carry = cpu->status;
   SBC_update_status_register(127);
   char not_expect_carry = cpu->status; 
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
 }
 
 void SBC_zero_status_flagged()
 {
   printf("test SBC_zero_status_flagged "); 
   cpu->A=0;
-  char zero_flag = 2;
+  
   SBC_update_status_register(5);
   char expect_zero = cpu->status;
   cpu->A=1;
   SBC_update_status_register(5);
   char not_expect_zero = cpu->status; 
-  assert((not_expect_zero&zero_flag)==0 && 
-           (expect_zero&zero_flag)==zero_flag); 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && 
+           (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
 }
 
 void SBC_overflow_status_flagged()
 {
   printf("test SBC_overflow_status_flagged "); 
-  cpu->A=126;
-  char overflow_flag = 64;
+  cpu->A=126; 
   SBC_update_status_register(125);
   char expect_overflow = cpu->status;
   SBC_update_status_register(127);
   char not_expect_overflow = cpu->status; 
-  assert((not_expect_overflow&overflow_flag)==0 && (expect_overflow&overflow_flag)==overflow_flag); 
+  assert((not_expect_overflow&NES_OVERFLOW_FLAG)==0 && (expect_overflow&NES_OVERFLOW_FLAG)==NES_OVERFLOW_FLAG); 
 }
 
 void SBC_negative_status_flagged()
 {
   printf("test SBC_negative_status_flagged "); 
   cpu->A=-1;
-  char negative_flag = 128;
   SBC_update_status_register(2);
   char expect_negative = cpu->status;
   cpu->A=1; 
   SBC_update_status_register(2);
   char not_expect_negative = cpu->status; 
-  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
 void SBC_get_expected_overflow()
@@ -315,26 +303,24 @@ void ORA_negative_status_flagged()
 {
   printf("test ORA_negative_status_flagged "); 
   cpu->A=-1;
-  char negative_flag = 128;
   ORA_update_status_register();
   char expect_negative = cpu->status;
   cpu->A=1; 
   ORA_update_status_register();
   char not_expect_negative = cpu->status; 
-  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
 void ORA_zero_status_flagged()
 {
   printf("test ORA_zero_status_flagged "); 
   cpu->A=0;
-  char zero_flag = 2;
   ORA_update_status_register();
   char expect_zero = cpu->status;
   cpu->A=1;
   ORA_update_status_register();
   char not_expect_zero = cpu->status; 
-  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
 }
 
 void ORA_get_expected_happy_path()
@@ -382,37 +368,34 @@ void STA_get_expected_happy_path()
 void CMP_carry_status_flagged()
 {
   printf("test CMP_carry_status_flagged "); 
-  cpu->A=1;
-  char carry_flag = 1;
+  cpu->A=1; 
   CMP_update_status_register(0);
   char expect_carry = cpu->status;
   CMP_update_status_register(2);
   char not_expect_carry = cpu->status; 
-  assert((not_expect_carry&carry_flag)==0 && (expect_carry&carry_flag)==carry_flag); 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
 }
 
 void CMP_zero_status_flagged()
 {
   printf("test CMP_zero_status_flagged "); 
   cpu->A=1;
-  char zero_flag = 2;
   CMP_update_status_register(1);
   char expect_zero = cpu->status;
   CMP_update_status_register(0);
   char not_expect_zero = cpu->status; 
-  assert((not_expect_zero&zero_flag)==0 && (expect_zero&zero_flag)==zero_flag); 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
 }
 
 void CMP_negative_status_flagged()
 {
   printf("test CMP_negative_status_flagged "); 
   cpu->A=1;
-  char negative_flag = 128;
   CMP_update_status_register(2);
   char expect_negative = cpu->status;
   CMP_update_status_register(0);
   char not_expect_negative = cpu->status; 
-  assert((not_expect_negative&negative_flag)==0 && (expect_negative&negative_flag)==negative_flag); 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
 void check_adc_print()

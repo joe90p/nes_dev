@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define NES_CARRY_FLAG 1
+#define NES_ZERO_FLAG 2
+#define NES_OVERFLOW_FLAG 64
+#define NES_NEGATIVE_FLAG 128
 
 struct NES_CPU
 {

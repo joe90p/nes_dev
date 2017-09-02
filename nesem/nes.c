@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
@@ -73,78 +74,31 @@ void switch_status_flag(char flag, char switch_on)
 }
 
 void ADC_update_status_register(signed char oldA)
-{
-  char carry_flag=1;
-  char zero_flag=2;
-  char overflow_flag=64;
-  char negative_flag=128;
+{ 
+
   char oldA_sign_bit = oldA&128;
   char newA_sign_bit = (cpu->A)&128;
-  //switch_status_flag(carry_flag, 0);
-  switch_status_flag(carry_flag, cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit==oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit!=oldA_sign_bit))); 
-  if(cpu->A<oldA)
-  {
-    /*if(oldA<0 && (cpu->A)<0)
-    {
-      switch_status_flag(carry_flag, 1); 
-    }
-    if(oldA>=0 && (cpu->A)>=0 )
-    {
-      switch_status_flag(carry_flag, 1); 
-    }*/
-  }
-  else
-  {
-    /*
-    if(oldA<0 && cpu->A>=0)
-    {
-      switch_status_flag(carry_flag, 1);
-    }*/
-  }
-   
-  switch_status_flag(zero_flag,cpu->A == 0);
-  switch_status_flag(negative_flag,cpu->A < 0);
-  switch_status_flag(overflow_flag,cpu->A < oldA); 
+  switch_status_flag(NES_CARRY_FLAG, cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit==oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit!=oldA_sign_bit)));   
+  switch_status_flag(NES_ZERO_FLAG,cpu->A == 0);
+  switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < 0);
+  switch_status_flag(NES_OVERFLOW_FLAG,cpu->A < oldA); 
 }
 
 void SBC_update_status_register(signed char oldA)
 {
-  char carry_flag=1;
-  char zero_flag=2;
-  char overflow_flag=64;
-  char negative_flag=128;
   char oldA_sign_bit = oldA&128;
   char newA_sign_bit = (cpu->A)&128;
-  switch_status_flag(carry_flag,cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit!=oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit==oldA_sign_bit))); 
-
-  /*if(cpu->A>oldA)
-  {
-    if((oldA>=0 && cpu->A>=0) || (oldA<0 && cpu->A<0))
-    {
-      switch_status_flag(carry_flag, 1); 
-    }
-  }
-  else
-  {
-    if(oldA>=0 && cpu->A<0)
-    {
-      switch_status_flag(carry_flag, 1);
-    }
-  }*/
-  switch_status_flag(zero_flag,cpu->A == 0);
-  switch_status_flag(negative_flag,cpu->A < 0);
-  switch_status_flag(overflow_flag,cpu->A > oldA); 
+  switch_status_flag(NES_CARRY_FLAG,cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit!=oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit==oldA_sign_bit))); 
+  switch_status_flag(NES_ZERO_FLAG,cpu->A == 0);
+  switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < 0);
+  switch_status_flag(NES_OVERFLOW_FLAG,cpu->A > oldA); 
 }
 
 void CMP_update_status_register(unsigned char data)
 {
-  char carry_flag=1;
-  char zero_flag=2; 
-  char negative_flag=128;
-
-  switch_status_flag(carry_flag,cpu->A >= data);
-  switch_status_flag(zero_flag,cpu->A == data);
-  switch_status_flag(negative_flag,cpu->A < data); 
+  switch_status_flag(NES_CARRY_FLAG,cpu->A >= data);
+  switch_status_flag(NES_ZERO_FLAG,cpu->A == data);
+  switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < data); 
 }
 
 //also applies to
@@ -153,12 +107,8 @@ void CMP_update_status_register(unsigned char data)
 //LDA
 void ORA_update_status_register()
 { 
-  char zero_flag=2;
-  char negative_flag=128;
-
-  switch_status_flag(zero_flag,cpu->A == 0);
-  switch_status_flag(negative_flag,cpu->A < 0);
-
+  switch_status_flag(NES_ZERO_FLAG,cpu->A == 0);
+  switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < 0);
 }
 
 void ORA(unsigned char toOr)

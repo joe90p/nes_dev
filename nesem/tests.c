@@ -398,6 +398,59 @@ void CMP_negative_status_flagged()
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
+void ASL_carry_status_flagged()
+{
+  unsigned char operand_1 = 129;
+  unsigned char operand_2 = 1;
+  printf("test ASL_carry_status_flagged "); 
+
+  ASL(&operand_1);
+  char expect_carry = cpu->status;
+  ASL(&operand_2);
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
+}
+
+void ASL_zero_status_flagged()
+{
+  unsigned char operand_1 = 129;
+  printf("test ASL_zero_status_flagged "); 
+  cpu->A=0;
+  ASL(&operand_1); 
+  char expect_zero = cpu->status;
+ 
+  cpu->A=1; 
+  ASL(&operand_1);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
+}
+
+void ASL_negative_status_flagged()
+{
+  unsigned char operand_1 = 64;
+  unsigned char operand_2 = 129;
+  printf("test ASL_negative_status_flagged "); 
+
+  ASL(&operand_1);
+  char expect_negative = cpu->status;
+  ASL(&operand_2);
+  
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
+}
+
+void ASL_get_expected_happy_path()
+{
+  unsigned char operand_1 = 64;
+  unsigned char operand_2 = 129;
+  printf("test ASL_get_expected_happy_path "); 
+
+  ASL(&operand_1);
+  ASL(&operand_2);
+  
+  assert(operand_1==128 && operand_2==2); 
+}
+
 void check_adc_print()
 {
   cpu->PC=0;
@@ -451,5 +504,8 @@ int main(int argc, char* argv[])
   CMP_carry_status_flagged();
   CMP_zero_status_flagged();
   CMP_negative_status_flagged();
-  check_adc_print();
+  ASL_carry_status_flagged();
+  ASL_negative_status_flagged();
+  ASL_zero_status_flagged();
+  ASL_get_expected_happy_path();
 }

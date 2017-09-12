@@ -38,3 +38,4 @@ void EOR(unsigned char);
 void LDA(unsigned char);
 void STA(unsigned short);
 void SBC(unsigned char);
+void ASL(unsigned char*);

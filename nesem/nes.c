@@ -159,6 +159,14 @@ void LDA(unsigned char newA)
   ORA_update_status_register();
 }
 
+void ASL(unsigned char* operand_ptr)
+{
+  switch_status_flag(NES_CARRY_FLAG, *operand_ptr&128);
+  switch_status_flag(NES_ZERO_FLAG, cpu->A==0);
+  *operand_ptr = *operand_ptr<<1;
+  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)*operand_ptr < 0);
+
+}
 
 void run_rom()
 {
@@ -174,6 +182,7 @@ void run_rom()
   char opcode_mask = 224;
   char addressing_mode_mask = 28;
   char program_counter_increment;
+  unsigned char* operand_ptr =0;
   unsigned short address;
   for(int k=0; k < 5; k++)
   {
@@ -275,6 +284,62 @@ void run_rom()
         // print out opcode info
         printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);      
         cpu->PC+=program_counter_increment;
+        break;
+      case 2:
+         
+        switch(addressing_mode)
+        {
+          case 0:
+            //immediate
+            address = cpu->PC + 1;
+            program_counter_increment = 2;
+            sprintf(address_mode_info,"#%02x", cpu->cpu_memory[cpu->PC + 1]);
+            operand_ptr = &cpu->cpu_memory[address];
+            break;          
+          case 1:
+            //zero page
+            address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 2;
+            sprintf(address_mode_info,"$%02x", cpu->cpu_memory[cpu->PC + 1]);
+            operand_ptr = &cpu->cpu_memory[address];
+            break;
+          case 2:
+            //accumulator
+            
+            program_counter_increment = 1;
+            sprintf(address_mode_info, "A");
+            operand_ptr = (unsigned char*)&cpu->A;
+            break; 
+          case 3:
+            //absolute
+            address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 3;
+            sprintf(address_mode_info,"$%02x%02x", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC+1]);
+            operand_ptr = &cpu->cpu_memory[address];
+            break; 
+          case 5:
+            //zero page,X
+            address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 2;
+            sprintf(address_mode_info,"$%02x,X", cpu->cpu_memory[cpu->PC + 1]); 
+            operand_ptr = &cpu->cpu_memory[address];
+            break;
+          case 7:
+            //absolute,X
+            address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+            program_counter_increment = 3;
+            sprintf(address_mode_info,"$%02x%02x,X", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
+            operand_ptr = &cpu->cpu_memory[address];
+            break;
+
+        }
+        switch(opcode)
+        {
+          case 0:
+            ASL(operand_ptr);
+            strcpy(opcode_info, "ASL");
+            break;
+        }
     }
     //clear string memory
     free(opcode_info);  

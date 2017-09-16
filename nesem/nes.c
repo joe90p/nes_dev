@@ -158,16 +158,61 @@ void LDA(unsigned char newA)
   cpu->A=newA;
   ORA_update_status_register();
 }
-
-void ASL(unsigned char* operand_ptr)
+void shift_right(unsigned char* operand_ptr, char rotate)
 {
-  switch_status_flag(NES_CARRY_FLAG, *operand_ptr&128);
-  switch_status_flag(NES_ZERO_FLAG, cpu->A==0);
-  *operand_ptr = *operand_ptr<<1;
+  char original_carry = cpu->status&NES_CARRY_FLAG;
+  switch_status_flag(NES_CARRY_FLAG, *operand_ptr&1);
+  *operand_ptr = *operand_ptr>>1;
+  if(rotate)
+  {
+    *operand_ptr|=(original_carry<<7);
+  }
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)*operand_ptr < 0);
+  switch_status_flag(NES_ZERO_FLAG, *operand_ptr==0);
+
+}
+void LSR(unsigned char* operand_ptr)
+{
+  shift_right(operand_ptr, 0);
+}
+void ROR(unsigned char* operand_ptr)
+{
+  shift_right(operand_ptr, 1);
+}
+void shift_left(unsigned char* operand_ptr, char rotate)
+{
+  char original_carry = cpu->status&NES_CARRY_FLAG;
+  switch_status_flag(NES_CARRY_FLAG, *operand_ptr&128);
+  *operand_ptr = *operand_ptr<<1;
+  if(rotate)
+  {
+    *operand_ptr|=original_carry;
+  }
+  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)*operand_ptr < 0);
+  switch_status_flag(NES_ZERO_FLAG, *operand_ptr==0);
 
 }
 
+void ASL(unsigned char* operand_ptr)
+{
+  shift_left(operand_ptr, 0);
+
+}
+
+void ROL(unsigned char* operand_ptr)
+{
+  shift_left(operand_ptr, 1);
+}
+void STX(unsigned char address)
+{
+  cpu->cpu_memory[address] = cpu->X;
+}
+void LDX(unsigned char address)
+{
+  cpu->X = cpu->cpu_memory[address];
+  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)cpu->X < 0);
+  switch_status_flag(NES_ZERO_FLAG, cpu->X==0);
+}
 void run_rom()
 {
   cpu->PC = cpu->cpu_memory[0xfffc]<<8 | cpu->cpu_memory[0xfffd]>>8;
@@ -305,7 +350,6 @@ void run_rom()
             break;
           case 2:
             //accumulator
-            
             program_counter_increment = 1;
             sprintf(address_mode_info, "A");
             operand_ptr = (unsigned char*)&cpu->A;
@@ -339,6 +383,27 @@ void run_rom()
             ASL(operand_ptr);
             strcpy(opcode_info, "ASL");
             break;
+          case 1:
+            ROL(operand_ptr);
+            strcpy(opcode_info, "ROL");
+            break;
+          case 2:
+            LSR(operand_ptr);
+            strcpy(opcode_info, "LSR");
+            break;
+          case 3:
+            ROR(operand_ptr);
+            strcpy(opcode_info, "ROR");
+            break;
+          case 4:
+            STX(*operand_ptr);
+            strcpy(opcode_info, "STX");
+            break;
+          case 5:
+            LDX(*operand_ptr);
+            strcpy(opcode_info, "LDX");
+            break;
+
         }
     }
     //clear string memory

@@ -398,59 +398,178 @@ void CMP_negative_status_flagged()
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
-void ASL_carry_status_flagged()
+void shift_left_carry_status_flagged()
 {
   unsigned char operand_1 = 129;
   unsigned char operand_2 = 1;
-  printf("test ASL_carry_status_flagged "); 
+  printf("test shift_left_carry_status_flagged "); 
 
-  ASL(&operand_1);
+  shift_left(&operand_1, 0);
   char expect_carry = cpu->status;
-  ASL(&operand_2);
+  shift_left(&operand_2, 0);
   char not_expect_carry = cpu->status; 
   assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
 }
 
-void ASL_zero_status_flagged()
+void shift_left_zero_status_flagged()
 {
-  unsigned char operand_1 = 129;
-  printf("test ASL_zero_status_flagged "); 
-  cpu->A=0;
-  ASL(&operand_1); 
+  unsigned char operand_1 = 128;
+  printf("test shift_left_zero_status_flagged "); 
+  shift_left(&operand_1, 0); 
   char expect_zero = cpu->status;
- 
-  cpu->A=1; 
-  ASL(&operand_1);
+
+  unsigned char operand_2 = 1; 
+  shift_left(&operand_2, 0);
   char not_expect_zero = cpu->status; 
   assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
 }
 
-void ASL_negative_status_flagged()
+void shift_left_negative_status_flagged()
 {
   unsigned char operand_1 = 64;
   unsigned char operand_2 = 129;
-  printf("test ASL_negative_status_flagged "); 
+  printf("test shift_left_negative_status_flagged "); 
 
-  ASL(&operand_1);
+  shift_left(&operand_1, 0);
   char expect_negative = cpu->status;
-  ASL(&operand_2);
+  shift_left(&operand_2, 0);
   
   char not_expect_negative = cpu->status; 
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
 
-void ASL_get_expected_happy_path()
+void shift_left_get_expected_happy_path()
 {
   unsigned char operand_1 = 64;
   unsigned char operand_2 = 129;
-  printf("test ASL_get_expected_happy_path "); 
+  printf("test shift_left_get_expected_happy_path "); 
 
-  ASL(&operand_1);
-  ASL(&operand_2);
+  shift_left(&operand_1, 0);
+  shift_left(&operand_2, 0);
   
   assert(operand_1==128 && operand_2==2); 
 }
 
+void shift_left_rotate_expected()
+{
+  unsigned char operand_1=128;
+  cpu->status=0;
+  printf("test shift_left_rotate_expected ");
+  shift_left(&operand_1, 1);
+  unsigned char operand_2 = 0;
+  shift_left(&operand_2, 1);
+  assert(operand_1==0 && operand_2==1);
+}
+
+void shift_right_carry_status_flagged()
+{
+  unsigned char operand_1 = 1;
+  unsigned char operand_2 = 2;
+  printf("test shift_right_carry_status_flagged "); 
+
+  shift_right(&operand_1, 0);
+  char expect_carry = cpu->status;
+  shift_right(&operand_2, 0);
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
+}
+
+void shift_right_zero_status_flagged()
+{
+  unsigned char operand_1 = 1;
+  printf("test shift_right_zero_status_flagged "); 
+  shift_right(&operand_1, 0); 
+  char expect_zero = cpu->status;
+
+  unsigned char operand_2 = 2; 
+  shift_right(&operand_2, 0);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
+}
+
+void shift_right_negative_status_flagged()
+{
+  unsigned char operand_1 = 128;
+  printf("test shift_right_negative_status_flagged "); 
+
+  shift_right(&operand_1, 0);
+  
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 ); 
+}
+
+void shift_right_get_expected_happy_path()
+{
+  unsigned char operand_1 = 64;
+  unsigned char operand_2 = 129;
+  printf("test shift_right_get_expected_happy_path "); 
+
+  shift_right(&operand_1, 0);
+  shift_right(&operand_2, 0);
+  
+  assert(operand_1==32 && operand_2==64); 
+}
+
+void shift_right_rotate_expected()
+{
+  cpu->status=0;
+  unsigned char operand_1 = 65;
+  unsigned char operand_2 = 2;
+  printf("test shift_right_get_expected_happy_path "); 
+
+  shift_right(&operand_1, 1);
+  shift_right(&operand_2, 1);
+  
+  assert(operand_1==32 && operand_2==129); 
+}
+void STX_get_expected()
+{
+  printf("STX_get_expected ");
+  char x_value = 250;
+  cpu->X=x_value;
+  unsigned char address = 23;
+  STX(address);
+  assert(cpu->cpu_memory[address] == x_value);
+}
+
+void LDX_get_expected()
+{
+  printf("LDX_get_expetced ");
+  cpu->X=0;
+  unsigned char address = 47;
+  unsigned char val = 93;
+  cpu->cpu_memory[address]=val;
+  LDX(address);
+  assert(cpu->X==val);
+  
+}
+
+void LDX_zero_flag()
+{
+  printf("LDX_zero_flag ");
+  unsigned char address = 23;
+  cpu->cpu_memory[address]=0;
+  LDX(address);
+  char expect_zero = cpu->status;
+  cpu->cpu_memory[address]=1;
+  LDX(address);
+  char not_expect_zero = cpu->status;
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
+
+}
+
+void LDX_negative_flag()
+{
+  printf("LDX_negative_flag ");
+  unsigned char address = 23;
+  cpu->cpu_memory[address]=128;
+  LDX(address);
+  char expect_negative = cpu->status;
+  cpu->cpu_memory[address]=1;
+  LDX(address);
+  char not_expect_negative = cpu->status;
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG);
+}
 void check_adc_print()
 {
   cpu->PC=0;
@@ -504,8 +623,18 @@ int main(int argc, char* argv[])
   CMP_carry_status_flagged();
   CMP_zero_status_flagged();
   CMP_negative_status_flagged();
-  ASL_carry_status_flagged();
-  ASL_negative_status_flagged();
-  ASL_zero_status_flagged();
-  ASL_get_expected_happy_path();
+  shift_left_carry_status_flagged();
+  shift_left_negative_status_flagged();
+  shift_left_zero_status_flagged();
+  shift_left_get_expected_happy_path();
+  shift_left_zero_status_flagged();
+  shift_right_carry_status_flagged();
+  shift_right_negative_status_flagged();
+  shift_right_zero_status_flagged();
+  shift_right_get_expected_happy_path();
+  shift_right_rotate_expected();
+  STX_get_expected();
+  LDX_get_expected();
+  LDX_zero_flag();
+  LDX_negative_flag();
 }

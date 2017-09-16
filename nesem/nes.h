@@ -38,4 +38,7 @@ void EOR(unsigned char);
 void LDA(unsigned char);
 void STA(unsigned short);
 void SBC(unsigned char);
-void ASL(unsigned char*);
+void shift_left(unsigned char*, char);
+void shift_right(unsigned char*, char);
+void STX(unsigned char);
+void LDX(unsigned char);

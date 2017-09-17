@@ -330,6 +330,16 @@ void ORA_get_expected_happy_path()
   ORA(4);
   assert(cpu->A==7); 
 }
+ 
+void get_data_at_address_do_opcode_expected()
+{
+  printf("get_data_at_address_do_opcode_expected ");
+  cpu->A=3;
+  short address = 257;
+  cpu->cpu_memory[address]=4;
+  get_data_at_address_do_opcode(address, ORA);
+  assert(cpu->A==7);
+}
 
 void AND_get_expected_happy_path()
 {
@@ -637,4 +647,5 @@ int main(int argc, char* argv[])
   LDX_get_expected();
   LDX_zero_flag();
   LDX_negative_flag();
+  get_data_at_address_do_opcode_expected();
 }

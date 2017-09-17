@@ -7,7 +7,6 @@ unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
 
 void run_rom();
-
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {
   return get_address_input_upper_byte<<8 | get_address_input_lower_byte;
@@ -213,6 +212,13 @@ void LDX(unsigned char address)
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)cpu->X < 0);
   switch_status_flag(NES_ZERO_FLAG, cpu->X==0);
 }
+
+void get_data_at_address_do_opcode(short address, opcode_action_type opcode_action)
+{
+  unsigned char data = cpu->cpu_memory[address];
+  opcode_action(data);
+}
+
 void run_rom()
 {
   cpu->PC = cpu->cpu_memory[0xfffc]<<8 | cpu->cpu_memory[0xfffd]>>8;
@@ -294,7 +300,7 @@ void run_rom()
         switch(opcode)
         {
           case 0:
-            ORA(cpu->cpu_memory[address]);
+            get_data_at_address_do_opcode(address, ORA);      
             strcpy(opcode_info, "ORA");
             break;
           case 1:
@@ -315,7 +321,7 @@ void run_rom()
             break;
           case 5:
             LDA(cpu->cpu_memory[address]);
-            strcpy(opcode_info, "STA");
+            strcpy(opcode_info, "LDA");
             break;
           case 6:
             CMP_update_status_register(cpu->cpu_memory[address]);

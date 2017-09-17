@@ -17,7 +17,7 @@ struct NES_CPU
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
-
+typedef void (*opcode_action_type)(unsigned char a);
 void run_rom();
 
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte);
@@ -42,3 +42,4 @@ void shift_left(unsigned char*, char);
 void shift_right(unsigned char*, char);
 void STX(unsigned char);
 void LDX(unsigned char);
+void get_data_at_address_do_opcode(short address, opcode_action_type);

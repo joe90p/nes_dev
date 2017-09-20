@@ -46,6 +46,6 @@ void STA(unsigned short);
 void SBC(unsigned char);
 void shift_left(unsigned char*, char);
 void shift_right(unsigned char*, char);
-void STX(unsigned char);
-void LDX(unsigned char);
+void STX(unsigned char*);
+void LDX(unsigned char*);
 void get_data_at_address_do_opcode(short address, opcode_action_type);

@@ -204,26 +204,16 @@ void ROL(unsigned char* operand_ptr)
 }
 
 
-void STX(unsigned char address)
+void STX(unsigned char* operand_ptr)
 {
-  cpu->cpu_memory[address] = cpu->X;
+  *operand_ptr = cpu->X;
 }
 
-void LDX(unsigned char address)
+void LDX(unsigned char* operand_ptr)
 {
-  cpu->X = cpu->cpu_memory[address];
+  cpu->X = *operand_ptr;
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)cpu->X < 0);
   switch_status_flag(NES_ZERO_FLAG, cpu->X==0);
-}
-
-void STX_ptr(unsigned char* address_ptr)
-{
-  STX(*address_ptr); 
-}
-
-void LDX_ptr(unsigned char* address_ptr)
-{
-  LDX(*address_ptr);
 }
 
 void get_data_at_address_do_opcode(short address, opcode_action_type opcode_action)
@@ -260,9 +250,9 @@ void run_rom()
   opcodes[3].name = "ROR";
   opcodes[3].action = ROR;
   opcodes[4].name = "STX";
-  opcodes[4].action = STX_ptr;
+  opcodes[4].action = STX;
   opcodes[5].name = "LDX";
-  opcodes[5].action = LDX_ptr;
+  opcodes[5].action = LDX;
 
   for(int k=0; k < 5; k++)
   {

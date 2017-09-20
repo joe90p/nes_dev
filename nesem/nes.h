@@ -19,6 +19,12 @@ unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
 typedef void (*opcode_action_type)(unsigned char a);
 void run_rom();
+typedef void (*opcode_action)(unsigned char* ptr);
+struct opcode
+{
+  opcode_action action;
+  char* name;
+};
 
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte);
 unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte);

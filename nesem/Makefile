@@ -1,4 +1,4 @@
-CFLAGS=-Wall -g -include nes.h -std=c99
+CFLAGS=-Wall -g -include nes.h -std=c99  -Wno-char-subscripts
 nes: nes.c main.c
 tests: nes.c tests.c
 clean:

@@ -202,15 +202,28 @@ void ROL(unsigned char* operand_ptr)
 {
   shift_left(operand_ptr, 1);
 }
+
+
 void STX(unsigned char address)
 {
   cpu->cpu_memory[address] = cpu->X;
 }
+
 void LDX(unsigned char address)
 {
   cpu->X = cpu->cpu_memory[address];
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)cpu->X < 0);
   switch_status_flag(NES_ZERO_FLAG, cpu->X==0);
+}
+
+void STX_ptr(unsigned char* address_ptr)
+{
+  STX(*address_ptr); 
+}
+
+void LDX_ptr(unsigned char* address_ptr)
+{
+  LDX(*address_ptr);
 }
 
 void get_data_at_address_do_opcode(short address, opcode_action_type opcode_action)
@@ -235,6 +248,22 @@ void run_rom()
   char program_counter_increment;
   unsigned char* operand_ptr =0;
   unsigned short address;
+
+
+  struct opcode opcodes[8];
+  opcodes[0].name = "ASL";
+  opcodes[0].action = ASL;
+  opcodes[1].name = "ROL";
+  opcodes[1].action = ROL;
+  opcodes[2].name = "LSR";
+  opcodes[2].action = LSR;
+  opcodes[3].name = "ROR";
+  opcodes[3].action = ROR;
+  opcodes[4].name = "STX";
+  opcodes[4].action = STX_ptr;
+  opcodes[5].name = "LDX";
+  opcodes[5].action = LDX_ptr;
+
   for(int k=0; k < 5; k++)
   {
     char current_opcode = cpu->cpu_memory[cpu->PC];
@@ -381,36 +410,10 @@ void run_rom()
             sprintf(address_mode_info,"$%02x%02x,X", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
             operand_ptr = &cpu->cpu_memory[address];
             break;
-
         }
-        switch(opcode)
-        {
-          case 0:
-            ASL(operand_ptr);
-            strcpy(opcode_info, "ASL");
-            break;
-          case 1:
-            ROL(operand_ptr);
-            strcpy(opcode_info, "ROL");
-            break;
-          case 2:
-            LSR(operand_ptr);
-            strcpy(opcode_info, "LSR");
-            break;
-          case 3:
-            ROR(operand_ptr);
-            strcpy(opcode_info, "ROR");
-            break;
-          case 4:
-            STX(*operand_ptr);
-            strcpy(opcode_info, "STX");
-            break;
-          case 5:
-            LDX(*operand_ptr);
-            strcpy(opcode_info, "LDX");
-            break;
 
-        }
+          opcodes[opcode].action(operand_ptr);
+          strcpy(opcode_info, opcodes[opcode].name);
     }
     //clear string memory
     free(opcode_info);  

@@ -7,6 +7,41 @@ unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
 
 void run_rom();
+
+unsigned char* get_immediate_operand_ptr()
+{
+  return &cpu->cpu_memory[cpu->PC + 1];
+}
+
+unsigned char* get_zeropage_operand_ptr()
+{
+  unsigned char address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
+  return &cpu->cpu_memory[address];
+}         
+
+unsigned char* get_accumulator_operand_ptr()
+{
+  return (unsigned char*)&cpu->A;
+}
+
+unsigned char* get_absolute_operand_ptr()
+{
+  unsigned char address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
+  return &cpu->cpu_memory[address];
+}
+
+unsigned char* get_zeropage_X_operand_ptr()
+{
+  unsigned char address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
+  return &cpu->cpu_memory[address];
+}
+
+unsigned char* get_absolute_X_operand_ptr()
+{
+  unsigned char address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
+  return &cpu->cpu_memory[address];
+}
+
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {
   return get_address_input_upper_byte<<8 | get_address_input_lower_byte;
@@ -239,7 +274,6 @@ void run_rom()
   unsigned char* operand_ptr =0;
   unsigned short address;
 
-
   struct opcode opcodes[8];
   opcodes[0].name = "ASL";
   opcodes[0].action = ASL;
@@ -253,6 +287,27 @@ void run_rom()
   opcodes[4].action = STX;
   opcodes[5].name = "LDX";
   opcodes[5].action = LDX;
+
+  struct address addresses[8];
+  addresses[0].program_counter_increment = 2;
+  addresses[0].get_operand_ptr = get_immediate_operand_ptr;
+  addresses[0].address_info = "#%02x";
+  addresses[1].program_counter_increment = 2;
+  addresses[1].get_operand_ptr = get_zeropage_operand_ptr;
+  addresses[1].address_info = "$%02x";
+  addresses[2].program_counter_increment = 1;
+  addresses[2].get_operand_ptr = get_accumulator_operand_ptr;
+  addresses[2].address_info = "A";
+  addresses[3].program_counter_increment = 3;
+  addresses[3].get_operand_ptr = get_absolute_operand_ptr;
+  addresses[3].address_info = "$%02x%02x";
+  addresses[5].program_counter_increment = 2;
+  addresses[5].get_operand_ptr = get_zeropage_X_operand_ptr;
+  addresses[5].address_info = "$%02x,X";
+  addresses[7].program_counter_increment = 3;
+  addresses[7].get_operand_ptr = get_absolute_X_operand_ptr;
+  addresses[7].address_info = "$%02x%02x,X";
+
 
   for(int k=0; k < 5; k++)
   {
@@ -355,53 +410,22 @@ void run_rom()
         printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);      
         cpu->PC+=program_counter_increment;
         break;
-      case 2:
-         
-        switch(addressing_mode)
-        {
-          case 0:
-            //immediate
-            address = cpu->PC + 1;
-            program_counter_increment = 2;
-            sprintf(address_mode_info,"#%02x", cpu->cpu_memory[cpu->PC + 1]);
-            operand_ptr = &cpu->cpu_memory[address];
-            break;          
-          case 1:
-            //zero page
-            address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
-            program_counter_increment = 2;
-            sprintf(address_mode_info,"$%02x", cpu->cpu_memory[cpu->PC + 1]);
-            operand_ptr = &cpu->cpu_memory[address];
-            break;
-          case 2:
-            //accumulator
-            program_counter_increment = 1;
-            sprintf(address_mode_info, "A");
-            operand_ptr = (unsigned char*)&cpu->A;
-            break; 
-          case 3:
-            //absolute
-            address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-            program_counter_increment = 3;
-            sprintf(address_mode_info,"$%02x%02x", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC+1]);
-            operand_ptr = &cpu->cpu_memory[address];
-            break; 
-          case 5:
-            //zero page,X
-            address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
-            program_counter_increment = 2;
-            sprintf(address_mode_info,"$%02x,X", cpu->cpu_memory[cpu->PC + 1]); 
-            operand_ptr = &cpu->cpu_memory[address];
-            break;
-          case 7:
-            //absolute,X
-            address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-            program_counter_increment = 3;
-            sprintf(address_mode_info,"$%02x%02x,X", cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
-            operand_ptr = &cpu->cpu_memory[address];
-            break;
-        }
+      case 2: 
+          operand_ptr = addresses[addressing_mode].get_operand_ptr();
+          program_counter_increment = addresses[addressing_mode].program_counter_increment;
+          if(addresses[addressing_mode].program_counter_increment == 1)
+          {
+             sprintf(address_mode_info,addresses[addressing_mode].address_info );
 
+          }
+          if(addresses[addressing_mode].program_counter_increment == 2)
+          {
+            sprintf(address_mode_info,addresses[addressing_mode].address_info, cpu->cpu_memory[cpu->PC + 1]);
+          }
+          if(addresses[addressing_mode].program_counter_increment == 3)
+          {
+            sprintf(address_mode_info,addresses[addressing_mode].address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
+          }
           opcodes[opcode].action(operand_ptr);
           strcpy(opcode_info, opcodes[opcode].name);
     }

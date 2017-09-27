@@ -17,9 +17,16 @@ struct NES_CPU
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
-typedef void (*opcode_action_type)(unsigned char a);
+typedef void (*opcode_action_type)(unsigned char a); 
 void run_rom();
 typedef void (*opcode_action)(unsigned char* ptr);
+typedef unsigned char* (*get_operand_ptr_type)();
+struct address
+{
+  char program_counter_increment;
+  get_operand_ptr_type get_operand_ptr;
+  char* address_info;
+};
 struct opcode
 {
   opcode_action action;

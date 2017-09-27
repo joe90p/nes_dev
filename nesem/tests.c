@@ -538,7 +538,7 @@ void STX_get_expected()
   char x_value = 250;
   cpu->X=x_value;
   unsigned char address = 23;
-  STX(address);
+  STX(&cpu->cpu_memory[address]);
   assert(cpu->cpu_memory[address] == x_value);
 }
 
@@ -549,7 +549,7 @@ void LDX_get_expected()
   unsigned char address = 47;
   unsigned char val = 93;
   cpu->cpu_memory[address]=val;
-  LDX(address);
+  LDX(&cpu->cpu_memory[address]);
   assert(cpu->X==val);
   
 }
@@ -559,10 +559,10 @@ void LDX_zero_flag()
   printf("LDX_zero_flag ");
   unsigned char address = 23;
   cpu->cpu_memory[address]=0;
-  LDX(address);
+  LDX(&cpu->cpu_memory[address]);
   char expect_zero = cpu->status;
   cpu->cpu_memory[address]=1;
-  LDX(address);
+  LDX(&cpu->cpu_memory[address]);
   char not_expect_zero = cpu->status;
   assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
 
@@ -573,10 +573,10 @@ void LDX_negative_flag()
   printf("LDX_negative_flag ");
   unsigned char address = 23;
   cpu->cpu_memory[address]=128;
-  LDX(address);
+  LDX(&cpu->cpu_memory[address]);
   char expect_negative = cpu->status;
   cpu->cpu_memory[address]=1;
-  LDX(address);
+  LDX(&cpu->cpu_memory[address]);
   char not_expect_negative = cpu->status;
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG);
 }

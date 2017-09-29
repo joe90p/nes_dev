@@ -580,6 +580,10 @@ void LDX_negative_flag()
   char not_expect_negative = cpu->status;
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG);
 }
+
+// should print
+// 00: ADC #a1
+// 02: ADC $a3a2
 void check_adc_print()
 {
   cpu->PC=0;

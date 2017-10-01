@@ -55,4 +55,7 @@ void shift_left(unsigned char*, char);
 void shift_right(unsigned char*, char);
 void STX(unsigned char*);
 void LDX(unsigned char*);
+void INC(unsigned char*);
+void DEC(unsigned char*);
 void get_data_at_address_do_opcode(short address, opcode_action_type);
+void set_negative_zero_flag(unsigned char);

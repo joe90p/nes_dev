@@ -581,6 +581,24 @@ void LDX_negative_flag()
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG);
 }
 
+void INC_get_expected()
+{
+  printf("INC_get_expected ");
+  unsigned char a = 1;
+  unsigned char b = 255;
+  INC(&a);
+  INC(&b);
+  assert(a==2 && b==0);
+}
+void DEC_get_expected()
+{
+  printf("DEC_get_expected ");
+  unsigned char a = 1;
+  unsigned char b = 0;
+  DEC(&a);
+  DEC(&b);
+  assert(a==0 && b==255);
+}
 // should print
 // 00: ADC #a1
 // 02: ADC $a3a2
@@ -652,4 +670,6 @@ int main(int argc, char* argv[])
   LDX_zero_flag();
   LDX_negative_flag();
   get_data_at_address_do_opcode_expected();
+  INC_get_expected();
+  DEC_get_expected();
 }

@@ -280,9 +280,7 @@ void shift_left(unsigned char* operand_ptr, char rotate)
   {
     *operand_ptr|=original_carry;
   }
-  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)*operand_ptr < 0);
-  switch_status_flag(NES_ZERO_FLAG, *operand_ptr==0);
-
+  set_negative_zero_flag(*operand_ptr);
 }
 
 void ASL(unsigned char* operand_ptr)
@@ -305,9 +303,27 @@ void STX(unsigned char* operand_ptr)
 void LDX(unsigned char* operand_ptr)
 {
   cpu->X = *operand_ptr;
-  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)cpu->X < 0);
-  switch_status_flag(NES_ZERO_FLAG, cpu->X==0);
+  set_negative_zero_flag(*operand_ptr);
 }
+
+void DEC(unsigned char* operand_ptr)
+{
+  *operand_ptr = *operand_ptr - 1;
+  set_negative_zero_flag(*operand_ptr);
+}
+
+void INC(unsigned char* operand_ptr)
+{
+  *operand_ptr = *operand_ptr + 1;
+  set_negative_zero_flag(*operand_ptr);
+}
+
+void set_negative_zero_flag(unsigned char operand)
+{
+  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);
+  switch_status_flag(NES_ZERO_FLAG, operand==0);
+}
+
 
 void get_data_at_address_do_opcode(short address, opcode_action_type opcode_action)
 {
@@ -350,6 +366,10 @@ void set_opcode_array()
   opcodes[1][4].action = STX;
   opcodes[1][5].name = "LDX";
   opcodes[1][5].action = LDX;
+  opcodes[1][4].name = "DEC";
+  opcodes[1][4].action = DEC;
+  opcodes[1][5].name = "INC";
+  opcodes[1][5].action = INC;
   
   addresses[1][0].program_counter_increment = 2;
   addresses[1][0].get_operand_ptr = get_immediate_operand_ptr;

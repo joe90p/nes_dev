@@ -57,5 +57,6 @@ void STX(unsigned char*);
 void LDX(unsigned char*);
 void INC(unsigned char*);
 void DEC(unsigned char*);
+void BIT(unsigned char*);
 void get_data_at_address_do_opcode(short address, opcode_action_type);
 void set_negative_zero_flag(unsigned char);

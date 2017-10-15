@@ -615,6 +615,15 @@ void check_adc_print()
   run_rom();
 }
 
+void BIT_get_expected()
+{
+  printf("BIT_get_expected ");
+  cpu->status=0;
+  cpu->A = 254;
+  unsigned char a = 65;
+  BIT(&a);
+  assert((cpu->status&NES_NEGATIVE_FLAG)==0 && (cpu->status&NES_OVERFLOW_FLAG)==NES_OVERFLOW_FLAG && (cpu->status&NES_ZERO_FLAG)==0);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -672,4 +681,5 @@ int main(int argc, char* argv[])
   get_data_at_address_do_opcode_expected();
   INC_get_expected();
   DEC_get_expected();
+  BIT_get_expected();
 }

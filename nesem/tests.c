@@ -636,6 +636,55 @@ void JMP_get_expected()
   assert(cpu->PC==0xABCD);
 }
 
+void STY_get_expected()
+{
+  printf("STY_get_expected ");
+  char y_value = 250;
+  cpu->Y=y_value;
+  unsigned short address = 0xCDEF;
+  STY(&cpu->cpu_memory[address]);
+  assert(cpu->cpu_memory[address] == y_value);
+}
+
+void LDY_get_expected()
+{
+  printf("LDY_get_expetced ");
+  cpu->Y=0;
+  unsigned char address = 47;
+  unsigned char val = 93;
+  cpu->cpu_memory[address]=val;
+  LDY(&cpu->cpu_memory[address]);
+  assert(cpu->Y==val);
+  
+}
+
+void LDY_zero_flag()
+{
+  printf("LDY_zero_flag ");
+  unsigned char address = 23;
+  cpu->cpu_memory[address]=0;
+  LDY(&cpu->cpu_memory[address]);
+  char expect_zero = cpu->status;
+  cpu->cpu_memory[address]=1;
+  LDY(&cpu->cpu_memory[address]);
+  char not_expect_zero = cpu->status;
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
+
+}
+
+void LDY_negative_flag()
+{
+  printf("LDY_negative_flag ");
+  unsigned char address = 23;
+  cpu->cpu_memory[address]=128;
+  LDY(&cpu->cpu_memory[address]);
+  char expect_negative = cpu->status;
+  cpu->cpu_memory[address]=1;
+  LDY(&cpu->cpu_memory[address]);
+  char not_expect_negative = cpu->status;
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG);
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -695,4 +744,8 @@ int main(int argc, char* argv[])
   DEC_get_expected();
   BIT_get_expected();
   JMP_get_expected();
+  STY_get_expected();
+  LDY_get_expected();
+  LDY_zero_flag();
+  LDY_negative_flag();
 }

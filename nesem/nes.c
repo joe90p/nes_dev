@@ -189,6 +189,7 @@ void STA_ptr(unsigned char* toOr)
   STA(*toOr);  
 }
 
+
 void LDA_ptr(unsigned char* toOr)
 {
   LDA(*toOr);  
@@ -244,7 +245,6 @@ void STA(unsigned short address)
 {
   cpu->cpu_memory[address]=cpu->A;
 }
-
 void LDA(unsigned char newA)
 {
   cpu->A=newA;
@@ -306,6 +306,17 @@ void LDX(unsigned char* operand_ptr)
   set_negative_zero_flag(*operand_ptr);
 }
 
+void STY(unsigned char* operand_ptr)
+{
+  *operand_ptr = cpu->Y;
+}
+
+void LDY(unsigned char* operand_ptr)
+{
+  cpu->Y = *operand_ptr;
+  set_negative_zero_flag(*operand_ptr);
+}
+
 void DEC(unsigned char* operand_ptr)
 {
   *operand_ptr = *operand_ptr - 1;
@@ -350,10 +361,14 @@ struct address addresses[2][8];
 
 void set_opcode_array()
 {
-  opcodes[0][0].name = "BIT";
-  opcodes[0][1].action = BIT;
-  opcodes[0][0].name = "JMP";
-  opcodes[0][1].action = JMP;
+  opcodes[1][0].name = "BIT";
+  opcodes[1][1].action = BIT;
+  opcodes[3][0].name = "JMP";
+  opcodes[3][1].action = JMP;
+  opcodes[4][0].name = "STY";
+  opcodes[4][1].action = STY;
+  opcodes[5][0].name = "LDY";
+  opcodes[5][1].action = LDY;
 
   opcodes[1][0].name = "ORA";
   opcodes[1][0].action = ORA_ptr;

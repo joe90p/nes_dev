@@ -407,6 +407,73 @@ void CMP_negative_status_flagged()
   char not_expect_negative = cpu->status; 
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
+//--------------------------
+void CPX_carry_status_flagged()
+{
+  printf("test CPX_carry_status_flagged "); 
+  cpu->X=1; 
+  CPX_update_status_register(0);
+  char expect_carry = cpu->status;
+  CPX_update_status_register(2);
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
+}
+
+void CPX_zero_status_flagged()
+{
+  printf("test CPX_zero_status_flagged "); 
+  cpu->X=1;
+  CPX_update_status_register(1);
+  char expect_zero = cpu->status;
+  CPX_update_status_register(0);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
+}
+
+void CPX_negative_status_flagged()
+{
+  printf("test CPX_negative_status_flagged "); 
+  cpu->X=1;
+  CPX_update_status_register(2);
+  char expect_negative = cpu->status;
+  CPX_update_status_register(0);
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
+}
+//--------------------------
+void CPY_carry_status_flagged()
+{
+  printf("test CPY_carry_status_flagged "); 
+  cpu->A=1; 
+  CPY_update_status_register(0);
+  char expect_carry = cpu->status;
+  CPY_update_status_register(2);
+  char not_expect_carry = cpu->status; 
+  assert((not_expect_carry&NES_CARRY_FLAG)==0 && (expect_carry&NES_CARRY_FLAG)==NES_CARRY_FLAG); 
+}
+
+void CPY_zero_status_flagged()
+{
+  printf("test CPY_zero_status_flagged "); 
+  cpu->A=1;
+  CPY_update_status_register(1);
+  char expect_zero = cpu->status;
+  CPY_update_status_register(0);
+  char not_expect_zero = cpu->status; 
+  assert((not_expect_zero&NES_ZERO_FLAG)==0 && (expect_zero&NES_ZERO_FLAG)==NES_ZERO_FLAG); 
+}
+
+void CPY_negative_status_flagged()
+{
+  printf("test CPY_negative_status_flagged "); 
+  cpu->A=1;
+  CPY_update_status_register(2);
+  char expect_negative = cpu->status;
+  CPY_update_status_register(0);
+  char not_expect_negative = cpu->status; 
+  assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
+}
+//------------------------
 
 void shift_left_carry_status_flagged()
 {
@@ -748,4 +815,11 @@ int main(int argc, char* argv[])
   LDY_get_expected();
   LDY_zero_flag();
   LDY_negative_flag();
+  CPX_carry_status_flagged();
+  CPX_zero_status_flagged();
+  CPX_negative_status_flagged();
+  CPY_carry_status_flagged();
+  CPY_zero_status_flagged();
+  CPY_negative_status_flagged();
+
 }

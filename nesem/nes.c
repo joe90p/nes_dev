@@ -152,7 +152,18 @@ void CMP_update_status_register(unsigned char data)
   switch_status_flag(NES_ZERO_FLAG,cpu->A == data);
   switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < data); 
 }
-
+void CPY_update_status_register(unsigned char data)
+{
+  switch_status_flag(NES_CARRY_FLAG,cpu->Y >= data);
+  switch_status_flag(NES_ZERO_FLAG,cpu->Y == data);
+  switch_status_flag(NES_NEGATIVE_FLAG,cpu->Y < data); 
+}
+void CPX_update_status_register(unsigned char data)
+{
+  switch_status_flag(NES_CARRY_FLAG,cpu->X >= data);
+  switch_status_flag(NES_ZERO_FLAG,cpu->X == data);
+  switch_status_flag(NES_NEGATIVE_FLAG,cpu->X < data); 
+}
 //also applies to
 //AND
 //EOR
@@ -199,7 +210,14 @@ void CMP_ptr(unsigned char* toOr)
 {
   CMP_update_status_register(*toOr);  
 }
-
+void CPX(unsigned char* toOr)
+{
+  CPX_update_status_register(*toOr);  
+}
+void CPY(unsigned char* toOr)
+{
+  CPY_update_status_register(*toOr);  
+}
 void SBC_ptr(unsigned char* toOr)
 {
   SBC(*toOr);  
@@ -369,6 +387,10 @@ void set_opcode_array()
   opcodes[4][1].action = STY;
   opcodes[5][0].name = "LDY";
   opcodes[5][1].action = LDY;
+  opcodes[6][0].name = "CPX";
+  opcodes[6][1].action = CPX;
+  opcodes[7][0].name = "CPY";
+  opcodes[7][1].action = CPY;
 
   opcodes[1][0].name = "ORA";
   opcodes[1][0].action = ORA_ptr;

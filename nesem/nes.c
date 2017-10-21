@@ -320,6 +320,12 @@ void BIT(unsigned char* operand_ptr)
   switch_status_flag(NES_ZERO_FLAG, data==0);
 }
 
+void JMP(unsigned char* operand_ptr)
+{
+  unsigned short* short_ptr = (unsigned short*)operand_ptr;
+  cpu->PC=*short_ptr; 
+}
+
 void INC(unsigned char* operand_ptr)
 {
   *operand_ptr = *operand_ptr + 1;
@@ -346,6 +352,8 @@ void set_opcode_array()
 {
   opcodes[0][0].name = "BIT";
   opcodes[0][1].action = BIT;
+  opcodes[0][0].name = "JMP";
+  opcodes[0][1].action = JMP;
 
   opcodes[1][0].name = "ORA";
   opcodes[1][0].action = ORA_ptr;

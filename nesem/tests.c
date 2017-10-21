@@ -624,6 +624,18 @@ void BIT_get_expected()
   BIT(&a);
   assert((cpu->status&NES_NEGATIVE_FLAG)==0 && (cpu->status&NES_OVERFLOW_FLAG)==NES_OVERFLOW_FLAG && (cpu->status&NES_ZERO_FLAG)==0);
 }
+
+void JMP_get_expected()
+{
+  printf("JMP_get_expected ");
+  cpu->PC=0;
+  unsigned char a[2];
+  a[0] = 0xCD;
+  a[1] = 0xAB;
+  JMP(a);
+  assert(cpu->PC==0xABCD);
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -682,4 +694,5 @@ int main(int argc, char* argv[])
   INC_get_expected();
   DEC_get_expected();
   BIT_get_expected();
+  JMP_get_expected();
 }

@@ -355,6 +355,8 @@ void JMP(unsigned char* operand_ptr)
   cpu->PC=*short_ptr; 
 }
 
+
+
 void INC(unsigned char* operand_ptr)
 {
   *operand_ptr = *operand_ptr + 1;
@@ -372,6 +374,15 @@ void get_data_at_address_do_opcode(short address, opcode_action_type opcode_acti
 {
   unsigned char data = cpu->cpu_memory[address];
   opcode_action(data);
+}
+
+void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset)
+{
+  if((equalTo && (cpu->status&flag)) || (!equalTo && !(cpu->status&flag)))
+  {
+    cpu->PC+=(offset -2);
+  }
+
 }
 
 struct opcode opcodes[2][8];
@@ -492,6 +503,26 @@ void set_opcode_array()
 
 }
 
+void conditional_branch_instruction(unsigned char branch_context, unsigned char equalTo)
+{
+  unsigned char offset = cpu->cpu_memory[cpu->PC+1];
+  switch(branch_context)
+  {
+    case 0:
+      test_flag_and_branch(NES_NEGATIVE_FLAG, equalTo, offset);
+      break;
+    case 1:
+      test_flag_and_branch(NES_OVERFLOW_FLAG, equalTo, offset);
+      break;
+    case 2:
+      test_flag_and_branch(NES_CARRY_FLAG, equalTo, offset);
+      break;
+    case 3:
+      test_flag_and_branch(NES_ZERO_FLAG, equalTo, offset); 
+      break;
+  }
+}
+
 void run_rom()
 {
   set_opcode_array();
@@ -507,11 +538,21 @@ void run_rom()
   char addressing_mode_mask = 28;
   char program_counter_increment;
   unsigned char* operand_ptr =0;
-  
+  unsigned char cond_branch_mask = 31; 
+
+ 
   for(int k=0; k < 5; k++)
   {
     char current_opcode = cpu->cpu_memory[cpu->PC];
     
+    if((current_opcode&cond_branch_mask)==16)
+    {
+      unsigned char branch_context = (current_opcode&192)>>6;
+      unsigned char equalTo = (current_opcode&32)>>5;
+      conditional_branch_instruction(branch_context, equalTo);
+    }
+    else
+    { 
     char opcode_context = current_opcode&opcode_context_mask;
     char opcode = (current_opcode&opcode_mask)>>5;
     char addressing_mode = (current_opcode&addressing_mode_mask)>>2;
@@ -534,27 +575,14 @@ void run_rom()
     {
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
-    opcodes[opcode_context][opcode].action(operand_ptr);
     strcpy(opcode_info, opcodes[opcode_context][opcode].name);
-    
     printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);
+
+    opcodes[opcode_context][opcode].action(operand_ptr);
+    cpu->PC+=program_counter_increment;
     free(opcode_info);  
     free(address_mode_info);
- 
-    switch(cpu->cpu_memory[cpu->PC])
-    {
-      
-      case 0x00d8:
-        printf("%02x: CLD\n", cpu->PC);
-        cpu->PC++;
-        break;
-      case 0x00a2:
-        printf("%02x: LDX %02x\n", cpu->PC, cpu->cpu_memory[cpu->PC+1]);
-        cpu->X=cpu->cpu_memory[cpu->PC+1];
-        cpu->PC+=2;
-        break;
-    } 
-    cpu->PC+=program_counter_increment;
+    }
   } 
 }
 

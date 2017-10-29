@@ -752,6 +752,24 @@ void LDY_negative_flag()
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG);
 }
 
+void test_flag_and_branch_get_expected()
+{
+  printf("test_flag_and_branch ");
+  unsigned char offset = 7;
+  cpu->status=NES_NEGATIVE_FLAG;
+  cpu->PC=0;
+  unsigned short pc0 = cpu->PC;
+  test_flag_and_branch(NES_NEGATIVE_FLAG, 1, offset);
+  unsigned short pc1 = cpu->PC;
+  test_flag_and_branch(NES_NEGATIVE_FLAG, 0, offset);
+  unsigned short pc2 = cpu->PC;
+  test_flag_and_branch(NES_ZERO_FLAG, 1, offset);
+  unsigned short pc3 = cpu->PC;
+  test_flag_and_branch(NES_ZERO_FLAG, 0, offset);
+  unsigned short pc4 = cpu->PC;
+  assert((pc2-pc0==offset-2) && (pc1==pc2) && (pc2==pc3) && (pc4-pc3==offset-2));
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -821,5 +839,5 @@ int main(int argc, char* argv[])
   CPY_carry_status_flagged();
   CPY_zero_status_flagged();
   CPY_negative_status_flagged();
-
+  test_flag_and_branch_get_expected();
 }

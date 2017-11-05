@@ -770,6 +770,27 @@ void test_flag_and_branch_get_expected()
   assert((pc2-pc0==offset-2) && (pc1==pc2) && (pc2==pc3) && (pc4-pc3==offset-2));
 }
 
+void BRK_pc_increment()
+{
+  printf("BRK_pc_increment ");
+  cpu->PC=258;
+  unsigned short pc_0 = cpu->PC; 
+  BRK();
+  assert(cpu->PC==(pc_0+2));
+}
+
+void BRK_pc_stack_push()
+{
+  printf("BRK_pc_stack_push ");
+  cpu->stack_pointer=0;
+  cpu->PC=258;
+  BRK();
+  unsigned char expected_pc_high = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
+  unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
+  //pc+2 should be pushed onto stack
+  assert(expected_pc_high==1 && expected_pc_low==4);
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -839,5 +860,7 @@ int main(int argc, char* argv[])
   CPY_carry_status_flagged();
   CPY_zero_status_flagged();
   CPY_negative_status_flagged();
+  BRK_pc_increment();
+  BRK_pc_stack_push();
   test_flag_and_branch_get_expected();
 }

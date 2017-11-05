@@ -4,7 +4,7 @@
 #define NES_ZERO_FLAG 2
 #define NES_OVERFLOW_FLAG 64
 #define NES_NEGATIVE_FLAG 128
-
+#define STACK_TOP 511
 struct NES_CPU
 {
   unsigned char* cpu_memory;
@@ -13,6 +13,7 @@ struct NES_CPU
   unsigned char Y;
   unsigned char status;
   unsigned short PC;
+  unsigned char stack_pointer;
 }; 
 void load_rom();
 unsigned char* ines_file_contents;
@@ -66,3 +67,4 @@ void set_negative_zero_flag(unsigned char);
 void CPX_update_status_register(unsigned char data);
 void CPY_update_status_register(unsigned char data);
 void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset);
+void BRK();

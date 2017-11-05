@@ -363,6 +363,22 @@ void INC(unsigned char* operand_ptr)
   set_negative_zero_flag(*operand_ptr);
 }
 
+void stack_push(unsigned short to_push)
+{
+  unsigned char pc_low_byte = to_push;
+  unsigned char pc_high_byte = to_push>>8;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_high_byte;
+  cpu->stack_pointer+=1;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_low_byte;
+  cpu->stack_pointer+=1;
+}
+
+void BRK()
+{
+  cpu->PC+=2;
+  stack_push(cpu->PC); 
+}
+
 void set_negative_zero_flag(unsigned char operand)
 {
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);
@@ -522,6 +538,8 @@ void conditional_branch_instruction(unsigned char branch_context, unsigned char 
       break;
   }
 }
+
+
 
 void run_rom()
 {

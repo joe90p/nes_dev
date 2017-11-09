@@ -363,20 +363,30 @@ void INC(unsigned char* operand_ptr)
   set_negative_zero_flag(*operand_ptr);
 }
 
-void stack_push(unsigned short to_push)
+void stack_push_char(unsigned char to_push)
 {
-  unsigned char pc_low_byte = to_push;
-  unsigned char pc_high_byte = to_push>>8;
-  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_high_byte;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=to_push;
   cpu->stack_pointer+=1;
-  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_low_byte;
-  cpu->stack_pointer+=1;
+}
+void stack_push_short(unsigned short to_push)
+{
+  unsigned char low_byte = to_push;
+  unsigned char high_byte = to_push>>8;
+  //cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_high_byte;
+ // cpu->stack_pointer+=1;
+  //cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_low_byte;
+  //cpu->stack_pointer+=1;
+  stack_push_char(high_byte);
+  stack_push_char(low_byte);
 }
 
 void BRK()
 {
   cpu->PC+=2;
-  stack_push(cpu->PC); 
+  stack_push_short(cpu->PC);  
+  stack_push_char(cpu->status|NES_BREAK_FLAG);
+  cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
+  //load inerrupt vector into PC
 }
 
 void set_negative_zero_flag(unsigned char operand)

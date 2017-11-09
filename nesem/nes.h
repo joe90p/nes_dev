@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #define NES_CARRY_FLAG 1
 #define NES_ZERO_FLAG 2
+#define NES_INTERRUPT_DISABLE_FLAG 4
+#define NES_DECIMAL_MODE_FLAG 8
+#define NES_BREAK_FLAG 16
 #define NES_OVERFLOW_FLAG 64
 #define NES_NEGATIVE_FLAG 128
 #define STACK_TOP 511

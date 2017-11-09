@@ -781,14 +781,18 @@ void BRK_pc_increment()
 
 void BRK_pc_stack_push()
 {
+  cpu->cpu_memory[0xfffe]=2;
+  cpu->cpu_memory[0xffff]=3;
   printf("BRK_pc_stack_push ");
   cpu->stack_pointer=0;
   cpu->PC=258;
+  cpu->status = 128;
   BRK();
-  unsigned char expected_pc_high = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
-  unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
+  unsigned char expected_pc_high = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+3];
+  unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
+  unsigned char status_with_break=  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
   //pc+2 should be pushed onto stack
-  assert(expected_pc_high==1 && expected_pc_low==4);
+  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==50);
 }
 
 int main(int argc, char* argv[])

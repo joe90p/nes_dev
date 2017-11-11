@@ -355,12 +355,14 @@ void JMP(unsigned char* operand_ptr)
   cpu->PC=*short_ptr; 
 }
 
-
-
 void INC(unsigned char* operand_ptr)
 {
   *operand_ptr = *operand_ptr + 1;
   set_negative_zero_flag(*operand_ptr);
+}
+unsigned short get_short_from_cpu_memory(unsigned short mem_index)
+{
+  return ((cpu->cpu_memory[mem_index +1]<<8) | (cpu->cpu_memory[mem_index]>>8));
 }
 
 void stack_push_char(unsigned char to_push)
@@ -368,14 +370,11 @@ void stack_push_char(unsigned char to_push)
   cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=to_push;
   cpu->stack_pointer+=1;
 }
+
 void stack_push_short(unsigned short to_push)
 {
   unsigned char low_byte = to_push;
   unsigned char high_byte = to_push>>8;
-  //cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_high_byte;
- // cpu->stack_pointer+=1;
-  //cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=pc_low_byte;
-  //cpu->stack_pointer+=1;
   stack_push_char(high_byte);
   stack_push_char(low_byte);
 }
@@ -386,6 +385,8 @@ void BRK()
   stack_push_short(cpu->PC);  
   stack_push_char(cpu->status|NES_BREAK_FLAG);
   cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
+  unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffe);
+  cpu->PC=interrupt_vector;
   //load inerrupt vector into PC
 }
 
@@ -554,7 +555,7 @@ void conditional_branch_instruction(unsigned char branch_context, unsigned char 
 void run_rom()
 {
   set_opcode_array();
-  cpu->PC = cpu->cpu_memory[0xfffc]<<8 | cpu->cpu_memory[0xfffd]>>8;
+  cpu->PC = get_short_from_cpu_memory(0xfffc);//cpu->cpu_memory[0xfffc]<<8 | cpu->cpu_memory[0xfffd]>>8;
   printf("first 3 bytes at RESET\n"); 
 
   for(int j=0; j < 3; j++)

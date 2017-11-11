@@ -602,10 +602,10 @@ void shift_right_rotate_expected()
 void STX_get_expected()
 {
   printf("STX_get_expected ");
-  char x_value = 250;
+  unsigned char x_value = 250;
   cpu->X=x_value;
   unsigned char address = 23;
-  STX(&cpu->cpu_memory[address]);
+  STX(&(cpu->cpu_memory[address]));
   assert(cpu->cpu_memory[address] == x_value);
 }
 
@@ -706,7 +706,7 @@ void JMP_get_expected()
 void STY_get_expected()
 {
   printf("STY_get_expected ");
-  char y_value = 250;
+  unsigned char y_value = 250;
   cpu->Y=y_value;
   unsigned short address = 0xCDEF;
   STY(&cpu->cpu_memory[address]);
@@ -770,14 +770,14 @@ void test_flag_and_branch_get_expected()
   assert((pc2-pc0==offset-2) && (pc1==pc2) && (pc2==pc3) && (pc4-pc3==offset-2));
 }
 
-void BRK_pc_increment()
+/*void BRK_pc_increment()
 {
   printf("BRK_pc_increment ");
   cpu->PC=258;
   unsigned short pc_0 = cpu->PC; 
   BRK();
   assert(cpu->PC==(pc_0+2));
-}
+}*/
 
 void BRK_pc_stack_push()
 {
@@ -792,7 +792,7 @@ void BRK_pc_stack_push()
   unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
   unsigned char status_with_break=  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
   //pc+2 should be pushed onto stack
-  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==50);
+  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==768);
 }
 
 int main(int argc, char* argv[])
@@ -864,7 +864,6 @@ int main(int argc, char* argv[])
   CPY_carry_status_flagged();
   CPY_zero_status_flagged();
   CPY_negative_status_flagged();
-  BRK_pc_increment();
   BRK_pc_stack_push();
   test_flag_and_branch_get_expected();
 }

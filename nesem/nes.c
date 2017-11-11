@@ -352,6 +352,7 @@ void BIT(unsigned char* operand_ptr)
 void JMP(unsigned char* operand_ptr)
 {
   unsigned short* short_ptr = (unsigned short*)operand_ptr;
+  cpu->old_PC=cpu->PC;
   cpu->PC=*short_ptr; 
 }
 
@@ -381,13 +382,12 @@ void stack_push_short(unsigned short to_push)
 
 void BRK()
 {
-  cpu->PC+=2;
+  increment_PC(2);
   stack_push_short(cpu->PC);  
   stack_push_char(cpu->status|NES_BREAK_FLAG);
   cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
   unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffe);
   cpu->PC=interrupt_vector;
-  //load inerrupt vector into PC
 }
 
 void set_negative_zero_flag(unsigned char operand)
@@ -407,7 +407,7 @@ void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned ch
 {
   if((equalTo && (cpu->status&flag)) || (!equalTo && !(cpu->status&flag)))
   {
-    cpu->PC+=(offset -2);
+    increment_PC(offset -2);
   }
 
 }
@@ -550,7 +550,11 @@ void conditional_branch_instruction(unsigned char branch_context, unsigned char 
   }
 }
 
-
+void increment_PC(unsigned char increment)
+{
+  cpu->old_PC=cpu->PC;
+  cpu->PC+=increment;
+}
 
 void run_rom()
 {
@@ -569,7 +573,6 @@ void run_rom()
   unsigned char* operand_ptr =0;
   unsigned char cond_branch_mask = 31; 
 
- 
   for(int k=0; k < 5; k++)
   {
     char current_opcode = cpu->cpu_memory[cpu->PC];
@@ -608,7 +611,7 @@ void run_rom()
     printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);
 
     opcodes[opcode_context][opcode].action(operand_ptr);
-    cpu->PC+=program_counter_increment;
+    increment_PC(program_counter_increment);
     free(opcode_info);  
     free(address_mode_info);
     }

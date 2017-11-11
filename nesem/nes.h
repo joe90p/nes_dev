@@ -16,6 +16,7 @@ struct NES_CPU
   unsigned char Y;
   unsigned char status;
   unsigned short PC;
+  unsigned char old_PC;
   unsigned char stack_pointer;
 }; 
 void load_rom();
@@ -71,3 +72,4 @@ void CPX_update_status_register(unsigned char data);
 void CPY_update_status_register(unsigned char data);
 void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset);
 void BRK();
+void increment_PC(unsigned char);

@@ -72,4 +72,7 @@ void CPX_update_status_register(unsigned char data);
 void CPY_update_status_register(unsigned char data);
 void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset);
 void BRK();
+void JSR();
+void RTI();
+void RTS();
 void increment_PC(unsigned char);

@@ -361,9 +361,15 @@ void INC(unsigned char* operand_ptr)
   *operand_ptr = *operand_ptr + 1;
   set_negative_zero_flag(*operand_ptr);
 }
+
+unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_byte)
+{
+  return ((high_byte<<8) | low_byte);
+}
+
 unsigned short get_short_from_cpu_memory(unsigned short mem_index)
 {
-  return ((cpu->cpu_memory[mem_index +1]<<8) | (cpu->cpu_memory[mem_index]>>8));
+  return get_short_from_chars(cpu->cpu_memory[mem_index +1],cpu->cpu_memory[mem_index]);
 }
 
 void stack_push_char(unsigned char to_push)
@@ -380,6 +386,20 @@ void stack_push_short(unsigned short to_push)
   stack_push_char(low_byte);
 }
 
+unsigned char stack_pull_char()
+{
+  unsigned char value =  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer) +1];
+  cpu->stack_pointer-=1;
+  return value;
+}
+
+unsigned short stack_pull_short()
+{
+  unsigned char low_byte = stack_pull_char();
+  unsigned char high_byte = stack_pull_char();
+  return get_short_from_chars(high_byte, low_byte);
+}
+
 void BRK()
 {
   increment_PC(2);
@@ -390,12 +410,29 @@ void BRK()
   cpu->PC=interrupt_vector;
 }
 
+void JSR()
+{
+  stack_push_short(cpu->PC);  
+  unsigned short newPC = get_short_from_cpu_memory(cpu->PC+1);
+  cpu->PC=newPC;
+}
+
+void RTI()
+{
+  cpu->status =  stack_pull_char();
+  cpu->PC = stack_pull_short();  
+}
+
+void RTS()
+{
+  cpu->PC = stack_pull_short() + 1;  
+}
+ 
 void set_negative_zero_flag(unsigned char operand)
 {
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);
   switch_status_flag(NES_ZERO_FLAG, operand==0);
 }
-
 
 void get_data_at_address_do_opcode(short address, opcode_action_type opcode_action)
 {
@@ -552,7 +589,7 @@ void conditional_branch_instruction(unsigned char branch_context, unsigned char 
 
 void increment_PC(unsigned char increment)
 {
-  cpu->old_PC=cpu->PC;
+  //cpu->old_PC=cpu->PC;
   cpu->PC+=increment;
 }
 

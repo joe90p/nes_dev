@@ -770,17 +770,9 @@ void test_flag_and_branch_get_expected()
   assert((pc2-pc0==offset-2) && (pc1==pc2) && (pc2==pc3) && (pc4-pc3==offset-2));
 }
 
-/*void BRK_pc_increment()
-{
-  printf("BRK_pc_increment ");
-  cpu->PC=258;
-  unsigned short pc_0 = cpu->PC; 
-  BRK();
-  assert(cpu->PC==(pc_0+2));
-}*/
-
 void BRK_pc_stack_push()
 {
+  printf("BRK_pc_stack_push ");
   cpu->cpu_memory[0xfffe]=2;
   cpu->cpu_memory[0xffff]=3;
   printf("BRK_pc_stack_push ");
@@ -791,10 +783,43 @@ void BRK_pc_stack_push()
   unsigned char expected_pc_high = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+3];
   unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
   unsigned char status_with_break=  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
-  //pc+2 should be pushed onto stack
-  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==768);
+  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==0x0302);
 }
 
+void RTI_get_expected()
+{
+  unsigned char pc_high = 4;
+  unsigned char pc_low = 2;
+  unsigned char status = 6;
+  printf("RTI_get_expected ");
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+3]=pc_high;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2]=pc_low;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1]=status;
+  RTI();
+  assert(cpu->PC==0x0402 && cpu->status==status);
+}
+
+void RTS_get_expected()
+{
+  printf("RTS_get_expected ");
+  unsigned char pc_high = 5;
+  unsigned char pc_low = 6;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2] = pc_high;
+  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1] = pc_low;
+  RTS();
+  assert(cpu->PC = 0x0507);
+} 
+void JSR_get_expected()
+{
+  printf("JSR_get_expected ");
+  cpu->PC=0xfe00;
+  cpu->cpu_memory[cpu->PC+1]=3;
+  cpu->cpu_memory[cpu->PC+2]=2;
+  JSR();
+  unsigned char expected_pc_high = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
+  unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
+  assert(expected_pc_high==0xfe && expected_pc_low==0x00 && cpu->PC==0x0203);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -865,5 +890,8 @@ int main(int argc, char* argv[])
   CPY_zero_status_flagged();
   CPY_negative_status_flagged();
   BRK_pc_stack_push();
+  JSR_get_expected();
   test_flag_and_branch_get_expected();
+  RTI_get_expected();
+  RTS_get_expected();
 }

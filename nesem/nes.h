@@ -75,4 +75,11 @@ void BRK();
 void JSR();
 void RTI();
 void RTS();
+
+void PHP();
+void PHA();
+void PLA();
+void PLP();
+void DEY();
+void stack_push_char(unsigned char);
 void increment_PC(unsigned char);

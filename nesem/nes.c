@@ -427,7 +427,11 @@ void RTS()
 {
   cpu->PC = stack_pull_short() + 1;  
 }
- 
+void PHP(){}
+void PHA(){}
+void PLA(){}
+void PLP(){}
+void DEY(){}
 void set_negative_zero_flag(unsigned char operand)
 {
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);

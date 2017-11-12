@@ -820,6 +820,52 @@ void JSR_get_expected()
   unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
   assert(expected_pc_high==0xfe && expected_pc_low==0x00 && cpu->PC==0x0203);
 }
+void PHP_get_expected()
+{
+  unsigned char status_value = 191;
+  printf("PHP_get_expected ");
+  cpu->status=status_value;
+  PHP();
+  assert((cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1]) == status_value);
+}
+
+void PLP_get_expected()
+{
+  cpu->status=0;
+  unsigned char status_value = 193;
+  printf("PLP_get_expected ");
+  stack_push_char(status_value);
+  PLP();
+  assert(cpu->status == status_value);
+}
+void PHA_get_expected()
+{
+  unsigned char a_value = 192;
+  printf("PHA_get_expected ");
+  cpu->A=a_value;
+  PHA();
+  assert((cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1]) == a_value);
+}
+
+void PLA_get_expected()
+{
+  cpu->status=0; 
+  unsigned char a_value = 193;
+  printf("PLA_get_expected ");
+  stack_push_char(a_value);
+  PLA();
+  assert(cpu->A == a_value  && cpu->status==NES_NEGATIVE_FLAG);
+}
+
+void DEY_get_expected()
+{
+  printf("DEY_get_expected ");
+  cpu->status=0;
+  unsigned char y_value = 1;
+  cpu->Y=y_value;
+  DEY();
+  assert(cpu->Y==0 && cpu->status==NES_ZERO_FLAG);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -894,4 +940,9 @@ int main(int argc, char* argv[])
   test_flag_and_branch_get_expected();
   RTI_get_expected();
   RTS_get_expected();
+  PHP_get_expected();
+  PLP_get_expected();
+  PHA_get_expected();
+  PLA_get_expected();
+  DEY_get_expected();
 }

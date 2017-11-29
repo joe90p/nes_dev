@@ -427,11 +427,34 @@ void RTS()
 {
   cpu->PC = stack_pull_short() + 1;  
 }
-void PHP(){}
-void PHA(){}
-void PLA(){}
-void PLP(){}
-void DEY(){}
+void PHP()
+{
+  stack_push_char(cpu->status);
+}
+void PHA()
+{
+  stack_push_char(cpu->A);
+}
+void PLA()
+{
+  cpu->A=stack_pull_char();
+  set_negative_zero_flag(cpu->A); 
+}
+void PLP()
+{
+  cpu->status=stack_pull_char();
+}
+void DEY()
+{
+  cpu->Y-=1;
+  set_negative_zero_flag(cpu->Y);
+}
+void TAY()
+{
+  cpu->Y=cpu->A;
+  set_negative_zero_flag(cpu->Y);
+}
+
 void set_negative_zero_flag(unsigned char operand)
 {
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);

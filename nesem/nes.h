@@ -81,5 +81,6 @@ void PHA();
 void PLA();
 void PLP();
 void DEY();
+void TAY();
 void stack_push_char(unsigned char);
 void increment_PC(unsigned char);

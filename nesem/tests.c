@@ -854,7 +854,7 @@ void PLA_get_expected()
   printf("PLA_get_expected ");
   stack_push_char(a_value);
   PLA();
-  assert(cpu->A == a_value  && cpu->status==NES_NEGATIVE_FLAG);
+  assert(cpu->A == (signed char)a_value  && cpu->status==NES_NEGATIVE_FLAG);
 }
 
 void DEY_get_expected()
@@ -865,6 +865,16 @@ void DEY_get_expected()
   cpu->Y=y_value;
   DEY();
   assert(cpu->Y==0 && cpu->status==NES_ZERO_FLAG);
+}
+void TAY_get_expected()
+{
+  printf("TAY_get_expected ");
+  unsigned char expected_value = 128;
+  cpu->A=expected_value;
+  cpu->status=0;
+  cpu->Y=0;
+  TAY();
+  assert(cpu->Y==expected_value && cpu->status==NES_NEGATIVE_FLAG);
 }
 int main(int argc, char* argv[])
 {
@@ -945,4 +955,5 @@ int main(int argc, char* argv[])
   PHA_get_expected();
   PLA_get_expected();
   DEY_get_expected();
+  TAY_get_expected();
 }

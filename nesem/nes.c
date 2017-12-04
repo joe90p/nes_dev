@@ -298,7 +298,8 @@ void shift_left(unsigned char* operand_ptr, char rotate)
   {
     *operand_ptr|=original_carry;
   }
-  set_negative_zero_flag(*operand_ptr);
+  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)*operand_ptr < 0);
+  switch_status_flag(NES_ZERO_FLAG, *operand_ptr==0);
 }
 
 void ASL(unsigned char* operand_ptr)
@@ -455,8 +456,28 @@ void TAY()
   set_negative_zero_flag(cpu->Y);
 }
 
+void INX()
+{
+  cpu->X+=1;
+  set_negative_zero_flag(cpu->X);
+}
+
+void INY()
+{
+  cpu->Y+=1;
+  set_negative_zero_flag(cpu->Y);
+}
+void CLC()
+{
+  switch_status_flag(NES_CARRY_FLAG, 0);
+}
+void SEC()
+{
+  switch_status_flag(NES_CARRY_FLAG, 1);
+}
 void set_negative_zero_flag(unsigned char operand)
 {
+  cpu->status=0;
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);
   switch_status_flag(NES_ZERO_FLAG, operand==0);
 }

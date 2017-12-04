@@ -876,6 +876,48 @@ void TAY_get_expected()
   TAY();
   assert(cpu->Y==expected_value && cpu->status==NES_NEGATIVE_FLAG);
 }
+void INY_get_expected()
+{
+  printf("INY_get_expected ");
+  cpu->Y=0;
+  cpu->status=0;
+  INY();
+  unsigned char y_1 = cpu->Y;
+  unsigned char s_1 = cpu->status;
+  cpu->Y=255;
+  INY();
+  unsigned char y_2 = cpu->Y;
+  unsigned char s_2 = cpu->status; 
+  assert(y_1==1 && s_1==0 && y_2==0 && s_2==NES_ZERO_FLAG);
+}
+void INX_get_expected()
+{
+  printf("INX_get_expected ");
+  cpu->X=0;
+  cpu->status=0;
+  INX();
+  unsigned char x_1 = cpu->X;
+  unsigned char s_1 = cpu->status;
+  cpu->X=255;
+  INX();
+  unsigned char x_2 = cpu->X;
+  unsigned char s_2 = cpu->status; 
+  assert(x_1==1 && s_1==0 && x_2==0 && s_2==NES_ZERO_FLAG);
+}
+void CLC_get_expected()
+{
+  printf("CLC get expected ");
+  cpu->status=NES_CARRY_FLAG;
+  CLC();
+  assert(cpu->status==0);
+}
+void SEC_get_expected()
+{
+  printf("SEC get expected ");
+  cpu->status=0;
+  SEC();
+  assert(cpu->status==NES_CARRY_FLAG);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -956,4 +998,8 @@ int main(int argc, char* argv[])
   PLA_get_expected();
   DEY_get_expected();
   TAY_get_expected();
+  INY_get_expected();
+  INX_get_expected();
+  CLC_get_expected();
+  SEC_get_expected();
 }

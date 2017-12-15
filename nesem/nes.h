@@ -86,5 +86,8 @@ void INX();
 void INY();
 void CLC();
 void SEC();
+void CLI();
+void SEI();
+void TAY();
 void stack_push_char(unsigned char);
 void increment_PC(unsigned char);

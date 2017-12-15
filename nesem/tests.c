@@ -918,6 +918,21 @@ void SEC_get_expected()
   SEC();
   assert(cpu->status==NES_CARRY_FLAG);
 }
+void CLI_get_expected()
+{
+  printf("CLI get expected ");
+  cpu->status=NES_INTERRUPT_DISABLE_FLAG;
+  CLI();
+  assert(cpu->status==0);
+}
+void SEI_get_expected()
+{
+  printf("SEI get expected ");
+  cpu->status=0;
+  SEI();
+  assert(cpu->status==NES_INTERRUPT_DISABLE_FLAG);
+}
+
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -1002,4 +1017,6 @@ int main(int argc, char* argv[])
   INX_get_expected();
   CLC_get_expected();
   SEC_get_expected();
+  CLI_get_expected();
+  SEI_get_expected();
 }

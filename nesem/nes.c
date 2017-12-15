@@ -475,6 +475,12 @@ void SEC()
 {
   switch_status_flag(NES_CARRY_FLAG, 1);
 }
+void CLI()
+{
+}
+void SEI()
+{
+}
 void set_negative_zero_flag(unsigned char operand)
 {
   cpu->status=0;

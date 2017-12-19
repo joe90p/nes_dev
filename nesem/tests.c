@@ -904,6 +904,20 @@ void INX_get_expected()
   unsigned char s_2 = cpu->status; 
   assert(x_1==1 && s_1==0 && x_2==0 && s_2==NES_ZERO_FLAG);
 }
+void DEX_get_expected()
+{
+  printf("DEX_get_expected ");
+  cpu->X=0;
+  cpu->status=0;
+  DEX();
+  unsigned char x_1 = cpu->X;
+  unsigned char s_1 = cpu->status;
+  cpu->X=1;
+  DEX();
+  unsigned char x_2 = cpu->X;
+  unsigned char s_2 = cpu->status; 
+  assert(x_1==255 && s_1==NES_NEGATIVE_FLAG && x_2==0 && s_2==NES_ZERO_FLAG);
+}
 void CLC_get_expected()
 {
   printf("CLC get expected ");
@@ -925,6 +939,27 @@ void CLI_get_expected()
   CLI();
   assert(cpu->status==0);
 }
+void CLV_get_expected()
+{
+  printf("CLV get expected ");
+  cpu->status=NES_OVERFLOW_FLAG;
+  CLV();
+  assert(cpu->status==0);
+}
+void CLD_get_expected()
+{
+  printf("CLD get expected ");
+  cpu->status=NES_DECIMAL_MODE_FLAG;
+  CLD();
+  assert(cpu->status==0);
+}
+void SED_get_expected()
+{
+  printf("SED get expected ");
+  cpu->status=0;
+  SED();
+  assert(cpu->status==NES_DECIMAL_MODE_FLAG);
+}
 void SEI_get_expected()
 {
   printf("SEI get expected ");
@@ -932,7 +967,57 @@ void SEI_get_expected()
   SEI();
   assert(cpu->status==NES_INTERRUPT_DISABLE_FLAG);
 }
+void TYA_get_expected()
+{
+  printf("TYA_get_expected ");
+  unsigned char expected_value = 128;
+  cpu->Y=expected_value;
+  cpu->status=0;
+  cpu->A=0;
+  TYA();
+  assert((unsigned char)cpu->A==expected_value && cpu->status==NES_NEGATIVE_FLAG);
+}
 
+void TXA_get_expected()
+{
+  printf("TXA_get_expected ");
+  unsigned char expected_value = 128;
+  cpu->X=expected_value;
+  cpu->status=0;
+  cpu->A=0;
+  TXA();
+  assert((unsigned char)cpu->A==expected_value && cpu->status==NES_NEGATIVE_FLAG);
+}
+void TXS_get_expected()
+{
+  printf("TXS_get_expected ");
+  unsigned char expected_value = 128;
+  cpu->X=expected_value;
+  cpu->status=0;
+  cpu->stack_pointer=0;
+  TXS();
+  assert((unsigned char)cpu->stack_pointer==expected_value && cpu->status==NES_NEGATIVE_FLAG);
+}
+void TAX_get_expected()
+{
+  printf("TAX_get_expected ");
+  unsigned char expected_value = 128;
+  cpu->A=expected_value;
+  cpu->status=0;
+  cpu->X=0;
+  TAX();
+  assert(cpu->X==expected_value && cpu->status==NES_NEGATIVE_FLAG);
+}
+void TSX_get_expected()
+{
+  printf("TSX_get_expected ");
+  unsigned char expected_value = 128;
+  cpu->stack_pointer=expected_value;
+  cpu->status=0;
+  cpu->X=0;
+  TSX();
+  assert(cpu->X==expected_value && cpu->status==NES_NEGATIVE_FLAG);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -1019,4 +1104,13 @@ int main(int argc, char* argv[])
   SEC_get_expected();
   CLI_get_expected();
   SEI_get_expected();
+  TYA_get_expected();
+  CLV_get_expected();
+  CLD_get_expected();
+  SED_get_expected();
+  TXA_get_expected();
+  TXS_get_expected();
+  TAX_get_expected();
+  TSX_get_expected();
+  DEX_get_expected();
 }

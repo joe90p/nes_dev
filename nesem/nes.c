@@ -455,13 +455,41 @@ void TAY()
   cpu->Y=cpu->A;
   set_negative_zero_flag(cpu->Y);
 }
-
+void TYA()
+{
+  cpu->A=cpu->Y;
+  set_negative_zero_flag(cpu->A);
+}
+void TXA()
+{
+  cpu->A=cpu->X;
+  set_negative_zero_flag(cpu->A);
+}
+void TAX()
+{
+  cpu->X=cpu->A;
+  set_negative_zero_flag(cpu->X);
+}
+void TXS()
+{
+  cpu->stack_pointer=cpu->X;
+  set_negative_zero_flag(cpu->stack_pointer);
+}
+void TSX()
+{
+  cpu->X=cpu->stack_pointer;
+  set_negative_zero_flag(cpu->X);
+}
 void INX()
 {
   cpu->X+=1;
   set_negative_zero_flag(cpu->X);
 }
-
+void DEX()
+{
+  cpu->X-=1;
+  set_negative_zero_flag(cpu->X);
+}
 void INY()
 {
   cpu->Y+=1;
@@ -471,19 +499,35 @@ void CLC()
 {
   switch_status_flag(NES_CARRY_FLAG, 0);
 }
+void CLV()
+{
+  switch_status_flag(NES_OVERFLOW_FLAG, 0);
+}
+void CLD()
+{
+  switch_status_flag(NES_DECIMAL_MODE_FLAG, 0);
+}
+void SED()
+{
+  switch_status_flag(NES_DECIMAL_MODE_FLAG, 1);
+}
 void SEC()
 {
   switch_status_flag(NES_CARRY_FLAG, 1);
 }
 void CLI()
 {
+  switch_status_flag(NES_INTERRUPT_DISABLE_FLAG, 0);
 }
 void SEI()
+{
+  switch_status_flag(NES_INTERRUPT_DISABLE_FLAG, 1);
+}
+void NOP()
 {
 }
 void set_negative_zero_flag(unsigned char operand)
 {
-  cpu->status=0;
   switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);
   switch_status_flag(NES_ZERO_FLAG, operand==0);
 }
@@ -643,7 +687,6 @@ void conditional_branch_instruction(unsigned char branch_context, unsigned char 
 
 void increment_PC(unsigned char increment)
 {
-  //cpu->old_PC=cpu->PC;
   cpu->PC+=increment;
 }
 

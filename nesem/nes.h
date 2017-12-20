@@ -8,6 +8,10 @@
 #define NES_OVERFLOW_FLAG 64
 #define NES_NEGATIVE_FLAG 128
 #define STACK_TOP 511
+#define OPCODE_CONTEXT_MASK  3
+#define OPCODE_MASK  224
+#define ADDRESSING_MODE_MASK  28
+#define COND_BRANCH_MASK  31 
 struct NES_CPU
 {
   unsigned char* cpu_memory;

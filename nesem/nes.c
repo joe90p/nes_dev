@@ -690,44 +690,9 @@ void increment_PC(unsigned char increment)
   cpu->PC+=increment;
 }
 
-void run_rom()
+void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
-  set_opcode_array();
-  cpu->PC = get_short_from_cpu_memory(0xfffc);//cpu->cpu_memory[0xfffc]<<8 | cpu->cpu_memory[0xfffd]>>8;
-  printf("first 3 bytes at RESET\n"); 
-
-  for(int j=0; j < 3; j++)
-  {
-    printf("%02x\n", cpu->cpu_memory[cpu->PC + j]);
-  }
-  char opcode_context_mask = 3;
-  char opcode_mask = 224;
-  char addressing_mode_mask = 28;
-  char program_counter_increment;
-  unsigned char* operand_ptr =0;
-  unsigned char cond_branch_mask = 31; 
-
-  for(int k=0; k < 5; k++)
-  {
-    char current_opcode = cpu->cpu_memory[cpu->PC];
-    
-    if((current_opcode&cond_branch_mask)==16)
-    {
-      unsigned char branch_context = (current_opcode&192)>>6;
-      unsigned char equalTo = (current_opcode&32)>>5;
-      conditional_branch_instruction(branch_context, equalTo);
-    }
-    else
-    { 
-    char opcode_context = current_opcode&opcode_context_mask;
-    char opcode = (current_opcode&opcode_mask)>>5;
-    char addressing_mode = (current_opcode&addressing_mode_mask)>>2;
     char* address_mode_info = (char*)malloc(10 * sizeof(char));
-    char* opcode_info = (char*)malloc(10 * sizeof(char));
-
-    operand_ptr = addresses[opcode_context][addressing_mode].get_operand_ptr();
-    char* address_info = addresses[opcode_context][addressing_mode].address_info;
-    program_counter_increment = addresses[opcode_context][addressing_mode].program_counter_increment;
  
     if(program_counter_increment == 1)
     {
@@ -741,13 +706,48 @@ void run_rom()
     {
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
-    strcpy(opcode_info, opcodes[opcode_context][opcode].name);
     printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);
-
-    opcodes[opcode_context][opcode].action(operand_ptr);
-    increment_PC(program_counter_increment);
     free(opcode_info);  
     free(address_mode_info);
+}
+
+void print_instruction_info_from_context(char program_counter_increment, char opcode_context, char addressing_mode, char opcode)
+{
+    char* opcode_info = (char*)malloc(10 * sizeof(char));
+    char* address_info = addresses[opcode_context][addressing_mode].address_info;
+    strcpy(opcode_info, opcodes[opcode_context][opcode].name);
+    print_instruction_info(program_counter_increment, address_info, opcode_info);
+}
+
+
+void run_rom()
+{
+  set_opcode_array();
+  cpu->PC = get_short_from_cpu_memory(0xfffc); 
+
+  unsigned char* operand_ptr =0;
+
+  for(int k=0; k < 5; k++)
+  {
+    char current_opcode = cpu->cpu_memory[cpu->PC];
+    
+    if((current_opcode&COND_BRANCH_MASK)==16)
+    {
+      unsigned char branch_context = (current_opcode&192)>>6;
+      unsigned char equalTo = (current_opcode&32)>>5;
+      conditional_branch_instruction(branch_context, equalTo);
+    }
+    else
+    { 
+      char opcode_context = current_opcode&OPCODE_CONTEXT_MASK;
+      char opcode = (current_opcode&OPCODE_MASK)>>5;
+      char addressing_mode = (current_opcode&ADDRESSING_MODE_MASK)>>2;
+      operand_ptr = addresses[opcode_context][addressing_mode].get_operand_ptr();
+      char program_counter_increment = addresses[opcode_context][addressing_mode].program_counter_increment;
+       
+      print_instruction_info_from_context( program_counter_increment, opcode_context, addressing_mode, opcode);
+      opcodes[opcode_context][opcode].action(operand_ptr);
+      increment_PC(program_counter_increment);
     }
   } 
 }

@@ -665,31 +665,6 @@ void set_opcode_array()
 
 }
 
-void conditional_branch_instruction(unsigned char branch_context, unsigned char equalTo)
-{
-  unsigned char offset = cpu->cpu_memory[cpu->PC+1];
-  switch(branch_context)
-  {
-    case 0:
-      test_flag_and_branch(NES_NEGATIVE_FLAG, equalTo, offset);
-      break;
-    case 1:
-      test_flag_and_branch(NES_OVERFLOW_FLAG, equalTo, offset);
-      break;
-    case 2:
-      test_flag_and_branch(NES_CARRY_FLAG, equalTo, offset);
-      break;
-    case 3:
-      test_flag_and_branch(NES_ZERO_FLAG, equalTo, offset); 
-      break;
-  }
-}
-
-void increment_PC(unsigned char increment)
-{
-  cpu->PC+=increment;
-}
-
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
     char* address_mode_info = (char*)malloc(10 * sizeof(char));
@@ -720,12 +695,61 @@ void print_instruction_info_from_context(char program_counter_increment, char op
 }
 
 
+void conditional_branch_instruction(unsigned char current_opcode)
+{
+  unsigned char branch_context = (current_opcode&192)>>6;
+  unsigned char equalTo = (current_opcode&32)>>5;
+
+  unsigned char offset = cpu->cpu_memory[cpu->PC+1];
+  char* opcode_info;
+  char flag;
+  switch(branch_context)
+  {
+    case 0:
+      flag=NES_NEGATIVE_FLAG;
+      opcode_info=equalTo ? "BMI" : "BMI";
+      break;
+    case 1:
+      flag=NES_OVERFLOW_FLAG;
+      opcode_info=equalTo ? "BVS" : "BVC";
+      break;
+    case 2:
+      flag=NES_CARRY_FLAG;
+      opcode_info=equalTo ? "BCC" : "BCS";
+      break;
+    case 3:
+      flag=NES_ZERO_FLAG;
+      opcode_info=equalTo ? "BNE" : "BEQ";
+      break;
+  }
+  print_instruction_info(2, "#%02x", opcode_info);
+  test_flag_and_branch(flag, equalTo, offset);
+}
+
+void increment_PC(unsigned char increment)
+{
+  cpu->PC+=increment;
+}
+
+void standard_instruction(unsigned char current_opcode)
+{
+  char opcode_context = current_opcode&OPCODE_CONTEXT_MASK;
+  char opcode = (current_opcode&OPCODE_MASK)>>5;
+  char addressing_mode = (current_opcode&ADDRESSING_MODE_MASK)>>2;
+  unsigned char* operand_ptr = addresses[opcode_context][addressing_mode].get_operand_ptr();
+  char program_counter_increment = addresses[opcode_context][addressing_mode].program_counter_increment;
+       
+  print_instruction_info_from_context( program_counter_increment, opcode_context, addressing_mode, opcode);
+  opcodes[opcode_context][opcode].action(operand_ptr);
+  increment_PC(program_counter_increment);
+}
+
+
+
 void run_rom()
 {
   set_opcode_array();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
-
-  unsigned char* operand_ptr =0;
 
   for(int k=0; k < 5; k++)
   {
@@ -733,21 +757,11 @@ void run_rom()
     
     if((current_opcode&COND_BRANCH_MASK)==16)
     {
-      unsigned char branch_context = (current_opcode&192)>>6;
-      unsigned char equalTo = (current_opcode&32)>>5;
-      conditional_branch_instruction(branch_context, equalTo);
+      conditional_branch_instruction(current_opcode);
     }
     else
     { 
-      char opcode_context = current_opcode&OPCODE_CONTEXT_MASK;
-      char opcode = (current_opcode&OPCODE_MASK)>>5;
-      char addressing_mode = (current_opcode&ADDRESSING_MODE_MASK)>>2;
-      operand_ptr = addresses[opcode_context][addressing_mode].get_operand_ptr();
-      char program_counter_increment = addresses[opcode_context][addressing_mode].program_counter_increment;
-       
-      print_instruction_info_from_context( program_counter_increment, opcode_context, addressing_mode, opcode);
-      opcodes[opcode_context][opcode].action(operand_ptr);
-      increment_PC(program_counter_increment);
+      standard_instruction(current_opcode);
     }
   } 
 }

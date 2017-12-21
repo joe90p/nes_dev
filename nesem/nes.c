@@ -549,6 +549,60 @@ void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned ch
 
 struct opcode opcodes[2][8];
 struct address addresses[2][8];
+struct opcode opcodes_singlebyte[256];
+
+void set_single_byte_opcode_array()
+{
+  for(int i=0; i<256; i++)
+  {
+    opcodes_singlebyte[i].name = 0;
+    opcodes_singlebyte[i].action = 0;
+  }
+  opcodes_singlebyte[0x08].name = "PHP";
+  opcodes_singlebyte[0x08].action = PHP;
+  opcodes_singlebyte[0x28].name = "PLP";
+  opcodes_singlebyte[0x28].action = PLP;
+  opcodes_singlebyte[0x48].name = "PHA";
+  opcodes_singlebyte[0x48].action = PHA;
+  opcodes_singlebyte[0x68].name = "PLA";
+  opcodes_singlebyte[0x68].action = PLA;
+  opcodes_singlebyte[0x88].name = "DEY";
+  opcodes_singlebyte[0x88].action = DEY;
+  opcodes_singlebyte[0xA8].name = "TAY";
+  opcodes_singlebyte[0xA8].action = TAY;
+  opcodes_singlebyte[0xC8].name = "INY";
+  opcodes_singlebyte[0xC8].action = INY;
+  opcodes_singlebyte[0xE8].name = "INY";
+  opcodes_singlebyte[0xE8].action = INY;
+  opcodes_singlebyte[0x18].name = "CLC";
+  opcodes_singlebyte[0x18].action = CLC;
+  opcodes_singlebyte[0x38].name = "SEC";
+  opcodes_singlebyte[0x38].action = SEC;
+  opcodes_singlebyte[0x58].name = "CLI";
+  opcodes_singlebyte[0x58].action = CLI;
+  opcodes_singlebyte[0x78].name = "SEI";
+  opcodes_singlebyte[0x78].action = SEI;
+  opcodes_singlebyte[0x98].name = "TYA";
+  opcodes_singlebyte[0x98].action = TYA;
+  opcodes_singlebyte[0xB8].name = "CLV";
+  opcodes_singlebyte[0xB8].action = CLV;
+  opcodes_singlebyte[0xD8].name = "CLD";
+  opcodes_singlebyte[0xD8].action = CLD;
+  opcodes_singlebyte[0xF8].name = "SED";
+  opcodes_singlebyte[0xF8].action = SED;
+  opcodes_singlebyte[0x8A].name = "TXA";
+  opcodes_singlebyte[0x8A].action = TXA;
+  opcodes_singlebyte[0x9A].name = "TXS";
+  opcodes_singlebyte[0x9A].action = TXS;
+  opcodes_singlebyte[0xAA].name = "TAX";
+  opcodes_singlebyte[0xAA].action = TAX;
+  opcodes_singlebyte[0xBA].name = "TSX";
+  opcodes_singlebyte[0xBA].action = TSX;
+  opcodes_singlebyte[0xCA].name = "DEX";
+  opcodes_singlebyte[0xCA].action = DEX;
+  opcodes_singlebyte[0xEA].name = "NOP";
+  opcodes_singlebyte[0xEA].action = NOP;
+}
 
 void set_opcode_array()
 {
@@ -749,19 +803,28 @@ void standard_instruction(unsigned char current_opcode)
 void run_rom()
 {
   set_opcode_array();
+  set_single_byte_opcode_array();
+
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
 
   for(int k=0; k < 5; k++)
   {
     char current_opcode = cpu->cpu_memory[cpu->PC];
     
-    if((current_opcode&COND_BRANCH_MASK)==16)
+    if(opcodes_singlebyte[current_opcode].action)
     {
-      conditional_branch_instruction(current_opcode);
+      
     }
     else
-    { 
-      standard_instruction(current_opcode);
+    {
+      if((current_opcode&COND_BRANCH_MASK)==16)
+      {
+        conditional_branch_instruction(current_opcode);
+      }
+      else
+      { 
+        standard_instruction(current_opcode);
+      }
     }
   } 
 }

@@ -407,7 +407,7 @@ void CMP_negative_status_flagged()
   char not_expect_negative = cpu->status; 
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
-//--------------------------
+
 void CPX_carry_status_flagged()
 {
   printf("test CPX_carry_status_flagged "); 
@@ -440,7 +440,7 @@ void CPX_negative_status_flagged()
   char not_expect_negative = cpu->status; 
   assert((not_expect_negative&NES_NEGATIVE_FLAG)==0 && (expect_negative&NES_NEGATIVE_FLAG)==NES_NEGATIVE_FLAG); 
 }
-//--------------------------
+
 void CPY_carry_status_flagged()
 {
   printf("test CPY_carry_status_flagged "); 

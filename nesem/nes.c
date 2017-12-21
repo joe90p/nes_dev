@@ -552,18 +552,18 @@ struct address addresses[2][8];
 
 void set_opcode_array()
 {
-  opcodes[1][0].name = "BIT";
-  opcodes[1][1].action = BIT;
-  opcodes[3][0].name = "JMP";
-  opcodes[3][1].action = JMP;
-  opcodes[4][0].name = "STY";
-  opcodes[4][1].action = STY;
-  opcodes[5][0].name = "LDY";
-  opcodes[5][1].action = LDY;
-  opcodes[6][0].name = "CPX";
-  opcodes[6][1].action = CPX;
-  opcodes[7][0].name = "CPY";
-  opcodes[7][1].action = CPY;
+  opcodes[0][1].name = "BIT";
+  opcodes[0][1].action = BIT;
+  opcodes[0][3].name = "JMP";
+  opcodes[0][3].action = JMP;
+  opcodes[0][4].name = "STY";
+  opcodes[0][4].action = STY;
+  opcodes[0][5].name = "LDY";
+  opcodes[0][5].action = LDY;
+  opcodes[0][6].name = "CPX";
+  opcodes[0][6].action = CPX;
+  opcodes[0][7].name = "CPY";
+  opcodes[0][7].action = CPY;
 
   opcodes[1][0].name = "ORA";
   opcodes[1][0].action = ORA_ptr;

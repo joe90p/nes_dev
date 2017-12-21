@@ -813,7 +813,10 @@ void run_rom()
     
     if(opcodes_singlebyte[current_opcode].action)
     {
-      
+      unsigned char* dummy_ptr = 0;
+      print_instruction_info(1, "", opcodes_singlebyte[current_opcode].name);
+      opcodes_singlebyte[current_opcode].action(dummy_ptr);      
+      increment_PC(1);
     }
     else
     {

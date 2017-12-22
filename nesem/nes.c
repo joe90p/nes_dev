@@ -370,7 +370,7 @@ unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_b
 
 unsigned short get_short_from_cpu_memory(unsigned short mem_index)
 {
-  return get_short_from_chars(cpu->cpu_memory[mem_index +1],cpu->cpu_memory[mem_index]);
+  return get_short_from_chars(cpu->cpu_memory[mem_index],cpu->cpu_memory[mem_index + 1]);
 }
 
 void stack_push_char(unsigned char to_push)
@@ -547,8 +547,8 @@ void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned ch
 
 }
 
-struct opcode opcodes[2][8];
-struct address addresses[2][8];
+struct opcode opcodes[3][8];
+struct address addresses[3][8];
 struct opcode opcodes_singlebyte[256];
 
 void set_single_byte_opcode_array()
@@ -648,10 +648,10 @@ void set_opcode_array()
   opcodes[2][4].action = STX;
   opcodes[2][5].name = "LDX";
   opcodes[2][5].action = LDX;
-  opcodes[2][4].name = "DEC";
-  opcodes[2][4].action = DEC;
-  opcodes[2][5].name = "INC";
-  opcodes[2][5].action = INC;
+  opcodes[2][6].name = "DEC";
+  opcodes[2][6].action = DEC;
+  opcodes[2][7].name = "INC";
+  opcodes[2][7].action = INC;
  
   addresses[0][0].program_counter_increment = 2;
   addresses[0][0].get_operand_ptr = get_immediate_operand_ptr;
@@ -736,7 +736,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
     printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);
-    free(opcode_info);  
+    //free(opcode_info);  
     free(address_mode_info);
 }
 
@@ -797,7 +797,6 @@ void standard_instruction(unsigned char current_opcode)
   opcodes[opcode_context][opcode].action(operand_ptr);
   increment_PC(program_counter_increment);
 }
-
 
 
 void run_rom()

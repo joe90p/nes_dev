@@ -542,7 +542,7 @@ void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned ch
 {
   if((equalTo && (cpu->status&flag)) || (!equalTo && !(cpu->status&flag)))
   {
-    increment_PC(offset -2);
+    increment_PC(offset + 2);
   }
 
 }
@@ -572,8 +572,8 @@ void set_single_byte_opcode_array()
   opcodes_singlebyte[0xA8].action = TAY;
   opcodes_singlebyte[0xC8].name = "INY";
   opcodes_singlebyte[0xC8].action = INY;
-  opcodes_singlebyte[0xE8].name = "INY";
-  opcodes_singlebyte[0xE8].action = INY;
+  opcodes_singlebyte[0xE8].name = "INX";
+  opcodes_singlebyte[0xE8].action = INX;
   opcodes_singlebyte[0x18].name = "CLC";
   opcodes_singlebyte[0x18].action = CLC;
   opcodes_singlebyte[0x38].name = "SEC";
@@ -761,7 +761,7 @@ void conditional_branch_instruction(unsigned char current_opcode)
   {
     case 0:
       flag=NES_NEGATIVE_FLAG;
-      opcode_info=equalTo ? "BMI" : "BMI";
+      opcode_info=equalTo ? "BMI" : "BPL";
       break;
     case 1:
       flag=NES_OVERFLOW_FLAG;
@@ -780,7 +780,7 @@ void conditional_branch_instruction(unsigned char current_opcode)
   test_flag_and_branch(flag, equalTo, offset);
 }
 
-void increment_PC(unsigned char increment)
+void increment_PC(signed char increment)
 {
   cpu->PC+=increment;
 }
@@ -806,7 +806,7 @@ void run_rom()
 
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
 
-  for(int k=0; k < 5; k++)
+  for(int k=0; k < 20; k++)
   {
     char current_opcode = cpu->cpu_memory[cpu->PC];
     

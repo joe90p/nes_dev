@@ -104,4 +104,4 @@ void TSX();
 void DEX();
 void NOP();
 void stack_push_char(unsigned char);
-void increment_PC(unsigned char);
+void increment_PC(signed char);

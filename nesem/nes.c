@@ -26,7 +26,7 @@ unsigned char* get_accumulator_operand_ptr()
 
 unsigned char* get_absolute_operand_ptr()
 {
-  unsigned char address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
+  unsigned short address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
   return &cpu->cpu_memory[address];
 }
 
@@ -345,8 +345,8 @@ void DEC(unsigned char* operand_ptr)
 void BIT(unsigned char* operand_ptr)
 {
   unsigned char data = *operand_ptr&cpu->A;
-  switch_status_flag(NES_NEGATIVE_FLAG, data&NES_NEGATIVE_FLAG);
-  switch_status_flag(NES_OVERFLOW_FLAG, data&NES_OVERFLOW_FLAG);
+  switch_status_flag(NES_NEGATIVE_FLAG, (*operand_ptr)&NES_NEGATIVE_FLAG);
+  switch_status_flag(NES_OVERFLOW_FLAG, (*operand_ptr)&NES_OVERFLOW_FLAG);
   switch_status_flag(NES_ZERO_FLAG, data==0);
 }
 
@@ -538,11 +538,16 @@ void get_data_at_address_do_opcode(short address, opcode_action_type opcode_acti
   opcode_action(data);
 }
 
-void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset)
+unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset)
 {
   if((equalTo && (cpu->status&flag)) || (!equalTo && !(cpu->status&flag)))
   {
     increment_PC(offset + 2);
+    return 1;
+  }
+  else
+  {
+    return 0;
   }
 
 }
@@ -769,15 +774,18 @@ void conditional_branch_instruction(unsigned char current_opcode)
       break;
     case 2:
       flag=NES_CARRY_FLAG;
-      opcode_info=equalTo ? "BCC" : "BCS";
+      opcode_info=equalTo ? "BCS" : "BCC";
       break;
     case 3:
       flag=NES_ZERO_FLAG;
-      opcode_info=equalTo ? "BNE" : "BEQ";
+      opcode_info=equalTo ? "BEQ" : "BNE";
       break;
   }
   print_instruction_info(2, "#%02x", opcode_info);
-  test_flag_and_branch(flag, equalTo, offset);
+  if(!test_flag_and_branch(flag, equalTo, offset))
+  {
+    increment_PC(2);
+  }
 }
 
 void increment_PC(signed char increment)
@@ -805,8 +813,8 @@ void run_rom()
   set_single_byte_opcode_array();
 
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
-
-  for(int k=0; k < 20; k++)
+  cpu->cpu_memory[0x2002] = 128;
+  for(int k=0; k < 75; k++)
   {
     char current_opcode = cpu->cpu_memory[cpu->PC];
     

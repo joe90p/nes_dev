@@ -74,7 +74,7 @@ void get_data_at_address_do_opcode(short address, opcode_action_type);
 void set_negative_zero_flag(unsigned char);
 void CPX_update_status_register(unsigned char data);
 void CPY_update_status_register(unsigned char data);
-void test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset);
+unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset);
 void BRK();
 void JSR();
 void RTI();

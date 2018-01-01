@@ -767,7 +767,7 @@ void test_flag_and_branch_get_expected()
   unsigned short pc3 = cpu->PC;
   test_flag_and_branch(NES_ZERO_FLAG, 0, offset);
   unsigned short pc4 = cpu->PC;
-  assert((pc2-pc0==offset-2) && (pc1==pc2) && (pc2==pc3) && (pc4-pc3==offset-2));
+  assert((pc2-pc0==offset+2) && (pc1==pc2) && (pc2==pc3) && (pc4-pc3==offset+2));
 }
 
 void BRK_pc_stack_push()
@@ -783,7 +783,7 @@ void BRK_pc_stack_push()
   unsigned char expected_pc_high = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+3];
   unsigned char expected_pc_low = cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+2];
   unsigned char status_with_break=  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)+1];
-  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==0x0302);
+  assert(expected_pc_high==1 && expected_pc_low==4 && status_with_break==144 && cpu->status==132 && cpu->PC==0x0203);
 }
 
 void RTI_get_expected()

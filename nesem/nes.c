@@ -806,16 +806,46 @@ void standard_instruction(unsigned char current_opcode)
   increment_PC(program_counter_increment);
 }
 
+void clear(char* pointer, int length)
+{
+  for(int i=0; i<length; i++)
+  {
+    pointer[i]=0;
+  }
+}
 
+char starts_with(const char *pre, const char *str)
+{
+    size_t lenpre = strlen(pre),
+           lenstr = strlen(str);
+    return lenstr < lenpre ? 0 : strncmp(pre, str, lenpre) == 0;
+}
 void run_rom()
 {
   set_opcode_array();
   set_single_byte_opcode_array();
-
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
   cpu->cpu_memory[0x2002] = 128;
+  int run_instructions_no_prompt = 0;
   for(int k=0; k < 75; k++)
   {
+    char input[20];
+    clear(input, 20);
+    if(run_instructions_no_prompt==0)
+    { 
+      
+      while (!starts_with("run", input))
+      {
+        printf("> ");
+        scanf("%s %d", input, &run_instructions_no_prompt);
+      }
+      run_instructions_no_prompt--; 
+      clear(input, 20 ); 
+    }
+    else
+    {
+      run_instructions_no_prompt--;
+    }
     char current_opcode = cpu->cpu_memory[cpu->PC];
     
     if(opcodes_singlebyte[current_opcode].action)
@@ -836,6 +866,7 @@ void run_rom()
         standard_instruction(current_opcode);
       }
     }
+    
   } 
 }
 

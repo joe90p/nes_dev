@@ -827,17 +827,39 @@ void run_rom()
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
   cpu->cpu_memory[0x2002] = 128;
   int run_instructions_no_prompt = 0;
+  char arg2 = ' ';
+  int arg1 = 0;
   for(int k=0; k < 75; k++)
   {
     char input[20];
+    char raw_input[20];
     clear(input, 20);
     if(run_instructions_no_prompt==0)
     { 
       
-      while (!starts_with("run", input))
+      while (strcmp("run", input))
       {
         printf("> ");
-        scanf("%s %d", input, &run_instructions_no_prompt);
+        fgets(raw_input, 20, stdin);
+        sscanf(raw_input, "%s %d %c", input, &arg1, &arg2);
+        if(strcmp("set", input)==0)
+        {
+          switch(arg2)
+          {
+            case 'x':
+              cpu->X = (unsigned char)arg1; 
+              break;
+          }
+        }
+        if(strcmp("print", input)==0)
+        {
+          printf("cpu->x = %d\n", cpu->X);
+        }
+        if(strcmp("run", input)==0)
+        {
+          run_instructions_no_prompt=arg1;
+        }
+        
       }
       run_instructions_no_prompt--; 
       clear(input, 20 ); 

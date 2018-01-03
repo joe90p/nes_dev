@@ -841,7 +841,7 @@ void run_rom()
       {
         printf("> ");
         fgets(raw_input, 20, stdin);
-        sscanf(raw_input, "%s %d %c", input, &arg1, &arg2);
+        sscanf(raw_input, "%s %x %c", input, &arg1, &arg2);
         if(strcmp("set", input)==0)
         {
           switch(arg2)
@@ -849,11 +849,47 @@ void run_rom()
             case 'x':
               cpu->X = (unsigned char)arg1; 
               break;
+            case 'y':
+              cpu->Y = (unsigned char)arg1; 
+              break;
+            case 'p':
+              cpu->PC = (unsigned short)arg1; 
+              break;
+            case 's':
+              cpu->status = (unsigned char)arg1; 
+              break;
+            case 'a':
+              cpu->A = (unsigned char)arg1; 
+              break;
+            case '0':
+              switch_status_flag(1,arg1);
+              break;
+            case '1':
+              switch_status_flag(2,arg1);
+              break;
+            case '2':
+              switch_status_flag(4,arg1);
+               break;
+            case '3':
+              switch_status_flag(8,arg1);
+              break;
+            case '4':
+              switch_status_flag(16,arg1);
+              break;
+            case '5':
+              switch_status_flag(32,arg1);
+              break;
+            case '6':
+              switch_status_flag(64,arg1);
+              break;
+            case '7':
+              switch_status_flag(128,arg1);
+              break;
           }
         }
         if(strcmp("print", input)==0)
         {
-          printf("cpu->x = %d\n", cpu->X);
+          printf("cpu->X = %d, cpu->Y = %d, cpu->A = %d, cpu->PC = %x, cpu->status = %d \n", cpu->X, cpu->Y, cpu->A, cpu->PC, cpu->status);
         }
         if(strcmp("run", input)==0)
         {

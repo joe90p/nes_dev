@@ -619,10 +619,10 @@ void set_opcode_array()
   opcodes[0][4].action = STY;
   opcodes[0][5].name = "LDY";
   opcodes[0][5].action = LDY;
-  opcodes[0][6].name = "CPX";
-  opcodes[0][6].action = CPX;
-  opcodes[0][7].name = "CPY";
-  opcodes[0][7].action = CPY;
+  opcodes[0][6].name = "CPY";
+  opcodes[0][6].action = CPY;
+  opcodes[0][7].name = "CPX";
+  opcodes[0][7].action = CPX;
 
   opcodes[1][0].name = "ORA";
   opcodes[1][0].action = ORA_ptr;
@@ -829,7 +829,8 @@ void run_rom()
   int run_instructions_no_prompt = 0;
   char arg2 = ' ';
   int arg1 = 0;
-  for(int k=0; k < 75; k++)
+  //for(int k=0; k < 75; k++)
+  while(1==1)
   {
     char input[20];
     char raw_input[20];
@@ -889,7 +890,7 @@ void run_rom()
         }
         if(strcmp("print", input)==0)
         {
-          printf("cpu->X = %d, cpu->Y = %d, cpu->A = %d, cpu->PC = %x, cpu->status = %d \n", cpu->X, cpu->Y, cpu->A, cpu->PC, cpu->status);
+          printf("cpu->X = %d (%x), cpu->Y = %d (%x), cpu->A = %d (%x), cpu->PC = %d (%x), cpu->status = %d (%x) \n", cpu->X, cpu->X, cpu->Y, cpu->Y, cpu->A, cpu->A, cpu->PC, cpu->PC, cpu->status, cpu->status);
         }
         if(strcmp("run", input)==0)
         {

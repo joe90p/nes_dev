@@ -613,6 +613,8 @@ void set_opcode_array()
 {
   opcodes[0][1].name = "BIT";
   opcodes[0][1].action = BIT;
+  opcodes[0][2].name = "JMP";
+  opcodes[0][2].action = JMP;
   opcodes[0][3].name = "JMP";
   opcodes[0][3].action = JMP;
   opcodes[0][4].name = "STY";
@@ -829,7 +831,6 @@ void run_rom()
   int run_instructions_no_prompt = 0;
   char arg2 = ' ';
   int arg1 = 0;
-  //for(int k=0; k < 75; k++)
   while(1==1)
   {
     char input[20];

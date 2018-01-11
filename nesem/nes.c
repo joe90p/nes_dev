@@ -352,9 +352,9 @@ void BIT(unsigned char* operand_ptr)
 
 void JMP(unsigned char* operand_ptr)
 {
-  unsigned short* short_ptr = (unsigned short*)operand_ptr;
-  cpu->old_PC=cpu->PC;
-  cpu->PC=*short_ptr; 
+  unsigned char* pc_0 = &cpu->cpu_memory[0];
+  unsigned char* count = operand_ptr - pc_0; 
+  cpu->PC = (unsigned short)count;
 }
 
 void INC(unsigned char* operand_ptr)
@@ -805,7 +805,14 @@ void standard_instruction(unsigned char current_opcode)
        
   print_instruction_info_from_context( program_counter_increment, opcode_context, addressing_mode, opcode);
   opcodes[opcode_context][opcode].action(operand_ptr);
-  increment_PC(program_counter_increment);
+  if(strcmp("JMP", opcodes[opcode_context][opcode].name))
+  {
+    increment_PC(program_counter_increment);
+  }
+  else
+  {
+    //increment_PC(-1);
+  }
 }
 
 void clear(char* pointer, int length)

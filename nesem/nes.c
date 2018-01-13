@@ -5,6 +5,7 @@
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
+void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info);
 
 void run_rom();
 
@@ -413,9 +414,10 @@ void BRK()
 
 void JSR()
 {
-  stack_push_short(cpu->PC);  
-  unsigned short newPC = get_short_from_cpu_memory(cpu->PC+1);
-  cpu->PC=newPC;
+  stack_push_short(cpu->PC + 3);  
+  unsigned short newPC = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
+  print_instruction_info(2, "info", "JSR");
+  cpu->PC=newPC -1;
 }
 
 void RTI()
@@ -426,7 +428,7 @@ void RTI()
 
 void RTS()
 {
-  cpu->PC = stack_pull_short() + 1;  
+  cpu->PC = stack_pull_short() ;  
 }
 void PHP()
 {
@@ -743,7 +745,6 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
     printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);
-    //free(opcode_info);  
     free(address_mode_info);
 }
 
@@ -811,7 +812,7 @@ void standard_instruction(unsigned char current_opcode)
   }
   else
   {
-    //increment_PC(-1);
+    increment_PC(-1); //not sure why we need to decrement in this case.
   }
 }
 
@@ -914,7 +915,22 @@ void run_rom()
       run_instructions_no_prompt--;
     }
     char current_opcode = cpu->cpu_memory[cpu->PC];
-    
+   
+
+    unsigned char exceptional_instruction = 0;
+    switch(current_opcode)
+    {
+      case 0x20:
+        JSR();
+        exceptional_instruction= 1;
+        break;
+      case 0x60:
+        RTS();
+        exceptional_instruction= 1;
+        break;
+    }
+    if(!exceptional_instruction)
+    { 
     if(opcodes_singlebyte[current_opcode].action)
     {
       unsigned char* dummy_ptr = 0;
@@ -932,6 +948,7 @@ void run_rom()
       { 
         standard_instruction(current_opcode);
       }
+    }
     }
     
   } 

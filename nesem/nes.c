@@ -416,7 +416,7 @@ void JSR()
 {
   stack_push_short(cpu->PC + 3);  
   unsigned short newPC = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
-  print_instruction_info(2, "info", "JSR");
+  print_instruction_info(3, "$%02x%02x", "JSR");
   cpu->PC=newPC -1;
 }
 
@@ -424,11 +424,13 @@ void RTI()
 {
   cpu->status =  stack_pull_char();
   cpu->PC = stack_pull_short();  
+  print_instruction_info(1, "", "RTI");
 }
 
 void RTS()
 {
   cpu->PC = stack_pull_short() ;  
+  print_instruction_info(1, "", "RTS");
 }
 void PHP()
 {
@@ -926,6 +928,10 @@ void run_rom()
         break;
       case 0x60:
         RTS();
+        exceptional_instruction= 1;
+        break;
+      case 0x40:
+        RTI();
         exceptional_instruction= 1;
         break;
     }

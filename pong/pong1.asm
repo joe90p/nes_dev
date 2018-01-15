@@ -152,7 +152,7 @@ LoadBackgroundLoopInner:
   BNE Incrementer
   CPY #$C0
   BNE Incrementer
-  JMP LoadBackgroundLoopEnd
+  JMP LoadAttribute
 Incrementer:
   LDA [bckgrndtlmemloc], Y
   STA $2007
@@ -165,9 +165,7 @@ Incrementer:
   ADC #$01
   STA bckgrndtlmemloc, Y
   BNE LoadBackgroundLoopOuter
-LoadBackgroundLoopEnd:
              
-              
 LoadAttribute:
   LDA $2002             ; read PPU status to reset the high/low latch
   LDA #$23

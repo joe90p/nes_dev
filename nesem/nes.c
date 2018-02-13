@@ -916,7 +916,7 @@ void run_rom()
     {
       run_instructions_no_prompt--;
     }
-    char current_opcode = cpu->cpu_memory[cpu->PC];
+    unsigned char current_opcode = cpu->cpu_memory[cpu->PC];
    
 
     unsigned char exceptional_instruction = 0;
@@ -937,24 +937,24 @@ void run_rom()
     }
     if(!exceptional_instruction)
     { 
-    if(opcodes_singlebyte[current_opcode].action)
-    {
-      unsigned char* dummy_ptr = 0;
-      print_instruction_info(1, "", opcodes_singlebyte[current_opcode].name);
-      opcodes_singlebyte[current_opcode].action(dummy_ptr);      
-      increment_PC(1);
-    }
-    else
-    {
-      if((current_opcode&COND_BRANCH_MASK)==16)
+      if(opcodes_singlebyte[current_opcode].action)
       {
-        conditional_branch_instruction(current_opcode);
+        unsigned char* dummy_ptr = 0;
+        print_instruction_info(1, "", opcodes_singlebyte[current_opcode].name);
+        opcodes_singlebyte[current_opcode].action(dummy_ptr);      
+        increment_PC(1);
       }
       else
-      { 
-        standard_instruction(current_opcode);
+      {
+        if((current_opcode&COND_BRANCH_MASK)==16)
+        {
+          conditional_branch_instruction(current_opcode);
+        }
+        else
+        { 
+          standard_instruction(current_opcode);
+        }
       }
-    }
     }
     
   } 

@@ -4,6 +4,7 @@
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU)); 
+  ppu = malloc(sizeof(struct NES_PPU)); 
   FILE* nes_file_ptr;
   int nes_file_length; 
   nes_file_ptr = fopen(argv[1], "r");

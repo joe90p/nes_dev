@@ -100,18 +100,27 @@ unsigned short get_indirect_indexed_Y(unsigned char get_address_input)
 void load_rom()
 {
   unsigned char* cpu_memory = malloc(0x10000);
-  short rom_fileoffset=17;
+  unsigned char* ppu_memory = malloc(0x10000);
+  int rom_fileoffset=17;
   char flags6 = ines_file_contents[6];
+  char prg_rom_banks_num = ines_file_contents[4];
+  char chr_rom_banks_num = ines_file_contents[5];
   if(flags6 & 8)
   {
     rom_fileoffset+=512;
   }
-  for(int i=0; i< 0x4000; i++)
+  for(int i=0; i< PRG_ROM_SIZE; i++)
   { 
     cpu_memory[0x8000 + i] = ines_file_contents[rom_fileoffset + i];
     cpu_memory[0xC000 + i] = ines_file_contents[rom_fileoffset + i];
   }
   cpu->cpu_memory=cpu_memory;
+  rom_fileoffset+=(prg_rom_banks_num * PRG_ROM_SIZE);
+  for(int i=0; i< CHR_ROM_SIZE; i++)
+  { 
+    ppu_memory[0x0000 + i] = ines_file_contents[rom_fileoffset + i];
+  }
+  ppu->ppu_memory=ppu_memory;
 }
 
 void switch_status_flag(char flag, char switch_on)

@@ -12,6 +12,8 @@
 #define OPCODE_MASK  224
 #define ADDRESSING_MODE_MASK  28
 #define COND_BRANCH_MASK  31 
+#define PRG_ROM_SIZE 0x4000
+#define CHR_ROM_SIZE 0x2000
 struct NES_CPU
 {
   unsigned char* cpu_memory;
@@ -23,9 +25,14 @@ struct NES_CPU
   unsigned char old_PC;
   unsigned char stack_pointer;
 }; 
+struct NES_PPU
+{
+  unsigned char* ppu_memory;
+};
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
+struct NES_PPU* ppu;
 typedef void (*opcode_action_type)(unsigned char a); 
 void run_rom();
 typedef void (*opcode_action)(unsigned char* ptr);

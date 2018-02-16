@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include </home/phil/git/nes_dev/nesem/sdl_test.h>
 
 void load_rom();
 unsigned char* ines_file_contents;
@@ -121,6 +122,7 @@ void load_rom()
     ppu_memory[0x0000 + i] = ines_file_contents[rom_fileoffset + i];
   }
   ppu->ppu_memory=ppu_memory;
+  draw(ppu->ppu_memory, CHR_ROM_SIZE); 
 }
 
 void switch_status_flag(char flag, char switch_on)

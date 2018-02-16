@@ -1,7 +1,36 @@
-CFLAGS=-Wall -g -include nes.h -std=c99  -Wno-char-subscripts
-nes: nes.c main.c
-tests: nes.c tests.c
+# A simple Makefile for compiling small SDL projects
+
+# set the compiler
+CC := gcc
+
+# set the compiler flags
+CFLAGS := `sdl2-config --libs --cflags` -include nes.h -ggdb3 -O0 --std=c99 -Wno-char-subscripts  -lm
+
+# add header files here
+HDRS :=
+
+# add source files here
+SRCS := sdl_test.c nes.c main.c
+
+# generate names of object files
+OBJS := $(SRCS:.c=.o)
+
+# name of executable
+EXEC := game
+
+# default recipe
+all: $(EXEC)
+
+# recipe for building the final executable
+$(EXEC): $(OBJS) $(HDRS) Makefile
+	$(CC) -o $@ $(OBJS) $(CFLAGS)
+
+# recipe for building object files
+#$(OBJS): $(@:.o=.c) $(HDRS) Makefile
+#	$(CC) -o $@ $(@:.o=.c) -c $(CFLAGS)
+
+# recipe to clean the workspace
 clean:
-	rm -f main
-	rm -f tests
-	rm -f nes
+	rm -f $(EXEC) $(OBJS)
+
+.PHONY: all clean

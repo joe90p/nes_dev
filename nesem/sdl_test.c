@@ -1,12 +1,8 @@
 /**
  * hello3_image.c - Initializes SDL, loads an image, And displys it in a window
  */
-
-#include <stdio.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_timer.h>
-void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend);
-int main(void)
+#include </home/phil/git/nes_dev/nesem/sdl_test.h>
+void draw(unsigned char* letter_a, int chr_length)
 {
     // attempt to initialize graphics and timer system
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0)
@@ -74,8 +70,8 @@ int main(void)
     SDL_SetRenderDrawColor( rend, 255, 0, 0, 255);
 
     SDL_RenderClear(rend);
-    unsigned char* letter_a = malloc(32);
-    /*letter_a[0] = 16;
+    /*unsigned char* letter_a = malloc(32);
+    letter_a[0] = 16;
     letter_a[1] = 0;
     letter_a[2] = 68;
     letter_a[3] = 0;
@@ -90,7 +86,7 @@ int main(void)
     letter_a[12] = 0;
     letter_a[13] = 130;
     letter_a[14] = 130;
-    letter_a[15] = 0;*/
+    letter_a[15] = 0;
     letter_a[0] = 128;
     letter_a[1] = 128;
     letter_a[2] = 128;
@@ -122,15 +118,9 @@ int main(void)
     letter_a[28] = 128;
     letter_a[29] = 128;
     letter_a[30] = 128;
-    letter_a[31] = 128;
+    letter_a[31] = 128;*/
 
-    int chr_length =32 ;
-    unsigned char* letter_a_2 = malloc(32);
-    for(int q=0; q<16; q++)
-    {
-      letter_a_2[q] = letter_a[16 + q];
-      printf("%d\n", letter_a_2[q]);
-    }
+
     //for(int i=0; i<32; i++)
     //{  
       //for(int j=0; j<30; j++)

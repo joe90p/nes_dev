@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include </usr/include/SDL2/SDL.h>
 #include </usr/include/SDL2/SDL_timer.h>
+#define RENDER_SCALE 3 
 void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend);
 void draw();
 

@@ -1018,6 +1018,11 @@ void TSX_get_expected()
   TSX();
   assert(cpu->X==expected_value && cpu->status==NES_NEGATIVE_FLAG);
 }
+
+void STA_2006_write_get_expected()
+{
+  printf("STA_2006_write_get_expected ");
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -1113,4 +1118,5 @@ int main(int argc, char* argv[])
   TAX_get_expected();
   TSX_get_expected();
   DEX_get_expected();
+  STA_2006_write_get_expected();
 }

@@ -9,6 +9,7 @@ struct NES_CPU* cpu;
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info);
 
 void run_rom();
+static unsigned short ppu_write_address;
 
 unsigned char* get_immediate_operand_ptr()
 {
@@ -209,6 +210,7 @@ void ADC_ptr(unsigned char* toOr)
 
 void STA_ptr(unsigned char* toOr)
 {
+
   STA(*toOr);  
 }
 
@@ -273,6 +275,10 @@ void SBC(unsigned char toSubtract)
 
 void STA(unsigned short address)
 {
+  if(address==0x2006)
+  {
+    ppu_write_address=1; 
+  }
   cpu->cpu_memory[address]=cpu->A;
 }
 void LDA(unsigned char newA)

@@ -8,12 +8,14 @@ CFLAGS := `sdl2-config --libs --cflags` -include nes.h -ggdb3 -O0 --std=c99 -Wno
 
 # add header files here
 HDRS :=
-
+TEST_HDRS := nes.h
 # add source files here
 SRCS := sdl_test.c nes.c main.c
+TEST_SRCS := sdl_test.c nes.c tests.c
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)
+TEST_OBJS := $(TEST_SRCS:.c=.o)
 
 # name of executable
 EXEC := game
@@ -22,8 +24,11 @@ EXEC := game
 all: $(EXEC)
 
 # recipe for building the final executable
-$(EXEC): $(OBJS) $(HDRS) Makefile
+$(EXEC): $(OBJS) $(TEST_HDRS) Makefile
 	$(CC) -o $@ $(OBJS) $(CFLAGS)
+
+test: $(TEST_OBJS) $(HDRS) Makefile
+	$(CC) -o $@ $(TEST_OBJS) $(CFLAGS) 
 
 # recipe for building object files
 #$(OBJS): $(@:.o=.c) $(HDRS) Makefile

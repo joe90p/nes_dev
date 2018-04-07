@@ -98,7 +98,11 @@ unsigned short get_indirect_indexed_Y(unsigned char get_address_input)
 { 
   return get_absolute_address(cpu->cpu_memory[get_address_input + 1], cpu->cpu_memory[get_address_input]) + cpu->Y;
 }
-
+ 
+unsigned short get_ppu_write_address()
+{
+  return ppu_write_address;
+}
 void load_rom()
 {
   unsigned char* cpu_memory = malloc(0x10000);
@@ -277,7 +281,8 @@ void STA(unsigned short address)
 {
   if(address==0x2006)
   {
-    ppu_write_address=1; 
+    ppu_write_address<<=8;
+    ppu_write_address|=cpu->A; 
   }
   cpu->cpu_memory[address]=cpu->A;
 }

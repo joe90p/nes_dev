@@ -56,6 +56,7 @@ unsigned short get_zeropage_X_address(unsigned char get_address_input);
 unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte);
 unsigned short get_indexed_indirect_X(unsigned char get_address_input);
 unsigned short get_indirect_indexed_Y(unsigned char get_address_input);
+unsigned short get_ppu_write_address();
 void ADC_update_status_register(signed char oldA);
 void SBC_update_status_register(signed char oldA);
 void ORA_update_status_register();

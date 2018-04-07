@@ -1022,6 +1022,12 @@ void TSX_get_expected()
 void STA_2006_write_get_expected()
 {
   printf("STA_2006_write_get_expected ");
+  unsigned short address = 0x2006;  
+  cpu->A = 0x12;
+  STA(address);
+  cpu->A = 0x34;
+  STA(address);
+  assert(get_ppu_write_address()==0x1234);
 }
 int main(int argc, char* argv[])
 {

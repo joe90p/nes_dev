@@ -4,13 +4,14 @@
 void load_test_rom()
 {
   unsigned char* cpu_memory = malloc(0x10000);
-  
+  unsigned char* ppu_memory = malloc(0x10000); 
   for(int i=0; i< 0x4000; i++)
   { 
     cpu_memory[0x8000 + i] = 0;
     cpu_memory[0xC000 + i] = 0;
   }
   cpu->cpu_memory=cpu_memory;
+  ppu->ppu_memory=ppu_memory;
   cpu->X = 3;
   cpu->Y = 5;
 }
@@ -1029,9 +1030,22 @@ void STA_2006_write_get_expected()
   STA(address);
   assert(get_ppu_write_address()==0x1234);
 }
+void STA_2007_write_get_expected()
+{
+  printf("STA_2007_write_get_expected ");
+  unsigned short start_ppu_write_address = 0x3f00;
+  unsigned short address = 0x2007;
+  set_ppu_write_address(start_ppu_write_address);
+  cpu->A = 0x12;
+  STA(address);
+  cpu->A = 0x34;
+  STA(address);
+  assert(ppu->ppu_memory[start_ppu_write_address]==0x12 && ppu->ppu_memory[start_ppu_write_address + 1]==0x34);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
+  ppu = malloc(sizeof(struct NES_PPU));
   load_test_rom();
   test_get_absolute_address();
   test_get_absolute_address_X();
@@ -1125,4 +1139,5 @@ int main(int argc, char* argv[])
   TSX_get_expected();
   DEX_get_expected();
   STA_2006_write_get_expected();
+  STA_2007_write_get_expected();
 }

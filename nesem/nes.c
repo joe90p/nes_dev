@@ -873,6 +873,7 @@ void run_rom()
   int run_instructions_no_prompt = 0;
   char arg2 = ' ';
   int arg1 = 0;
+  int draw_screen_count = 2400;
   while(1==1)
   {
     char input[20];
@@ -987,6 +988,12 @@ void run_rom()
           standard_instruction(current_opcode);
         }
       }
+    }
+    draw_screen_count--;
+    if(draw_screen_count==0)
+    {
+      draw(ppu->ppu_memory, CHR_ROM_SIZE);
+      draw_screen_count=2400;
     }
     
   } 

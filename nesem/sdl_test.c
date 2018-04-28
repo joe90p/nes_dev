@@ -61,7 +61,14 @@ int max = 3;//chr_length/16;
 
            //unsigned char* letter_part = &(letter_a[0]);
             //draw_chr_data(1, 1, letter_part, rend);
-    draw_sprite(2,0,3,letter_a,rend);
+   
+    for(int q=0; q<48; q++)
+    {
+     int col = q < 24 ? q : q%24; 
+     int sprite_number = letter_a[0x2000 + q];
+     draw_sprite(col,q/24,sprite_number,letter_a,rend); 
+    }
+    //draw_sprite(2,0,3,letter_a,rend);
     SDL_RenderPresent(rend);
     // wait a few seconds
     SDL_Delay(5000);

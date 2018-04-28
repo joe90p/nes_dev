@@ -219,8 +219,9 @@ void ADC_ptr(unsigned char* toOr)
 
 void STA_ptr(unsigned char* toOr)
 {
+  unsigned short address = toOr - cpu->cpu_memory; 
 
-  STA(*toOr);  
+  STA(address);  
 }
 
 

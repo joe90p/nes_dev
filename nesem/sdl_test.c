@@ -61,12 +61,14 @@ int max = 3;//chr_length/16;
 
            //unsigned char* letter_part = &(letter_a[0]);
             //draw_chr_data(1, 1, letter_part, rend);
-   
-    for(int q=0; q<48; q++)
+    int row_length = 32;   
+    int row_num = 30;
+    for(int q=0; q<row_length*row_num; q++)
     {
-     int col = q < 24 ? q : q%24; 
-     int sprite_number = letter_a[0x2000 + q];
-     draw_sprite(col,q/24,sprite_number,letter_a,rend); 
+     int col = q < row_length ? q : q%row_length; 
+     int name_table_index = 0x2000 -1;
+     int sprite_number = letter_a[name_table_index + q];
+     draw_sprite(col,q/row_length,sprite_number,letter_a,rend); 
     }
     //draw_sprite(2,0,3,letter_a,rend);
     SDL_RenderPresent(rend);
@@ -83,7 +85,8 @@ void draw_sprite(int i, int j, int sprite_number, unsigned char* chr_data, SDL_R
 {
   for(int m=0; m<8; m++)
   {
-     unsigned char* letter_part = &(chr_data[(sprite_number*16) + m]);
+     int sprite_index = 0x1000 + (sprite_number*16) + m;
+     unsigned char* letter_part = &(chr_data[sprite_index]);
      draw_chr_data(i*8, (j*8) +m, letter_part, rend);
   }
 }

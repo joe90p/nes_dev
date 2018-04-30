@@ -59,7 +59,8 @@ unsigned char* get_indexed_indirect_X_operand_ptr()
 
 unsigned char* get_indirect_indexed_Y_operand_ptr()
 {
-  unsigned char address = get_indirect_indexed_Y(cpu->cpu_memory[cpu->PC + 1]);
+  unsigned short intermediate_address = get_absolute_address(0, cpu->cpu_memory[cpu->PC + 1]);
+  unsigned short address = get_indirect_indexed_Y(intermediate_address);
   return &cpu->cpu_memory[address];
 }
 
@@ -94,7 +95,7 @@ unsigned short get_indexed_indirect_X(unsigned char get_address_input)
   return get_absolute_address(cpu->cpu_memory[indir_address + 1], cpu->cpu_memory[indir_address]);
 }
 
-unsigned short get_indirect_indexed_Y(unsigned char get_address_input)
+unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
 { 
   return get_absolute_address(cpu->cpu_memory[get_address_input + 1], cpu->cpu_memory[get_address_input]) + cpu->Y;
 }

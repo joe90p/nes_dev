@@ -40,27 +40,7 @@ void draw(unsigned char* letter_a, int chr_length)
     SDL_SetRenderDrawColor( rend, 255, 0, 0, 255);
 
     SDL_RenderClear(rend);
-/*
-int j = 0;
-int i = 0;
-int max = 3;//chr_length/16;
-        for(int z=2; z<max; z++)
-        {
-          for(int m=0; m<8; m++)
-          {
-            unsigned char* letter_part = &(letter_a[(z*16) + m]);
-            draw_chr_data(i*8, (j*8) +m, letter_part, rend);
-          }
-          i++;
-          if(i==24)
-          {
-            i=0;
-            j++;
-          }
-        }*/
 
-           //unsigned char* letter_part = &(letter_a[0]);
-            //draw_chr_data(1, 1, letter_part, rend);
     int row_length = 32;   
     int row_num = 30;
     for(int q=0; q<row_length*row_num; q++)
@@ -85,7 +65,7 @@ void draw_sprite(int i, int j, int sprite_number, unsigned char* chr_data, SDL_R
 {
   for(int m=0; m<8; m++)
   {
-     int sprite_index = 0x1000 + (sprite_number*16) + m;
+     int sprite_index = 0x1000 + (sprite_number*16) + m -1;
      unsigned char* letter_part = &(chr_data[sprite_index]);
      draw_chr_data(i*8, (j*8) +m, letter_part, rend);
   }
@@ -113,7 +93,7 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend)
         SDL_SetRenderDrawColor( rend, 255, 0, 255, 255);
         break;
     }
-    SDL_RenderDrawPoint(rend, i + n,j );
+    SDL_RenderDrawPoint(rend, i + 7 -n,j );
     chr_data_1>>=1;
     chr_data_2>>=1;
   }

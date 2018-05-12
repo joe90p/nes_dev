@@ -46,7 +46,7 @@ void draw(unsigned char* letter_a, int chr_length)
     for(int q=0; q<row_length*row_num; q++)
     {
      int col = q < row_length ? q : q%row_length; 
-     int name_table_index = 0x2000 -1;
+     int name_table_index = 0x2000;
      int sprite_number = letter_a[name_table_index + q];
      draw_sprite(col,q/row_length,sprite_number,letter_a,rend); 
     }

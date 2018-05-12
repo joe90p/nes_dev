@@ -121,10 +121,13 @@ void load_rom()
   {
     rom_fileoffset+=512;
   }
-  for(int i=0; i< PRG_ROM_SIZE; i++)
+  for(int i=0; i< PRG_ROM_SIZE * prg_rom_banks_num; i++)
   { 
     cpu_memory[0x8000 + i] = ines_file_contents[rom_fileoffset + i];
-    cpu_memory[0xC000 + i] = ines_file_contents[rom_fileoffset + i];
+    if(prg_rom_banks_num<=1)
+    {
+      cpu_memory[0xC000 + i] = ines_file_contents[rom_fileoffset + i];
+    }
   }
   cpu->cpu_memory=cpu_memory;
   rom_fileoffset+=(prg_rom_banks_num * PRG_ROM_SIZE);

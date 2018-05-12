@@ -113,7 +113,7 @@ void load_rom()
 {
   unsigned char* cpu_memory = malloc(0x10000);
   unsigned char* ppu_memory = malloc(0x10000);
-  int rom_fileoffset=17;
+  int rom_fileoffset=16;
   char flags6 = ines_file_contents[6];
   char prg_rom_banks_num = ines_file_contents[4];
   char chr_rom_banks_num = ines_file_contents[5];
@@ -405,7 +405,7 @@ unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_b
 
 unsigned short get_short_from_cpu_memory(unsigned short mem_index)
 {
-  return get_short_from_chars(cpu->cpu_memory[mem_index],cpu->cpu_memory[mem_index + 1]);
+  return get_short_from_chars(cpu->cpu_memory[mem_index + 1],cpu->cpu_memory[mem_index]);
 }
 
 void stack_push_char(unsigned char to_push)
@@ -845,10 +845,6 @@ void standard_instruction(unsigned char current_opcode)
   if(strcmp("JMP", opcodes[opcode_context][opcode].name))
   {
     increment_PC(program_counter_increment);
-  }
-  else
-  {
-    increment_PC(-1); //not sure why we need to decrement in this case.
   }
 }
 

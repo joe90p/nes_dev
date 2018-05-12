@@ -65,7 +65,7 @@ void draw_sprite(int i, int j, int sprite_number, unsigned char* chr_data, SDL_R
 {
   for(int m=0; m<8; m++)
   {
-     int sprite_index = 0x1000 + (sprite_number*16) + m -1;
+     int sprite_index = 0x1000 + (sprite_number*16) + m;
      unsigned char* letter_part = &(chr_data[sprite_index]);
      draw_chr_data(i*8, (j*8) +m, letter_part, rend);
   }

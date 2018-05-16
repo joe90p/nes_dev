@@ -10,7 +10,8 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
 
 void run_rom();
 static unsigned short ppu_write_address;
-
+static unsigned char cpu_sprite_copy_address_low;
+static unsigned char cpu_sprite_copy_address_high;
 unsigned char* get_immediate_operand_ptr()
 {
   return &cpu->cpu_memory[cpu->PC + 1];
@@ -21,6 +22,11 @@ unsigned char* get_zeropage_operand_ptr()
   unsigned char address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
   return &cpu->cpu_memory[address];
 }         
+
+unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_byte)
+{
+  return ((high_byte<<8) | low_byte);
+}
 
 unsigned char* get_accumulator_operand_ptr()
 {
@@ -113,6 +119,7 @@ void load_rom()
 {
   unsigned char* cpu_memory = malloc(0x10000);
   unsigned char* ppu_memory = malloc(0x10000);
+  unsigned char* spr_ram = malloc(0x100);
   int rom_fileoffset=16;
   char flags6 = ines_file_contents[6];
   char prg_rom_banks_num = ines_file_contents[4];
@@ -135,7 +142,13 @@ void load_rom()
   { 
     ppu_memory[0x0000 + i] = ines_file_contents[rom_fileoffset + i];
   }
+  //initialise spr_ram
+  for(int i=0; i< 256; i++)
+  {
+    spr_ram[i]=0;
+  }
   ppu->ppu_memory=ppu_memory;
+  ppu->spr_ram=spr_ram;
   draw(ppu->ppu_memory, CHR_ROM_SIZE); 
 }
 
@@ -289,6 +302,19 @@ void SBC(unsigned char toSubtract)
 
 void STA(unsigned short address)
 {
+  if(address==0x2003)
+  {
+    cpu_sprite_copy_address_low=cpu->A;
+  }
+  if(address==0x4014)
+  {
+    cpu_sprite_copy_address_high=cpu->A;
+    unsigned short cpu_sprite_copy_address = get_short_from_chars( cpu_sprite_copy_address_high, cpu_sprite_copy_address_low);
+    for(int i=0; i< 256; i++)
+    {
+      ppu->spr_ram[i]=cpu->cpu_memory[cpu_sprite_copy_address + i]; 
+    }
+  }
   if(address==0x2006)
   {
     ppu_write_address<<=8;
@@ -401,10 +427,7 @@ void INC(unsigned char* operand_ptr)
   set_negative_zero_flag(*operand_ptr);
 }
 
-unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_byte)
-{
-  return ((high_byte<<8) | low_byte);
-}
+
 
 unsigned short get_short_from_cpu_memory(unsigned short mem_index)
 {

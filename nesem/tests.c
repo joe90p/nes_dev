@@ -5,6 +5,7 @@ void load_test_rom()
 {
   unsigned char* cpu_memory = malloc(0x10000);
   unsigned char* ppu_memory = malloc(0x10000); 
+  unsigned char* spr_ram = malloc(0x100);
   for(int i=0; i< 0x4000; i++)
   { 
     cpu_memory[0x8000 + i] = 0;
@@ -12,6 +13,7 @@ void load_test_rom()
   }
   cpu->cpu_memory=cpu_memory;
   ppu->ppu_memory=ppu_memory;
+  ppu->spr_ram=spr_ram;
   cpu->X = 3;
   cpu->Y = 5;
 }
@@ -1042,6 +1044,18 @@ void STA_2007_write_get_expected()
   STA(address);
   assert(ppu->ppu_memory[start_ppu_write_address]==0x12 && ppu->ppu_memory[start_ppu_write_address + 1]==0x34);
 }
+void STA_write_spr_ram()
+{
+  printf("STA_write_spr_ram ");
+  unsigned short copy_address = 0x5678;
+  cpu->cpu_memory[copy_address]=0xA;
+  cpu->cpu_memory[copy_address + 255] = 0xB;
+  cpu->A = 0x78;
+  STA(0x2003);
+  cpu->A = 0x56;
+  STA(0x4014);
+  assert(ppu->spr_ram[0]==0xA && ppu->spr_ram[255]==0xB);
+}
 int main(int argc, char* argv[])
 {
   cpu = malloc(sizeof(struct NES_CPU));
@@ -1140,4 +1154,5 @@ int main(int argc, char* argv[])
   DEX_get_expected();
   STA_2006_write_get_expected();
   STA_2007_write_get_expected();
+  STA_write_spr_ram();
 }

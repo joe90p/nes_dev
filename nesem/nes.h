@@ -28,6 +28,7 @@ struct NES_CPU
 struct NES_PPU
 {
   unsigned char* ppu_memory;
+  unsigned char* spr_ram;
 };
 void load_rom();
 unsigned char* ines_file_contents;

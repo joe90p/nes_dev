@@ -149,7 +149,7 @@ void load_rom()
   }
   ppu->ppu_memory=ppu_memory;
   ppu->spr_ram=spr_ram;
-  draw(ppu->ppu_memory, CHR_ROM_SIZE); 
+  draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE); 
 }
 
 void switch_status_flag(char flag, char switch_on)
@@ -1016,7 +1016,7 @@ void run_rom()
     draw_screen_count--;
     if(draw_screen_count==0)
     {
-      draw(ppu->ppu_memory, CHR_ROM_SIZE);
+      draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE);
       draw_screen_count=2400;
     }
     

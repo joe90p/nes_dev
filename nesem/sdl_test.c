@@ -3,7 +3,7 @@
  */
 #include </home/phil/git/nes_dev/nesem/sdl_test.h>
 
-void draw(unsigned char* letter_a, int chr_length)
+void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
 {
     // attempt to initialize graphics and timer system
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0)
@@ -47,10 +47,16 @@ void draw(unsigned char* letter_a, int chr_length)
     {
      int col = q < row_length ? q : q%row_length; 
      int name_table_index = 0x2000;
-     int sprite_number = letter_a[name_table_index + q];
-     draw_sprite(col,q/row_length,sprite_number,letter_a,rend); 
+     int sprite_number = ppu_memory[name_table_index + q];
+     draw_sprite(1, col,q/row_length,sprite_number,ppu_memory,rend); 
     }
-    //draw_sprite(2,0,3,letter_a,rend);
+
+    for(int i=0;i<64; i++)
+    {
+      unsigned char sprite_index = i *4;
+      draw_sprite(0, sprite_data[sprite_index+3], sprite_data[sprite_index]+1, sprite_data[sprite_index+1], ppu_memory, rend);
+    }
+
     SDL_RenderPresent(rend);
     // wait a few seconds
     SDL_Delay(5000);
@@ -61,13 +67,14 @@ void draw(unsigned char* letter_a, int chr_length)
     SDL_Quit();
 }
 
-void draw_sprite(int i, int j, int sprite_number, unsigned char* chr_data, SDL_Renderer* rend)
+void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, SDL_Renderer* rend)
 {
   for(int m=0; m<8; m++)
   {
-     int sprite_index = 0x1000 + (sprite_number*16) + m;
-     unsigned char* letter_part = &(chr_data[sprite_index]);
-     draw_chr_data(i*8, (j*8) +m, letter_part, rend);
+     int sprite_index_offset = sprite_table * 0x1000;
+     int sprite_index = sprite_index_offset + (sprite_number*16) + m;
+     unsigned char* chr_data = &(ppu_memory[sprite_index]);
+     draw_chr_data(i*8, (j*8) +m, chr_data, rend);
   }
 }
 

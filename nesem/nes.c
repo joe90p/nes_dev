@@ -436,8 +436,8 @@ unsigned short get_short_from_cpu_memory(unsigned short mem_index)
 
 void stack_push_char(unsigned char to_push)
 {
-  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer)]=to_push;
-  cpu->stack_pointer+=1;
+  cpu->cpu_memory[STACK_BOTTOM+(cpu->stack_pointer)]=to_push;
+  cpu->stack_pointer-=1;
 }
 
 void stack_push_short(unsigned short to_push)
@@ -450,8 +450,8 @@ void stack_push_short(unsigned short to_push)
 
 unsigned char stack_pull_char()
 {
-  unsigned char value =  cpu->cpu_memory[STACK_TOP-(cpu->stack_pointer) +1];
-  cpu->stack_pointer-=1;
+  unsigned char value =  cpu->cpu_memory[STACK_BOTTOM+(cpu->stack_pointer) +1];
+  cpu->stack_pointer+=1;
   return value;
 }
 
@@ -471,13 +471,21 @@ void BRK()
   unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffe);
   cpu->PC=interrupt_vector;
 }
-
+void NMI()
+{
+  //increment_PC(3);
+  stack_push_short(cpu->PC);  
+  stack_push_char(cpu->status|NES_BREAK_FLAG);
+  cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
+  unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffa);
+  cpu->PC=interrupt_vector;
+}
 void JSR()
 {
   stack_push_short(cpu->PC + 3);  
   unsigned short newPC = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
   print_instruction_info(3, "$%02x%02x", "JSR");
-  cpu->PC=newPC -1;
+  cpu->PC=newPC;
 }
 
 void RTI()
@@ -1013,11 +1021,16 @@ void run_rom()
         }
       }
     }
+    if((cpu->cpu_memory[0x2000]&128)==128)
+    {
     draw_screen_count--;
+    }
     if(draw_screen_count==0)
     {
+      
       draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE);
       draw_screen_count=2400;
+      NMI();
     }
     
   } 

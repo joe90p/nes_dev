@@ -47,7 +47,7 @@ unsigned char* get_zeropage_X_operand_ptr()
 
 unsigned char* get_absolute_X_operand_ptr()
 {
-  unsigned char address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
+  unsigned short address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
   return &cpu->cpu_memory[address];
 }
 

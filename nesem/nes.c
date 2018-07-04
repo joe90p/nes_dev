@@ -101,11 +101,19 @@ unsigned short get_indexed_indirect_X(unsigned char get_address_input)
   return get_absolute_address(cpu->cpu_memory[indir_address + 1], cpu->cpu_memory[indir_address]);
 }
 
+unsigned short get_indirect_indexed(unsigned short get_address_input, unsigned char index)
+{ 
+  return get_absolute_address(cpu->cpu_memory[get_address_input + 1], cpu->cpu_memory[get_address_input]) + index;
+
+}
+
 unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
 { 
-  return get_absolute_address(cpu->cpu_memory[get_address_input + 1], cpu->cpu_memory[get_address_input]) + cpu->Y;
+  return get_indirect_indexed(get_address_input, cpu->Y);
 }
- 
+
+
+
 void set_ppu_write_address(unsigned short address)
 {
   ppu_write_address = address;
@@ -493,6 +501,14 @@ void RTI()
   cpu->status =  stack_pull_char();
   cpu->PC = stack_pull_short();  
   print_instruction_info(1, "", "RTI");
+}
+
+void JMP_ind()
+{
+  unsigned short intermediate_address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+  unsigned short newPC = get_indirect_indexed(intermediate_address,0);
+  print_instruction_info(3, "$(%02x%02x)", "JMP");
+  cpu->PC=newPC;
 }
 
 void RTS()
@@ -982,8 +998,6 @@ void run_rom()
       run_instructions_no_prompt--;
     }
     unsigned char current_opcode = cpu->cpu_memory[cpu->PC];
-   
-
     unsigned char exceptional_instruction = 0;
     switch(current_opcode)
     {
@@ -998,6 +1012,10 @@ void run_rom()
       case 0x40:
         RTI();
         exceptional_instruction= 1;
+        break;
+      case 0x6C:
+        JMP_ind();
+        exceptional_instruction=1;
         break;
     }
     if(!exceptional_instruction)

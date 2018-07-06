@@ -48,7 +48,7 @@ void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
      int col = q < row_length ? q : q%row_length; 
      int name_table_index = 0x2000;
      int sprite_number = ppu_memory[name_table_index + q];
-     draw_sprite(1, col,q/row_length,sprite_number,ppu_memory,rend); 
+     draw_sprite(1, col*8,(q/row_length)*8,sprite_number,ppu_memory,rend); 
     }
 
     for(int i=0;i<64; i++)
@@ -74,7 +74,7 @@ void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned cha
      int sprite_index_offset = sprite_table * 0x1000;
      int sprite_index = sprite_index_offset + (sprite_number*16) + m;
      unsigned char* chr_data = &(ppu_memory[sprite_index]);
-     draw_chr_data(i*8, (j*8) +m, chr_data, rend);
+     draw_chr_data(i, j +m, chr_data, rend);
   }
 }
 

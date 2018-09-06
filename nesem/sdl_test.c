@@ -3,13 +3,13 @@
  */
 #include </home/phil/git/nes_dev/nesem/sdl_test.h>
 
-void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
-{
+SDL_Window* createWindow() {
+
     // attempt to initialize graphics and timer system
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0)
     {
         printf("error initializing SDL: %s\n", SDL_GetError());
-        return 1;
+        //return 1;
     }
     Uint32 window_flags = SDL_WINDOW_RESIZABLE|SDL_WINDOW_BORDERLESS;
     SDL_Window* win = SDL_CreateWindow("Hello, CS50!",
@@ -20,9 +20,13 @@ void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
     {
         printf("error creating window: %s\n", SDL_GetError());
         SDL_Quit();
-	    return 1;
+	//    return 1;
     }
+    return win;
+}
 
+SDL_Renderer* createRenderer(SDL_Window* win)
+{
     // create a renderer, which sets up the graphics hardware
     Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
     SDL_Renderer* rend = SDL_CreateRenderer(win, -1, render_flags);
@@ -31,15 +35,19 @@ void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
       printf("error creating renderer: %s\n", SDL_GetError());
       SDL_DestroyWindow(win);
       SDL_Quit();
-      return 1;
+      //return 1;
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     SDL_RenderSetScale(rend,RENDER_SCALE,RENDER_SCALE);
 
 
     SDL_SetRenderDrawColor( rend, 255, 0, 0, 255);
+    return rend;
 
-    SDL_RenderClear(rend);
+}
+
+void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length) {
+     SDL_RenderClear(rend);
 
     int row_length = 32;   
     int row_num = 30;
@@ -59,7 +67,14 @@ void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
 
     SDL_RenderPresent(rend);
     // wait a few seconds
-    SDL_Delay(5000);
+    SDL_Delay(500);   
+}
+
+void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
+{
+    SDL_Window* win = createWindow();
+    SDL_Renderer* rend = createRenderer(win);
+    updateRenderer(rend,ppu_memory,sprite_data,chr_length); 
     
     // clean up resources before exiting
     SDL_DestroyRenderer(rend);

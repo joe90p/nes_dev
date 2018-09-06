@@ -157,7 +157,7 @@ void load_rom()
   }
   ppu->ppu_memory=ppu_memory;
   ppu->spr_ram=spr_ram;
-  draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE); 
+  //draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE); 
 }
 
 void switch_status_flag(char flag, char switch_on)
@@ -912,8 +912,11 @@ char starts_with(const char *pre, const char *str)
            lenstr = strlen(str);
     return lenstr < lenpre ? 0 : strncmp(pre, str, lenpre) == 0;
 }
+
 void run_rom()
 {
+  SDL_Window* win = createWindow();
+  SDL_Renderer* rend = createRenderer(win);
   set_opcode_array();
   set_single_byte_opcode_array();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
@@ -1045,12 +1048,16 @@ void run_rom()
     }
     if(draw_screen_count==0)
     {
-      
-      draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE);
+      //draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE);
+      updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE);
       draw_screen_count=2400;
       NMI();
     }
     
   } 
+  // clean up resources before exiting
+  SDL_DestroyRenderer(rend);
+  SDL_DestroyWindow(win);
+  SDL_Quit();
 }
 

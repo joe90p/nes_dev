@@ -2,6 +2,17 @@
  * hello3_image.c - Initializes SDL, loads an image, And displys it in a window
  */
 #include </home/phil/git/nes_dev/nesem/sdl_test.h>
+char keepRunning()
+{
+  SDL_Event event;
+  SDL_PollEvent(&event);
+  switch(event.type) {
+    case SDL_QUIT:
+      return 0;
+    default:
+      return 1;
+  }
+}
 
 SDL_Window* createWindow() {
 
@@ -11,6 +22,7 @@ SDL_Window* createWindow() {
         printf("error initializing SDL: %s\n", SDL_GetError());
         //return 1;
     }
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_PING, "0");
     Uint32 window_flags = SDL_WINDOW_RESIZABLE|SDL_WINDOW_BORDERLESS;
     SDL_Window* win = SDL_CreateWindow("Hello, CS50!",
                                        SDL_WINDOWPOS_CENTERED,

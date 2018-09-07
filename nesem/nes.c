@@ -925,7 +925,7 @@ void run_rom()
   char arg2 = ' ';
   int arg1 = 0;
   int draw_screen_count = 2400;
-  while(1==1)
+  while(keepRunning()==1)
   {
     char input[20];
     char raw_input[20];

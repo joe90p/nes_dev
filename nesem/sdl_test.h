@@ -11,4 +11,4 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend);
 void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory, unsigned char* sprite_data, int chr_length);
 SDL_Renderer* createRenderer(SDL_Window* win);
 SDL_Window* createWindow();
-char keepRunning();
+char keepRunning(char* controller);

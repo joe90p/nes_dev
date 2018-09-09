@@ -2,13 +2,22 @@
  * hello3_image.c - Initializes SDL, loads an image, And displys it in a window
  */
 #include </home/phil/git/nes_dev/nesem/sdl_test.h>
-char keepRunning()
+char keepRunning(char* controller)
 {
   SDL_Event event;
   SDL_PollEvent(&event);
+  *controller=0;
   switch(event.type) {
     case SDL_QUIT:
       return 0;
+    case SDL_KEYDOWN:
+      switch(event.key.keysym.sym)
+      {
+        case SDLK_w:
+           *controller=(*controller)|8;
+          break;  
+      }  
+      return 1;
     default:
       return 1;
   }

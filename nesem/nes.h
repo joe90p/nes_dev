@@ -25,6 +25,10 @@ struct NES_CPU
   unsigned char old_PC;
   unsigned char stack_pointer;
 }; 
+struct NES_IO
+{
+  unsigned char controller1;
+};
 struct NES_PPU
 {
   unsigned char* ppu_memory;
@@ -34,6 +38,7 @@ void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
 struct NES_PPU* ppu;
+struct NES_IO* io;
 typedef void (*opcode_action_type)(unsigned char a); 
 void run_rom();
 typedef void (*opcode_action)(unsigned char* ptr);

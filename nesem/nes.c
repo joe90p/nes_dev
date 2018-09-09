@@ -6,6 +6,7 @@
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
+//struct NES_IO* io;
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info);
 
 void run_rom();
@@ -323,6 +324,7 @@ void STA(unsigned short address)
       ppu->spr_ram[i]=cpu->cpu_memory[cpu_sprite_copy_address + i]; 
     }
   }
+
   if(address==0x2006)
   {
     ppu_write_address<<=8;
@@ -925,7 +927,7 @@ void run_rom()
   char arg2 = ' ';
   int arg1 = 0;
   int draw_screen_count = 2400;
-  while(keepRunning()==1)
+  while(keepRunning(&(io->controller1))==1)
   {
     char input[20];
     char raw_input[20];

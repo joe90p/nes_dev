@@ -253,7 +253,15 @@ void STA_ptr(unsigned char* toOr)
 
 void LDA_ptr(unsigned char* toOr)
 {
-  LDA(*toOr);  
+  unsigned short address = toOr - cpu->cpu_memory;
+  
+  unsigned char value_to_load = *toOr;
+  if(address==0x4016)
+  {
+    value_to_load = io->controller1|1;
+    io->controller1=io->controller1>>1;
+  }
+  LDA(value_to_load);  
 }
 
 void CMP_ptr(unsigned char* toOr)

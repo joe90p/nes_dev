@@ -15,6 +15,7 @@ char keepRunning(char* controller)
       {
         case SDLK_w:
            *controller=(*controller)|8;
+           //*controller=255;
           break;  
       }  
       return 1;

@@ -10,6 +10,7 @@ struct NES_CPU* cpu;
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info);
 
 void run_rom();
+static unsigned char read_controller_reset_await = 0;
 static unsigned short ppu_write_address;
 static unsigned char cpu_sprite_copy_address_low;
 static unsigned char cpu_sprite_copy_address_high;
@@ -258,7 +259,7 @@ void LDA_ptr(unsigned char* toOr)
   unsigned char value_to_load = *toOr;
   if(address==0x4016)
   {
-    value_to_load = io->controller1|1;
+    value_to_load = io->controller1&1;
     io->controller1=io->controller1>>1;
   }
   LDA(value_to_load);  
@@ -342,6 +343,18 @@ void STA(unsigned short address)
   {
     ppu->ppu_memory[ppu_write_address]=cpu->A;
     ppu_write_address+=1;
+  }
+  if(address==0x4016)
+  {
+    if(cpu->A==1) {
+      read_controller_reset_await = 1;
+    }
+    else {
+      if(cpu->A==0 && read_controller_reset_await) {
+        io->controller1 = 0;
+      }
+      read_controller_reset_await = 0;
+    }
   }
   cpu->cpu_memory[address]=cpu->A;
 }
@@ -935,12 +948,13 @@ void run_rom()
   char arg2 = ' ';
   int arg1 = 0;
   int draw_screen_count = 2400;
+  unsigned short breakpoint = 0;
   while(keepRunning(&(io->controller1))==1)
   {
     char input[20];
     char raw_input[20];
     clear(input, 20);
-    if(run_instructions_no_prompt==0)
+    if(run_instructions_no_prompt==0 || breakpoint==cpu->PC)
     { 
       
       while (strcmp("run", input))
@@ -995,11 +1009,16 @@ void run_rom()
         }
         if(strcmp("print", input)==0)
         {
-          printf("cpu->X = %d (%x), cpu->Y = %d (%x), cpu->A = %d (%x), cpu->PC = %d (%x), cpu->status = %d (%x) \n", cpu->X, cpu->X, cpu->Y, cpu->Y, cpu->A, cpu->A, cpu->PC, cpu->PC, cpu->status, cpu->status);
+          printf("cpu->X = %d (%x), cpu->Y = %d (%x), cpu->A = %d (%x), cpu->PC = %d (%x), cpu->status = %d (%x), breakpoint = %d (%x), cpu->cpu_memory[%x] = %d (%x) \n", cpu->X, cpu->X, cpu->Y, cpu->Y, cpu->A, cpu->A, cpu->PC, cpu->PC, cpu->status, cpu->status, breakpoint, breakpoint, arg1, cpu->cpu_memory[arg1], cpu->cpu_memory[arg1]);
+          
         }
         if(strcmp("run", input)==0)
         {
           run_instructions_no_prompt=arg1;
+        }
+        if(strcmp("break", input)==0)
+        {
+          breakpoint=arg1;
         }
         
       }

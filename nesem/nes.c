@@ -11,6 +11,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
 
 void run_rom();
 static unsigned char read_controller_reset_await = 0;
+static unsigned char controller_read = 0;
 static unsigned short ppu_write_address;
 static unsigned char cpu_sprite_copy_address_low;
 static unsigned char cpu_sprite_copy_address_high;
@@ -197,9 +198,10 @@ void SBC_update_status_register(signed char oldA)
 
 void CMP_update_status_register(unsigned char data)
 {
-  switch_status_flag(NES_CARRY_FLAG,cpu->A >= data);
-  switch_status_flag(NES_ZERO_FLAG,cpu->A == data);
-  switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < data); 
+  unsigned char a = (unsigned char)cpu->A;
+  switch_status_flag(NES_CARRY_FLAG,a >= data);
+  switch_status_flag(NES_ZERO_FLAG,a == data);
+  switch_status_flag(NES_NEGATIVE_FLAG,a < data); 
 }
 void CPY_update_status_register(unsigned char data)
 {
@@ -259,8 +261,11 @@ void LDA_ptr(unsigned char* toOr)
   unsigned char value_to_load = *toOr;
   if(address==0x4016)
   {
-    value_to_load = io->controller1&1;
-    io->controller1=io->controller1>>1;
+    //value_to_load = io->controller1&1;
+    //io->controller1=io->controller1>>1;
+    value_to_load = controller_read&1;
+    controller_read=controller_read>>1;
+
   }
   LDA(value_to_load);  
 }
@@ -351,7 +356,7 @@ void STA(unsigned short address)
     }
     else {
       if(cpu->A==0 && read_controller_reset_await) {
-        io->controller1 = 0;
+        controller_read = io->controller1;
       }
       read_controller_reset_await = 0;
     }

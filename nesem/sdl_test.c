@@ -6,6 +6,7 @@ char keepRunning(char* controller)
 {
   SDL_Event event;
   SDL_PollEvent(&event);
+  //*controller=8;
   *controller=0;
   switch(event.type) {
     case SDL_QUIT:
@@ -14,8 +15,8 @@ char keepRunning(char* controller)
       switch(event.key.keysym.sym)
       {
         case SDLK_w:
-           *controller=(*controller)|8;
-           //*controller=255;
+           //*controller=(*controller)|8;
+           *controller=8;
           break;  
       }  
       return 1;
@@ -23,7 +24,6 @@ char keepRunning(char* controller)
       return 1;
   }
 }
-
 SDL_Window* createWindow() {
 
     // attempt to initialize graphics and timer system
@@ -89,7 +89,7 @@ void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char*
 
     SDL_RenderPresent(rend);
     // wait a few seconds
-    SDL_Delay(500);   
+    SDL_Delay(50);   
 }
 
 void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)

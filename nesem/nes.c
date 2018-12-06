@@ -359,6 +359,7 @@ void STA(unsigned short address)
         controller_read = io->controller1;
       }
       read_controller_reset_await = 0;
+      io->controller1=0;
     }
   }
   cpu->cpu_memory[address]=cpu->A;
@@ -961,7 +962,6 @@ void run_rom()
     clear(input, 20);
     if(run_instructions_no_prompt==0 || breakpoint==cpu->PC)
     { 
-      
       while (strcmp("run", input))
       {
         printf("> ");

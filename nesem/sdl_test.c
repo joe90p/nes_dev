@@ -7,7 +7,7 @@ char keepRunning(char* controller)
   SDL_Event event;
   SDL_PollEvent(&event);
   //*controller=8;
-  *controller=0;
+  //*controller=0;
   switch(event.type) {
     case SDL_QUIT:
       return 0;
@@ -15,8 +15,8 @@ char keepRunning(char* controller)
       switch(event.key.keysym.sym)
       {
         case SDLK_w:
-           //*controller=(*controller)|8;
-           *controller=8;
+           *controller=(*controller)|8;
+           //*controller=8;
           break;  
       }  
       return 1;

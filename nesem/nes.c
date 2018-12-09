@@ -511,7 +511,7 @@ void BRK()
 void NMI()
 {
   //increment_PC(3);
-  stack_push_short(cpu->PC);  
+  stack_push_short(cpu->PC - 1) ;  
   stack_push_char(cpu->status|NES_BREAK_FLAG);
   cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
   unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffa);
@@ -519,7 +519,7 @@ void NMI()
 }
 void JSR()
 {
-  stack_push_short(cpu->PC + 3);  
+  stack_push_short(cpu->PC + 2);  
   unsigned short newPC = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
   print_instruction_info(3, "$%02x%02x", "JSR");
   cpu->PC=newPC;
@@ -528,7 +528,7 @@ void JSR()
 void RTI()
 {
   cpu->status =  stack_pull_char();
-  cpu->PC = stack_pull_short();  
+  cpu->PC = stack_pull_short() + 1;  
   print_instruction_info(1, "", "RTI");
 }
 
@@ -542,7 +542,7 @@ void JMP_ind()
 
 void RTS()
 {
-  cpu->PC = stack_pull_short() ;  
+  cpu->PC = stack_pull_short() + 1 ;  
   print_instruction_info(1, "", "RTS");
 }
 void PHP()

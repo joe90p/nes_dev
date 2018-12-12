@@ -175,15 +175,17 @@ void switch_status_flag(char flag, char switch_on)
   }
 }
 
-void ADC_update_status_register(signed char oldA)
+void ADC_update_status_register(signed char oldA, unsigned char toAdd)
 { 
 
-  char oldA_sign_bit = oldA&128;
-  char newA_sign_bit = (cpu->A)&128;
+  unsigned char oldA_sign_bit = oldA&128;
+  unsigned char newA_sign_bit = (cpu->A)&128;
+  unsigned char toAdd_sign_bit = toAdd&128;
+  unsigned char overflow = (oldA_sign_bit==toAdd_sign_bit) && newA_sign_bit!=oldA_sign_bit;
   switch_status_flag(NES_CARRY_FLAG, cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit==oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit!=oldA_sign_bit)));   
   switch_status_flag(NES_ZERO_FLAG,cpu->A == 0);
   switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < 0);
-  switch_status_flag(NES_OVERFLOW_FLAG,cpu->A < oldA); 
+  switch_status_flag(NES_OVERFLOW_FLAG,overflow); 
 }
 
 void SBC_update_status_register(signed char oldA)
@@ -201,19 +203,19 @@ void CMP_update_status_register(unsigned char data)
   unsigned char a = (unsigned char)cpu->A;
   switch_status_flag(NES_CARRY_FLAG,a >= data);
   switch_status_flag(NES_ZERO_FLAG,a == data);
-  switch_status_flag(NES_NEGATIVE_FLAG,a < data); 
+  switch_status_flag(NES_NEGATIVE_FLAG, (a-data)&128);
 }
 void CPY_update_status_register(unsigned char data)
 {
   switch_status_flag(NES_CARRY_FLAG,cpu->Y >= data);
   switch_status_flag(NES_ZERO_FLAG,cpu->Y == data);
-  switch_status_flag(NES_NEGATIVE_FLAG,cpu->Y < data); 
+  switch_status_flag(NES_NEGATIVE_FLAG,(cpu->Y - data)&128); 
 }
 void CPX_update_status_register(unsigned char data)
 {
   switch_status_flag(NES_CARRY_FLAG,cpu->X >= data);
   switch_status_flag(NES_ZERO_FLAG,cpu->X == data);
-  switch_status_flag(NES_NEGATIVE_FLAG,cpu->X < data); 
+  switch_status_flag(NES_NEGATIVE_FLAG,(cpu->X-  data)&128); 
 }
 //also applies to
 //AND
@@ -312,15 +314,16 @@ void ADC(unsigned char toAdd)
   unsigned char oldA = cpu->A;
   cpu->A+=toAdd;
   cpu->A+=(cpu->status&1); // add carry if set
-  ADC_update_status_register(oldA); 
+  ADC_update_status_register(oldA, toAdd); 
 }
 
 void SBC(unsigned char toSubtract)
 {
-  unsigned char oldA = cpu->A;
-  cpu->A-=toSubtract;
-  cpu->A-=(cpu->status&1); // subtract carry if set
-  SBC_update_status_register(oldA); 
+  //unsigned char oldA = cpu->A;
+  //cpu->A-=toSubtract;
+  //cpu->A-=(cpu->status&1); // subtract carry if set
+  //SBC_update_status_register(oldA); 
+  ADC(255 - toSubtract);
 }
 
 void STA(unsigned short address)
@@ -423,7 +426,7 @@ void STX(unsigned char* operand_ptr)
 void LDX(unsigned char* operand_ptr)
 {
   cpu->X = *operand_ptr;
-  set_negative_zero_flag(*operand_ptr);
+  set_negative_zero_flag(cpu->X);
 }
 
 void STY(unsigned char* operand_ptr)
@@ -511,7 +514,7 @@ void BRK()
 void NMI()
 {
   //increment_PC(3);
-  stack_push_short(cpu->PC - 1) ;  
+  stack_push_short(cpu->PC) ;  
   stack_push_char(cpu->status|NES_BREAK_FLAG);
   cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
   unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffa);
@@ -527,9 +530,13 @@ void JSR()
 
 void RTI()
 {
-  cpu->status =  stack_pull_char();
-  cpu->PC = stack_pull_short() + 1;  
+
   print_instruction_info(1, "", "RTI");
+
+  cpu->status =  stack_pull_char();
+  switch_status_flag(32, 1);
+
+  cpu->PC = stack_pull_short();  
 }
 
 void JMP_ind()
@@ -561,6 +568,8 @@ void PLA()
 void PLP()
 {
   cpu->status=stack_pull_char();
+  switch_status_flag(NES_BREAK_FLAG, 0);
+  switch_status_flag(32, 1);
 }
 void DEY()
 {
@@ -590,7 +599,7 @@ void TAX()
 void TXS()
 {
   cpu->stack_pointer=cpu->X;
-  set_negative_zero_flag(cpu->stack_pointer);
+  //set_negative_zero_flag(cpu->stack_pointer);
 }
 void TSX()
 {
@@ -645,7 +654,7 @@ void NOP()
 }
 void set_negative_zero_flag(unsigned char operand)
 {
-  switch_status_flag(NES_NEGATIVE_FLAG, (signed char)operand < 0);
+  switch_status_flag(NES_NEGATIVE_FLAG, operand&NES_NEGATIVE_FLAG);
   switch_status_flag(NES_ZERO_FLAG, operand==0);
 }
 
@@ -859,7 +868,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
     {
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
-    printf("%02x: %s %s\n", cpu->PC, opcode_info, address_mode_info);
+    printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
     free(address_mode_info);
 }
 
@@ -949,7 +958,10 @@ void run_rom()
   set_opcode_array();
   set_single_byte_opcode_array();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
+  //cpu->PC = 0xc000;
   cpu->cpu_memory[0x2002] = 128;
+  cpu->stack_pointer = 0xfd;
+  cpu->status = 0x24;
   int run_instructions_no_prompt = 0;
   char arg2 = ' ';
   int arg1 = 0;

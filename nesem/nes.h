@@ -64,7 +64,7 @@ unsigned short get_indexed_indirect_X(unsigned char get_address_input);
 unsigned short get_indirect_indexed_Y(unsigned short get_address_input);
 unsigned short get_ppu_write_address();
 void set_ppu_write_address(unsigned short address);
-void ADC_update_status_register(signed char oldA);
+void ADC_update_status_register(signed char oldA, unsigned char overflow);
 void SBC_update_status_register(signed char oldA);
 void ORA_update_status_register();
 void CMP_update_status_register(unsigned char data);

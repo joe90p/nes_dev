@@ -48,6 +48,12 @@ unsigned char* get_zeropage_X_operand_ptr()
   return &cpu->cpu_memory[address];
 }
 
+unsigned char* get_zeropage_Y_operand_ptr()
+{
+  unsigned char address = get_zeropage_Y_address(cpu->cpu_memory[cpu->PC + 1]);
+  return &cpu->cpu_memory[address];
+}
+
 unsigned char* get_absolute_X_operand_ptr()
 {
   unsigned short address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
@@ -56,13 +62,13 @@ unsigned char* get_absolute_X_operand_ptr()
 
 unsigned char* get_absolute_Y_operand_ptr()
 {
-  unsigned char address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
+  unsigned short address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
   return &cpu->cpu_memory[address];
 }
 
 unsigned char* get_indexed_indirect_X_operand_ptr()
 {
-  unsigned char address = get_indexed_indirect_X(cpu->cpu_memory[cpu->PC + 1]);
+  unsigned short address = get_indexed_indirect_X(cpu->cpu_memory[cpu->PC + 1]);
   return &cpu->cpu_memory[address];
 }
 
@@ -83,6 +89,11 @@ unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte
   return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->X;
 }
 
+unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
+{
+  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->Y;
+}
+
 unsigned short get_zeropage_address(unsigned char get_address_input)
 {
   return get_absolute_address(0x00, get_address_input);
@@ -93,26 +104,37 @@ unsigned short get_zeropage_X_address(unsigned char get_address_input)
   return get_absolute_address_X(0x00, get_address_input);
 }
 
-unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
+unsigned short get_zeropage_Y_address(unsigned char get_address_input)
 {
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->Y;
+  return get_absolute_address_Y(0x00, get_address_input);
 }
+
+
 
 unsigned short get_indexed_indirect_X(unsigned char get_address_input)
 {
   unsigned char indir_address = get_address_input + cpu->X; 
-  return get_absolute_address(cpu->cpu_memory[indir_address + 1], cpu->cpu_memory[indir_address]);
+  unsigned char indir_address_high = indir_address + 1;
+  return get_absolute_address(cpu->cpu_memory[indir_address_high], cpu->cpu_memory[indir_address]);
 }
 
-unsigned short get_indirect_indexed(unsigned short get_address_input, unsigned char index)
+unsigned short get_indirect(unsigned short get_address_input)
 { 
-  return get_absolute_address(cpu->cpu_memory[get_address_input + 1], cpu->cpu_memory[get_address_input]) + index;
+  unsigned short address_high = get_address_input + 1;
+  if(get_address_input&0x00ff==0x00ff)
+  {
+    address_high=get_address_input&0xff00;
+  }
+   
+  return get_absolute_address(cpu->cpu_memory[address_high ], cpu->cpu_memory[get_address_input]);
 
 }
 
 unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
 { 
-  return get_indirect_indexed(get_address_input, cpu->Y);
+  unsigned char address_input_high = (unsigned char)get_address_input + 1;
+  return get_absolute_address(cpu->cpu_memory[address_input_high ], cpu->cpu_memory[get_address_input]) + cpu->Y;
+  //return get_indirect_indexed(get_address_input, cpu->Y);
 }
 
 
@@ -331,6 +353,7 @@ void STA(unsigned short address)
   if(address==0x2003)
   {
     cpu_sprite_copy_address_low=cpu->A;
+    
   }
   if(address==0x4014)
   {
@@ -366,6 +389,16 @@ void STA(unsigned short address)
     }
   }
   cpu->cpu_memory[address]=cpu->A;
+  if(address<0x2000)
+  {
+    unsigned short address_mirror_range = 0x0800; 
+    unsigned short start_address = (address<address_mirror_range) ? address : address%address_mirror_range;
+
+    for(unsigned char w=1;w<4;w++)
+    {
+      cpu->cpu_memory[start_address + (w*address_mirror_range)]=cpu->A;
+    }
+  }
 }
 void LDA(unsigned char newA)
 {
@@ -542,7 +575,7 @@ void RTI()
 void JMP_ind()
 {
   unsigned short intermediate_address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-  unsigned short newPC = get_indirect_indexed(intermediate_address,0);
+  unsigned short newPC = get_indirect(intermediate_address);
   print_instruction_info(3, "$(%02x%02x)", "JMP");
   cpu->PC=newPC;
 }
@@ -876,6 +909,11 @@ void print_instruction_info_from_context(char program_counter_increment, char op
 {
     char* opcode_info = (char*)malloc(10 * sizeof(char));
     char* address_info = addresses[opcode_context][addressing_mode].address_info;
+   if(opcode_context==2 
+      && (opcode == 4 || opcode == 5) 
+      && (addressing_mode == 5 || addressing_mode == 7)) {
+    address_info = addressing_mode ==5 ? "$%02x,Y" : "%02x%02x,Y"; 
+  } 
     strcpy(opcode_info, opcodes[opcode_context][opcode].name);
     print_instruction_info(program_counter_increment, address_info, opcode_info);
 }
@@ -925,7 +963,25 @@ void standard_instruction(unsigned char current_opcode)
   char opcode_context = current_opcode&OPCODE_CONTEXT_MASK;
   char opcode = (current_opcode&OPCODE_MASK)>>5;
   char addressing_mode = (current_opcode&ADDRESSING_MODE_MASK)>>2;
-  unsigned char* operand_ptr = addresses[opcode_context][addressing_mode].get_operand_ptr();
+  unsigned char* operand_ptr = 0;
+  if(opcode_context==2 
+      && (opcode == 4 || opcode == 5) 
+      && (addressing_mode == 5 || addressing_mode == 7)) {
+ /*   operand_ptr = addressing_mode ==5 ? 
+                get_zeropage_Y_operand_ptr() : 
+                get_absolute_Y_operand_ptr; 
+*/
+    if(addressing_mode ==5) {
+      operand_ptr = get_zeropage_Y_operand_ptr();
+    }
+    else {
+      operand_ptr = get_absolute_Y_operand_ptr();
+    }
+  }
+  else {
+    operand_ptr = addresses[opcode_context][addressing_mode].get_operand_ptr();
+  }
+  
   char program_counter_increment = addresses[opcode_context][addressing_mode].program_counter_increment;
        
   print_instruction_info_from_context( program_counter_increment, opcode_context, addressing_mode, opcode);
@@ -962,6 +1018,10 @@ void run_rom()
   cpu->cpu_memory[0x2002] = 128;
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
+  for(int q=0;q<0x0100;q++)
+  {
+    cpu->cpu_memory[q]= 0x5B;
+  }
   int run_instructions_no_prompt = 0;
   char arg2 = ' ';
   int arg1 = 0;

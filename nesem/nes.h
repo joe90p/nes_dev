@@ -53,6 +53,7 @@ struct opcode
 {
   opcode_action action;
   char* name;
+  unsigned char address_mode;
 };
 
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte);

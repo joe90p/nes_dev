@@ -109,8 +109,6 @@ unsigned short get_zeropage_Y_address(unsigned char get_address_input)
   return get_absolute_address_Y(0x00, get_address_input);
 }
 
-
-
 unsigned short get_indexed_indirect_X(unsigned char get_address_input)
 {
   unsigned char indir_address = get_address_input + cpu->X; 
@@ -136,8 +134,6 @@ unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
   return get_absolute_address(cpu->cpu_memory[address_input_high ], cpu->cpu_memory[get_address_input]) + cpu->Y;
   //return get_indirect_indexed(get_address_input, cpu->Y);
 }
-
-
 
 void set_ppu_write_address(unsigned short address)
 {
@@ -901,6 +897,599 @@ void set_opcodes()
   opcodes[0x1f].name = "SLO";
   opcodes[0x1f].action = SLO;
   opcodes[0x1f].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x1f].name = "SLO";
+  opcodes[0x1f].action = SLO;
+  opcodes[0x1f].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x1f].name = "SLO";
+  opcodes[0x1f].action = SLO;
+  opcodes[0x1f].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x20].name = "JSR";
+  opcodes[0x20].action = JSR;
+  opcodes[0x20].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x21].name = "AND";
+  opcodes[0x21].action = AND;
+  opcodes[0x21].address_mode = ZERO_PAGE_X_ADDRESS_MODE;
+
+  opcodes[0x22].name = "STP";
+  opcodes[0x22].action = STP;
+  opcodes[0x22].address_mode = NONE;
+
+  opcodes[0x23].name = "RLA";
+  opcodes[0x23].action = RLA;
+  opcodes[0x23].address_mode = ZERO_PAGE_X_ADDRESS_MODE;
+
+  opcodes[0x24].name = "BIT";
+  opcodes[0x24].action = BIT;
+  opcodes[0x24].address_mode = ZERO_PAGE_ADDRESS_MODE;
+
+  opcodes[0x25].name = "AND";
+  opcodes[0x25].action = AND;
+  opcodes[0x25].address_mode = ZERO_PAGE_ADDRESS_MODE;
+
+  opcodes[0x26].name = "ROL";
+  opcodes[0x26].action = ROL;
+  opcodes[0x26].address_mode = ZERO_PAGE_ADDRESS_MODE;
+
+  opcodes[0x27].name = "RLA";
+  opcodes[0x27].action = RLA;
+  opcodes[0x27].address_mode = ZEROPAGE_ADDRESS_MODE;
+
+  opcodes[0x28].name = "PLP";
+  opcodes[0x28].action = PLP;
+  opcodes[0x28].address_mode = NONE;
+
+  opcodes[0x29].name = "AND";
+  opcodes[0x29].action = AND;
+  opcodes[0x29].address_mode = IMMEDIATE_ADDRESS_MODE;
+
+  opcodes[0x2a].name = "ROL";
+  opcodes[0x2a].action = ROL;
+  opcodes[0x2a].address_mode = NONE;
+
+  opcodes[0x2b].name = "ANC";
+  opcodes[0x2b].action = ANC;
+  opcodes[0x2b].address_mode = IMMEDIATE_ADDRESS_MODE;
+
+  opcodes[0x2c].name = "BIT";
+  opcodes[0x2c].action = BIT;
+  opcodes[0x2c].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x2d].name = "AND";
+  opcodes[0x2d].action = AND;
+  opcodes[0x2d].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x2e].name = "ROL";
+  opcodes[0x2e].action = ROL;
+  opcodes[0x2e].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x2f].name = "RLA";
+  opcodes[0x2f].action = RLA;
+  opcodes[0x2f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x30].name = "BMI";
+  opcodes[0x30].action = BMI;
+  opcodes[0x30].address_mode = ZEROPAGE_ADDRESS_MODE;
+
+  opcodes[0x31].name = "AND";
+  opcodes[0x31].action = AND;
+  opcodes[0x31].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
+
+  opcodes[0x32].name = "STP";
+  opcodes[0x32].action = STP;
+  opcodes[0x32].address_mode = NONE;
+
+  opcodes[0x33].name = "RLA";
+  opcodes[0x33].action = RLA;
+  opcodes[0x33].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
+
+  opcodes[0x34].name = "NOP";
+  opcodes[0x34].action = NOP;
+  opcodes[0x34].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x35].name = "AND";
+  opcodes[0x35].action = AND;
+  opcodes[0x35].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x36].name = "ROL";
+  opcodes[0x36].action = ROL;
+  opcodes[0x36].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x37].name = "RLA";
+  opcodes[0x37].action = RLA;
+  opcodes[0x37].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x38].name = "SEC";
+  opcodes[0x38].action = SEC;
+  opcodes[0x38].address_mode = NONE;
+
+  opcodes[0x39].name = "AND";
+  opcodes[0x39].action = AND;
+  opcodes[0x39].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
+
+  opcodes[0x3a].name = "NOP";
+  opcodes[0x3a].action = NOP;
+  opcodes[0x3a].address_mode = NONE;
+
+  opcodes[0x3b].name = "RLA";
+  opcodes[0x3b].action = RLA;
+  opcodes[0x3b].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
+
+  opcodes[0x3c].name = "NOP";
+  opcodes[0x3c].action = NOP;
+  opcodes[0x3c].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x3d].name = "AND";
+  opcodes[0x3d].action = AND;
+  opcodes[0x3d].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x3e].name = "ROL";
+  opcodes[0x3e].action = ROL;
+  opcodes[0x3e].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x3f].name = "RLA";
+  opcodes[0x3f].action = RLA;
+  opcodes[0x3f].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x40].name = "RTI";
+  opcodes[0x40].action = RTI;
+  opcodes[0x40].address_mode = NONE;
+
+  opcodes[0x41].name = "EOR";
+  opcodes[0x41].action = EOR;
+  opcodes[0x41].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
+
+  opcodes[0x42].name = "STP";
+  opcodes[0x42].action = STP;
+  opcodes[0x42].address_mode = NONE;
+
+  opcodes[0x43].name = "SRE";
+  opcodes[0x43].action = SRE;
+  opcodes[0x43].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
+
+  opcodes[0x44].name = "SLO";
+  opcodes[0x44].action = SLO;
+  opcodes[0x44].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x45].name = "EOR";
+  opcodes[0x45].action = EOR;
+  opcodes[0x45].address_mode = ZEROPAGE_ADDRESS_MODE;
+
+  opcodes[0x46].name = "LSR";
+  opcodes[0x46].action = LSR;
+  opcodes[0x46].address_mode = ZEROPAGE_ADDRESS_MODE;
+
+  opcodes[0x47].name = "SRE";
+  opcodes[0x47].action = SRE;
+  opcodes[0x47].address_mode = ZEROPAGE_ADDRESS_MODE;
+
+  opcodes[0x48].name = "PHA";
+  opcodes[0x48].action = PHA;
+  opcodes[0x48].address_mode = NONE;
+
+  opcodes[0x49].name = "EOR";
+  opcodes[0x49].action = EOR;
+  opcodes[0x49].address_mode = IMMEDITAE_ADDRESS_MODE;
+
+  opcodes[0x4a].name = "LSR";
+  opcodes[0x4a].action = LSR;
+  opcodes[0x4a].address_mode = NONE;
+
+  opcodes[0x4b].name = "ALR";
+  opcodes[0x4b].action = ALR;
+  opcodes[0x4b].address_mode = IMMEDIATE_ADDRESS_MODE;
+
+  opcodes[0x4c].name = "JMP";
+  opcodes[0x4c].action = JMP;
+  opcodes[0x4c].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4d].name = "EOR";
+  opcodes[0x4d].action = EOR;
+  opcodes[0x4d].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4e].name = "LSR";
+  opcodes[0x4e].action = LSR;
+  opcodes[0x4e].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x50].name = "BVC";
+  opcodes[0x50].action = BVC;
+  opcodes[0x50].address_mode = ZEROPAGE_ADDRESS_MODE;
+
+  opcodes[0x51].name = "EOR";
+  opcodes[0x51].action = EOR;
+  opcodes[0x51].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
+
+  opcodes[0x52].name = "STP";
+  opcodes[0x52].action = STP;
+  opcodes[0x52].address_mode = NONE;
+
+  opcodes[0x53].name = "SRE";
+  opcodes[0x53].action = SRE;
+  opcodes[0x53].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
+
+
+  opcodes[0x54].name = "NOP";
+  opcodes[0x54].action = NOP;
+  opcodes[0x54].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x55].name = "EOR";
+  opcodes[0x55].action = EOR;
+  opcodes[0x55].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x56].name = "LSR";
+  opcodes[0x56].action = LSR;
+  opcodes[0x56].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x57].name = "SRE";
+  opcodes[0x57].action = SRE;
+  opcodes[0x57].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+
+  opcodes[0x58].name = "CLI";
+  opcodes[0x58].action = CLI;
+  opcodes[0x58].address_mode = NONE;
+
+  opcodes[0x59].name = "EOR";
+  opcodes[0x59].action = EOR;
+  opcodes[0x59].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
+
+  opcodes[0x5a].name = "NOP";
+  opcodes[0x5a].action = NOP;
+  opcodes[0x5a].address_mode = NONE;
+
+  opcodes[0x5b].name = "SRE";
+  opcodes[0x5b].action = SRE;
+  opcodes[0x5b].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
+
+  opcodes[0x5c].name = "NOP";
+  opcodes[0x5c].action = NOP;
+  opcodes[0x5c].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x5d].name = "EOR";
+  opcodes[0x5d].action = EOR;
+  opcodes[0x5d].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x5e].name = "LSR";
+  opcodes[0x5e].action = LSR;
+  opcodes[0x5e].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x5f].name = "SRE";
+  opcodes[0x5f].action = SRE;
+  opcodes[0x5f].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+  opcodes[0x4f].name = "SRE";
+  opcodes[0x4f].action = SRE;
+  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

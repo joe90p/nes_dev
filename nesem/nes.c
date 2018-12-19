@@ -1163,29 +1163,29 @@ void set_opcodes()
   opcodes[0x5f].action = SRE;
   opcodes[0x5f].address_mode = ABSOLUTE_X_ADDRESS_MODE;
 
-  opcodes[0x4f].name = "SRE";
-  opcodes[0x4f].action = SRE;
-  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x60].name = "RTS";
+  opcodes[0x60].action = RTS;
+  opcodes[0x60].address_mode = NONE;
 
-  opcodes[0x4f].name = "SRE";
-  opcodes[0x4f].action = SRE;
-  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x61].name = "ADC";
+  opcodes[0x61].action = ADC;
+  opcodes[0x61].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
-  opcodes[0x4f].name = "SRE";
-  opcodes[0x4f].action = SRE;
-  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x62].name = "STP";
+  opcodes[0x62].action = STP;
+  opcodes[0x62].address_mode = NONE;
 
-  opcodes[0x4f].name = "SRE";
-  opcodes[0x4f].action = SRE;
-  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x63].name = "RRA";
+  opcodes[0x63].action = RRA;
+  opcodes[0x63].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
-  opcodes[0x4f].name = "SRE";
-  opcodes[0x4f].action = SRE;
-  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x64].name = "NOP";
+  opcodes[0x64].action = NOP;
+  opcodes[0x64].address_mode = ZEROPAGE_ADDRESS_MODE;
 
-  opcodes[0x4f].name = "SRE";
-  opcodes[0x4f].action = SRE;
-  opcodes[0x4f].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x65].name = "SRE";
+  opcodes[0x65].action = SRE;
+  opcodes[0x65].address_mode = ABSOLUTE_ADDRESS_MODE;
 
   opcodes[0x4f].name = "SRE";
   opcodes[0x4f].action = SRE;

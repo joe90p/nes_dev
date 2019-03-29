@@ -290,9 +290,15 @@ void LDA_ptr(unsigned char* toOr)
   LDA(value_to_load);  
 }
 
+
+
 void CMP_ptr(unsigned char* toOr)
 {
   CMP_update_status_register(*toOr);  
+}
+void CMP(unsigned char* toOr)
+{
+  CMP_ptr(toOr);  
 }
 void CPX(unsigned char* toOr)
 {
@@ -553,7 +559,23 @@ void SRE(unsigned char* operand_ptr)
 {
 }
 
+void ALR(unsigned char* operand_ptr)
+{
+}
 
+void RLA(unsigned char* operand_ptr)
+{
+}
+void SAX(unsigned char* operand_ptr)
+{
+}
+
+void LAX(unsigned char* operand_ptr)
+{
+}
+void ANC(unsigned char* operand_ptr)
+{
+}
 
 
 
@@ -889,7 +911,7 @@ void set_opcodes()
 
   opcodes[0x02].name = "STP";
   opcodes[0x02].action = STP;
-  opcodes[0x02].address_mode = NONE;
+  opcodes[0x02].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x03].name = "SLO";
   opcodes[0x03].action = SLO;
@@ -913,7 +935,7 @@ void set_opcodes()
 
   opcodes[0x08].name = "PHP";
   opcodes[0x08].action = PHP;
-  opcodes[0x08].address_mode = NONE;
+  opcodes[0x08].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x09].name = "ORA";
   opcodes[0x09].action = ORA_ptr;
@@ -921,7 +943,7 @@ void set_opcodes()
 
   opcodes[0x0a].name = "ASL";
   opcodes[0x0a].action = ASL;
-  opcodes[0x0a].address_mode = NONE;
+  opcodes[0x0a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x0b].name = "ANC";
   opcodes[0x0b].action = ANC;
@@ -953,7 +975,7 @@ void set_opcodes()
 
   opcodes[0x12].name = "STP";
   opcodes[0x12].action = STP;
-  opcodes[0x12].address_mode = NONE;
+  opcodes[0x12].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x13].name = "SLO";
   opcodes[0x13].action = SLO;
@@ -977,7 +999,7 @@ void set_opcodes()
 
   opcodes[0x18].name = "CLC";
   opcodes[0x18].action = CLC;
-  opcodes[0x18].address_mode = NONE;
+  opcodes[0x18].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x19].name = "ORA";
   opcodes[0x19].action = ORA_ptr;
@@ -985,7 +1007,7 @@ void set_opcodes()
 
   opcodes[0x1a].name = "NOP";
   opcodes[0x1a].action = NOP;
-  opcodes[0x1a].address_mode = NONE;
+  opcodes[0x1a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x1b].name = "SLO";
   opcodes[0x1b].action = SLO;
@@ -1025,7 +1047,7 @@ void set_opcodes()
 
   opcodes[0x22].name = "STP";
   opcodes[0x22].action = STP;
-  opcodes[0x22].address_mode = NONE;
+  opcodes[0x22].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x23].name = "RLA";
   opcodes[0x23].action = RLA;
@@ -1049,7 +1071,7 @@ void set_opcodes()
 
   opcodes[0x28].name = "PLP";
   opcodes[0x28].action = PLP;
-  opcodes[0x28].address_mode = NONE;
+  opcodes[0x28].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x29].name = "AND";
   opcodes[0x29].action = AND_ptr;
@@ -1057,7 +1079,7 @@ void set_opcodes()
 
   opcodes[0x2a].name = "ROL";
   opcodes[0x2a].action = ROL;
-  opcodes[0x2a].address_mode = NONE;
+  opcodes[0x2a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x2b].name = "ANC";
   opcodes[0x2b].action = ANC;
@@ -1089,7 +1111,7 @@ void set_opcodes()
 
   opcodes[0x32].name = "STP";
   opcodes[0x32].action = STP;
-  opcodes[0x32].address_mode = NONE;
+  opcodes[0x32].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x33].name = "RLA";
   opcodes[0x33].action = RLA;
@@ -1113,7 +1135,7 @@ void set_opcodes()
 
   opcodes[0x38].name = "SEC";
   opcodes[0x38].action = SEC;
-  opcodes[0x38].address_mode = NONE;
+  opcodes[0x38].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x39].name = "AND";
   opcodes[0x39].action = AND_ptr;
@@ -1121,7 +1143,7 @@ void set_opcodes()
 
   opcodes[0x3a].name = "NOP";
   opcodes[0x3a].action = NOP;
-  opcodes[0x3a].address_mode = NONE;
+  opcodes[0x3a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x3b].name = "RLA";
   opcodes[0x3b].action = RLA;
@@ -1145,7 +1167,7 @@ void set_opcodes()
 
   opcodes[0x40].name = "RTI";
   opcodes[0x40].action = RTI;
-  opcodes[0x40].address_mode = NONE;
+  opcodes[0x40].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x41].name = "EOR";
   opcodes[0x41].action = EOR_ptr;
@@ -1153,7 +1175,7 @@ void set_opcodes()
 
   opcodes[0x42].name = "STP";
   opcodes[0x42].action = STP;
-  opcodes[0x42].address_mode = NONE;
+  opcodes[0x42].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x43].name = "SRE";
   opcodes[0x43].action = SRE;
@@ -1177,7 +1199,7 @@ void set_opcodes()
 
   opcodes[0x48].name = "PHA";
   opcodes[0x48].action = PHA;
-  opcodes[0x48].address_mode = NONE;
+  opcodes[0x48].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x49].name = "EOR";
   opcodes[0x49].action = EOR_ptr;
@@ -1185,7 +1207,7 @@ void set_opcodes()
 
   opcodes[0x4a].name = "LSR";
   opcodes[0x4a].action = LSR;
-  opcodes[0x4a].address_mode = NONE;
+  opcodes[0x4a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x4b].name = "ALR";
   opcodes[0x4b].action = ALR;
@@ -1217,7 +1239,7 @@ void set_opcodes()
 
   opcodes[0x52].name = "STP";
   opcodes[0x52].action = STP;
-  opcodes[0x52].address_mode = NONE;
+  opcodes[0x52].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x53].name = "SRE";
   opcodes[0x53].action = SRE;
@@ -1242,7 +1264,7 @@ void set_opcodes()
 
   opcodes[0x58].name = "CLI";
   opcodes[0x58].action = CLI;
-  opcodes[0x58].address_mode = NONE;
+  opcodes[0x58].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x59].name = "EOR";
   opcodes[0x59].action = EOR_ptr;
@@ -1250,7 +1272,7 @@ void set_opcodes()
 
   opcodes[0x5a].name = "NOP";
   opcodes[0x5a].action = NOP;
-  opcodes[0x5a].address_mode = NONE;
+  opcodes[0x5a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x5b].name = "SRE";
   opcodes[0x5b].action = SRE;
@@ -1274,7 +1296,7 @@ void set_opcodes()
 
   opcodes[0x60].name = "RTS";
   opcodes[0x60].action = RTS;
-  opcodes[0x60].address_mode = NONE;
+  opcodes[0x60].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x61].name = "ADC";
   opcodes[0x61].action = ADC_ptr;
@@ -1282,7 +1304,7 @@ void set_opcodes()
 
   opcodes[0x62].name = "STP";
   opcodes[0x62].action = STP;
-  opcodes[0x62].address_mode = NONE;
+  opcodes[0x62].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x63].name = "RRA";
   opcodes[0x63].action = RRA;
@@ -1306,7 +1328,7 @@ void set_opcodes()
 
   opcodes[0x68].name = "PHA";
   opcodes[0x68].action = PHA;
-  opcodes[0x68].address_mode = NONE;
+  opcodes[0x68].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x69].name = "ADC";
   opcodes[0x69].action = ADC_ptr;
@@ -1314,7 +1336,7 @@ void set_opcodes()
 
   opcodes[0x6a].name = "ROR";
   opcodes[0x6a].action = ROR;
-  opcodes[0x6a].address_mode = NONE;
+  opcodes[0x6a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x6b].name = "ARR";
   opcodes[0x6b].action = ARR;
@@ -1346,7 +1368,7 @@ void set_opcodes()
 
   opcodes[0x72].name = "STP";
   opcodes[0x72].action = STP;
-  opcodes[0x72].address_mode = NONE;
+  opcodes[0x72].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x73].name = "RRA";
   opcodes[0x73].action = RRA;
@@ -1370,7 +1392,7 @@ void set_opcodes()
 
   opcodes[0x78].name = "SEI";
   opcodes[0x78].action = SEI;
-  opcodes[0x78].address_mode = NONE;
+  opcodes[0x78].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x79].name = "ADC";
   opcodes[0x79].action = ADC_ptr;
@@ -1378,7 +1400,7 @@ void set_opcodes()
 
   opcodes[0x7a].name = "NOP";
   opcodes[0x7a].action = NOP;
-  opcodes[0x7a].address_mode = NONE;
+  opcodes[0x7a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x7b].name = "RRA";
   opcodes[0x7b].action = RRA;
@@ -1434,7 +1456,7 @@ void set_opcodes()
 
   opcodes[0x88].name = "DEY";
   opcodes[0x88].action = DEY;
-  opcodes[0x88].address_mode = NONE;
+  opcodes[0x88].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x89].name = "NOP";
   opcodes[0x89].action = NOP;
@@ -1442,7 +1464,7 @@ void set_opcodes()
 
   opcodes[0x8a].name = "TXA";
   opcodes[0x8a].action = TXA;
-  opcodes[0x8a].address_mode = NONE;
+  opcodes[0x8a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x8b].name = "XAA";
   opcodes[0x8b].action = XAA;
@@ -1474,7 +1496,7 @@ void set_opcodes()
 
   opcodes[0x92].name = "STP";
   opcodes[0x92].action = STP;
-  opcodes[0x92].address_mode = NONE;
+  opcodes[0x92].address_mode = NONE_ADDRESS_MODE;
   
   opcodes[0x93].name = "AHX";
   opcodes[0x93].action = AHX;
@@ -1498,7 +1520,7 @@ void set_opcodes()
 
   opcodes[0x98].name = "TYA";
   opcodes[0x98].action = TYA;
-  opcodes[0x98].address_mode = NONE;
+  opcodes[0x98].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x99].name = "STA";
   opcodes[0x99].action = STA_ptr;
@@ -1506,7 +1528,7 @@ void set_opcodes()
 
   opcodes[0x9a].name = "TXS";
   opcodes[0x9a].action = TXS;
-  opcodes[0x9a].address_mode = NONE;
+  opcodes[0x9a].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x9b].name = "TAS";
   opcodes[0x9b].action = TAS;
@@ -1562,7 +1584,7 @@ void set_opcodes()
 
   opcodes[0xa8].name = "TAY";
   opcodes[0xa8].action = TAY;
-  opcodes[0xa8].address_mode = NONE;
+  opcodes[0xa8].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xa9].name = "LDA";
   opcodes[0xa9].action = LDA_ptr;
@@ -1570,7 +1592,7 @@ void set_opcodes()
 
   opcodes[0xaa].name = "TAX";
   opcodes[0xaa].action = TAX;
-  opcodes[0xaa].address_mode = NONE;
+  opcodes[0xaa].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xab].name = "LAX";
   opcodes[0xab].action = LAX;
@@ -1602,7 +1624,7 @@ void set_opcodes()
 
   opcodes[0xb2].name = "STP";
   opcodes[0xb2].action = STP;
-  opcodes[0xb2].address_mode = NONE;
+  opcodes[0xb2].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xb3].name = "LAX";
   opcodes[0xb3].action = LAX;
@@ -1626,7 +1648,7 @@ void set_opcodes()
 
   opcodes[0xb8].name = "CLV";
   opcodes[0xb8].action = CLV;
-  opcodes[0xb8].address_mode = NONE;
+  opcodes[0xb8].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xb9].name = "LDA";
   opcodes[0xb9].action = LDA_ptr;
@@ -1634,7 +1656,7 @@ void set_opcodes()
 
   opcodes[0xba].name = "TSX";
   opcodes[0xba].action = TSX;
-  opcodes[0xba].address_mode = NONE;
+  opcodes[0xba].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xbb].name = "LAS";
   opcodes[0xbb].action = LAS;
@@ -1686,7 +1708,7 @@ void set_opcodes()
 
   opcodes[0xc8].name = "INY";
   opcodes[0xc8].action = INY;
-  opcodes[0xc8].address_mode = NONE;
+  opcodes[0xc8].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xc9].name = "CMP";
   opcodes[0xc9].action = CMP;
@@ -1694,7 +1716,7 @@ void set_opcodes()
 
   opcodes[0xca].name = "DEX";
   opcodes[0xca].action = DEX;
-  opcodes[0xca].address_mode = NONE;
+  opcodes[0xca].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xcb].name = "AXS";
   opcodes[0xcb].action = AXS;
@@ -1726,7 +1748,7 @@ void set_opcodes()
 
   opcodes[0xd2].name = "STP";
   opcodes[0xd2].action = STP;
-  opcodes[0xd2].address_mode = NONE;
+  opcodes[0xd2].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xd3].name = "DCP";
   opcodes[0xd3].action = DCP;
@@ -1750,7 +1772,7 @@ void set_opcodes()
 
   opcodes[0xd8].name = "CLD";
   opcodes[0xd8].action = CLD;
-  opcodes[0xd8].address_mode = NONE;
+  opcodes[0xd8].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xd9].name = "CMP";
   opcodes[0xd9].action = CMP;
@@ -1758,7 +1780,7 @@ void set_opcodes()
 
   opcodes[0xda].name = "NOP";
   opcodes[0xda].action = NOP;
-  opcodes[0xda].address_mode = NONE;
+  opcodes[0xda].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0xdb].name = "DCP";
   opcodes[0xdb].action = DCP;
@@ -1814,7 +1836,7 @@ void set_opcodes()
 
   opcodes[0xe8].name = "INX";
   opcodes[0xe8].action = INX;
-  opcodes[0xe8].address_mode = NONE;
+  opcodes[0xe8].address_mode = NONE_ADDRESS_MODE;
   
   opcodes[0xe9].name = "SBC";
   opcodes[0xe9].action = SBC_ptr;
@@ -1822,7 +1844,7 @@ void set_opcodes()
 
   opcodes[0xea].name = "NOP";
   opcodes[0xea].action = NOP;
-  opcodes[0xea].address_mode = NONE;
+  opcodes[0xea].address_mode = NONE_ADDRESS_MODE;
   
   opcodes[0xeb].name = "SBC";
   opcodes[0xeb].action = SBC_ptr;
@@ -1854,7 +1876,7 @@ void set_opcodes()
   
   opcodes[0xf2].name = "STP";
   opcodes[0xf2].action = STP;
-  opcodes[0xf2].address_mode = NONE;
+  opcodes[0xf2].address_mode = NONE_ADDRESS_MODE;
   
   opcodes[0xf3].name = "ISC";
   opcodes[0xf3].action = ISC;
@@ -1878,7 +1900,7 @@ void set_opcodes()
   
   opcodes[0xf8].name = "SED";
   opcodes[0xf8].action = SED;
-  opcodes[0xf8].address_mode = NONE;
+  opcodes[0xf8].address_mode = NONE_ADDRESS_MODE;
   
   opcodes[0xf9].name = "SBC";
   opcodes[0xf9].action = SBC_ptr;
@@ -1886,7 +1908,7 @@ void set_opcodes()
 
   opcodes[0xfa].name = "NOP";
   opcodes[0xfa].action = NOP;
-  opcodes[0xfa].address_mode = NONE;
+  opcodes[0xfa].address_mode = NONE_ADDRESS_MODE;
   
   opcodes[0xfb].name = "ISC";
   opcodes[0xfb].action = ISC;
@@ -1932,16 +1954,12 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
     free(address_mode_info);
 }
 
-void print_instruction_info_from_context(char program_counter_increment, char opcode_context, char addressing_mode, char opcode)
+void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, char opcode)
 {
     char* opcode_info = (char*)malloc(10 * sizeof(char));
-    char* address_info = addresses[opcode_context][addressing_mode].address_info;
-   if(opcode_context==2 
-      && (opcode == 4 || opcode == 5) 
-      && (addressing_mode == 5 || addressing_mode == 7)) {
-    address_info = addressing_mode ==5 ? "$%02x,Y" : "%02x%02x,Y"; 
-  } 
-    strcpy(opcode_info, opcodes[opcode_context][opcode].name);
+    char* address_info = addresses[addressing_mode].address_info;
+   
+    strcpy(opcode_info, opcodes[opcode].name);
     print_instruction_info(program_counter_increment, address_info, opcode_info);
 }
 
@@ -1990,9 +2008,9 @@ void increment_PC(signed char increment)
 void standard_instruction(unsigned char current_opcode)
 {
   unsigned char address_mode =  opcodes[current_opcode].address_mode;
-  operand_ptr = addresses[address_mode].get_operand_ptr();
+  unsigned char* operand_ptr = addresses[address_mode].get_operand_ptr();
   char program_counter_increment = addresses[address_mode].program_counter_increment;
-  print_instruction_info_from_context( program_counter_increment, opcode_context, addressing_mode, opcode);
+  print_instruction_info_from_context( program_counter_increment,  address_mode, current_opcode);
   opcodes[current_opcode].action(operand_ptr);
   if(strcmp("JMP", opcodes[current_opcode].name))
   {
@@ -2020,7 +2038,7 @@ void run_rom()
   SDL_Window* win = createWindow();
   SDL_Renderer* rend = createRenderer(win);
   set_opcodes();
-  set_single_byte_opcode_array();
+  //set_single_byte_opcode_array();
   //cpu->PC = get_short_from_cpu_memory(0xfffc); 
   cpu->PC = 0xc000;
   cpu->cpu_memory[0x2002] = 128;

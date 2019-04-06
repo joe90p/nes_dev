@@ -837,11 +837,13 @@ void BNE(unsigned char* c)
   branch("BNE", NES_ZERO_FLAG, 0);
 }
 
-struct opcode opcodes[256];
-struct address addresses[10];
+struct opcode* opcodes;// = malloc(256 * sizeof(struct opcode));
+struct address* addresses;//[10];
 
 void set_opcodes()
 {
+  opcodes = malloc(256 * sizeof(struct opcode));
+  addresses = malloc(10 * sizeof(struct address));
   unsigned char IMMEDIATE_ADDRESS_MODE = 0;
   unsigned char ZEROPAGE_ADDRESS_MODE = 1;
   unsigned char ACCUMULATOR_ADDRESS_MODE = 2;
@@ -1954,13 +1956,14 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
     free(address_mode_info);
 }
 
-void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, char opcode)
+void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
 {
-    char* opcode_info = (char*)malloc(10 * sizeof(char));
+    //char* opcode_info = (char*)malloc(10 * sizeof(char));
     char* address_info = addresses[addressing_mode].address_info;
    
-    strcpy(opcode_info, opcodes[opcode].name);
-    print_instruction_info(program_counter_increment, address_info, opcode_info);
+    //strcpy(opcode_info, opcodes[opcode].name);
+    print_instruction_info(program_counter_increment, address_info, opcodes[opcode].name);
+    //free(opcode_info);
 }
 
 void conditional_branch_instruction(unsigned char current_opcode)
@@ -2155,15 +2158,15 @@ void run_rom()
     }
     if(!exceptional_instruction)
     { 
-      if(opcodes[current_opcode].action)
-      {
-        unsigned char* dummy_ptr = 0;
-        print_instruction_info(1, "", opcodes[current_opcode].name);
-        opcodes[current_opcode].action(dummy_ptr);      
-        increment_PC(1);
-      }
-      else
-      {
+      //if(opcodes[current_opcode].action)
+      //{
+        //unsigned char* dummy_ptr = 0;
+        //print_instruction_info(1, "", opcodes[current_opcode].name);
+        //opcodes[current_opcode].action(dummy_ptr);      
+        //increment_PC(1);
+      //}
+      //else
+      //{
         if((current_opcode&COND_BRANCH_MASK)==16)
         {
           conditional_branch_instruction(current_opcode);
@@ -2172,7 +2175,7 @@ void run_rom()
         { 
           standard_instruction(current_opcode);
         }
-      }
+      //}
     }
     if((cpu->cpu_memory[0x2000]&128)==128)
     {

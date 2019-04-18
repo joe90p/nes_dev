@@ -54,6 +54,11 @@ unsigned char* get_zeropage_Y_operand_ptr()
   return &cpu->cpu_memory[address];
 }
 
+unsigned char* get_dummy_operand_ptr()
+{
+  return &cpu->cpu_memory[0];
+}
+
 unsigned char* get_absolute_X_operand_ptr()
 {
   unsigned short address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
@@ -402,6 +407,10 @@ void STA(unsigned short address)
     }
   }
 }
+void SAX_do(unsigned short address)
+{
+  cpu->cpu_memory[address]=((unsigned char)cpu->A)&cpu->X;
+}
 void LDA(unsigned char newA)
 {
   cpu->A=newA;
@@ -520,6 +529,8 @@ void TAS(unsigned char* operand_ptr)
 
 void ISC(unsigned char* operand_ptr)
 {
+  INC(operand_ptr);
+  SBC(*operand_ptr); 
 }
 
 void AXS(unsigned char* operand_ptr)
@@ -527,7 +538,13 @@ void AXS(unsigned char* operand_ptr)
 }
 
 void DCP(unsigned char* operand_ptr)
+
 {
+
+  //unsigned short address = operand_ptr - cpu->cpu_memory;
+  //cpu->cpu_memory[address]-=1;
+  *operand_ptr-=1;
+  CMP_update_status_register(*operand_ptr);
 }
 
 void LAS(unsigned char* operand_ptr)
@@ -568,10 +585,16 @@ void RLA(unsigned char* operand_ptr)
 }
 void SAX(unsigned char* operand_ptr)
 {
+  unsigned short address = operand_ptr - cpu->cpu_memory; 
+
+  SAX_do(address);  
+
 }
 
 void LAX(unsigned char* operand_ptr)
 {
+  LDA_ptr(operand_ptr);
+  LDX(operand_ptr);
 }
 void ANC(unsigned char* operand_ptr)
 {
@@ -855,7 +878,7 @@ void set_opcodes()
   unsigned char ABSOLUTE_Y_ADDRESS_MODE = 8;
   unsigned char ZEROPAGE_Y_ADDRESS_MODE = 9;
   unsigned char NONE_ADDRESS_MODE = 10;
-  unsigned char ABSOLUTE_INDIRECT_ADDRESS_MODE = 6;
+  unsigned char ABSOLUTE_INDIRECT_ADDRESS_MODE = 11;
   
   addresses[0].program_counter_increment = 2;
   addresses[0].get_operand_ptr = get_immediate_operand_ptr;
@@ -896,6 +919,10 @@ void set_opcodes()
   addresses[9].program_counter_increment = 2;
   addresses[9].get_operand_ptr = get_zeropage_Y_operand_ptr;
   addresses[9].address_info = "$%02x,Y";
+
+  addresses[10].program_counter_increment = 1;
+  addresses[10].get_operand_ptr = get_dummy_operand_ptr;
+  addresses[10].address_info = "";
 
   for(int i=0; i<256; i++)
   {
@@ -945,7 +972,7 @@ void set_opcodes()
 
   opcodes[0x0a].name = "ASL";
   opcodes[0x0a].action = ASL;
-  opcodes[0x0a].address_mode = NONE_ADDRESS_MODE;
+  opcodes[0x0a].address_mode = ACCUMULATOR_ADDRESS_MODE;
 
   opcodes[0x0b].name = "ANC";
   opcodes[0x0b].action = ANC;
@@ -1045,7 +1072,7 @@ void set_opcodes()
 
   opcodes[0x21].name = "AND";
   opcodes[0x21].action = AND_ptr;
-  opcodes[0x21].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+  opcodes[0x21].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
   opcodes[0x22].name = "STP";
   opcodes[0x22].action = STP;
@@ -1081,7 +1108,7 @@ void set_opcodes()
 
   opcodes[0x2a].name = "ROL";
   opcodes[0x2a].action = ROL;
-  opcodes[0x2a].address_mode = NONE_ADDRESS_MODE;
+  opcodes[0x2a].address_mode = ACCUMULATOR_ADDRESS_MODE;
 
   opcodes[0x2b].name = "ANC";
   opcodes[0x2b].action = ANC;
@@ -1183,9 +1210,9 @@ void set_opcodes()
   opcodes[0x43].action = SRE;
   opcodes[0x43].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
-  opcodes[0x44].name = "SLO";
-  opcodes[0x44].action = SLO;
-  opcodes[0x44].address_mode = ABSOLUTE_X_ADDRESS_MODE;
+  opcodes[0x44].name = "NOP";
+  opcodes[0x44].action = NOP;
+  opcodes[0x44].address_mode = ZEROPAGE_ADDRESS_MODE;
 
   opcodes[0x45].name = "EOR";
   opcodes[0x45].action = EOR_ptr;
@@ -1209,7 +1236,7 @@ void set_opcodes()
 
   opcodes[0x4a].name = "LSR";
   opcodes[0x4a].action = LSR;
-  opcodes[0x4a].address_mode = NONE_ADDRESS_MODE;
+  opcodes[0x4a].address_mode = ACCUMULATOR_ADDRESS_MODE;
 
   opcodes[0x4b].name = "ALR";
   opcodes[0x4b].action = ALR;
@@ -1328,8 +1355,8 @@ void set_opcodes()
   opcodes[0x67].action = RRA;
   opcodes[0x67].address_mode = ZEROPAGE_ADDRESS_MODE;
 
-  opcodes[0x68].name = "PHA";
-  opcodes[0x68].action = PHA;
+  opcodes[0x68].name = "PLA";
+  opcodes[0x68].action = PLA;
   opcodes[0x68].address_mode = NONE_ADDRESS_MODE;
 
   opcodes[0x69].name = "ADC";
@@ -1338,7 +1365,7 @@ void set_opcodes()
 
   opcodes[0x6a].name = "ROR";
   opcodes[0x6a].action = ROR;
-  opcodes[0x6a].address_mode = NONE_ADDRESS_MODE;
+  opcodes[0x6a].address_mode = ACCUMULATOR_ADDRESS_MODE;
 
   opcodes[0x6b].name = "ARR";
   opcodes[0x6b].action = ARR;
@@ -1430,7 +1457,7 @@ void set_opcodes()
 
   opcodes[0x81].name = "STA";
   opcodes[0x81].action = STA_ptr;
-  opcodes[0x81].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
+  opcodes[0x81].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
   opcodes[0x82].name = "NOP";
   opcodes[0x82].action = NOP;
@@ -1438,7 +1465,7 @@ void set_opcodes()
 
   opcodes[0x83].name = "SAX";
   opcodes[0x83].action = SAX;
-  opcodes[0x83].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
+  opcodes[0x83].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
   opcodes[0x84].name = "STY";
   opcodes[0x84].action = STY;
@@ -1514,11 +1541,11 @@ void set_opcodes()
 
   opcodes[0x96].name = "STX";
   opcodes[0x96].action = STX;
-  opcodes[0x96].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+  opcodes[0x96].address_mode = ZEROPAGE_Y_ADDRESS_MODE;
 
   opcodes[0x97].name = "SAX";
   opcodes[0x97].action = SAX;
-  opcodes[0x97].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+  opcodes[0x97].address_mode = ZEROPAGE_Y_ADDRESS_MODE;
 
   opcodes[0x98].name = "TYA";
   opcodes[0x98].action = TYA;
@@ -1675,6 +1702,10 @@ void set_opcodes()
   opcodes[0xbe].name = "LDX";
   opcodes[0xbe].action = LDX;
   opcodes[0xbe].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
+
+  opcodes[0xbf].name = "LAX";
+  opcodes[0xbf].action = LAX;
+  opcodes[0xbf].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
 
   opcodes[0xc0].name = "CPY";
   opcodes[0xc0].action = CPY;

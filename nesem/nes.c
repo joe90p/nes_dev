@@ -201,11 +201,18 @@ void switch_status_flag(char flag, char switch_on)
 void ADC_update_status_register(signed char oldA, unsigned char toAdd)
 { 
 
+  unsigned char old_carry = cpu->status&1;
   unsigned char oldA_sign_bit = oldA&128;
-  unsigned char newA_sign_bit = (cpu->A)&128;
+  //unsigned char newA_sign_bit = (cpu->A)&128;
   unsigned char toAdd_sign_bit = toAdd&128;
-  unsigned char overflow = (oldA_sign_bit==toAdd_sign_bit) && newA_sign_bit!=oldA_sign_bit;
-  switch_status_flag(NES_CARRY_FLAG, cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit==oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit!=oldA_sign_bit)));   
+  //unsigned char overflow = (oldA_sign_bit==toAdd_sign_bit) && newA_sign_bit!=oldA_sign_bit;
+  //switch_status_flag(NES_CARRY_FLAG, cpu->A!=oldA && ((cpu->A<oldA && newA_sign_bit==oldA_sign_bit) || (cpu->A>=oldA && newA_sign_bit!=oldA_sign_bit)));   
+  unsigned char oldA_u = oldA;
+  unsigned char has_carry_6 = ((oldA_u&127) + (toAdd&127) + (cpu->status&1))&128;
+  unsigned char has_carry_7 = ((has_carry_6 && (oldA_sign_bit||toAdd_sign_bit)) || (!has_carry_6 && (oldA_sign_bit && toAdd_sign_bit)))<<7;
+  unsigned char overflow = has_carry_6^has_carry_7;
+  switch_status_flag(NES_CARRY_FLAG, has_carry_7);
+  //unsigned char old oldA_u&128;
   switch_status_flag(NES_ZERO_FLAG,cpu->A == 0);
   switch_status_flag(NES_NEGATIVE_FLAG,cpu->A < 0);
   switch_status_flag(NES_OVERFLOW_FLAG,overflow); 
@@ -341,9 +348,10 @@ void EOR(unsigned char toEor)
 void ADC(unsigned char toAdd)
 { 
   unsigned char oldA = cpu->A;
-  cpu->A+=toAdd;
-  cpu->A+=(cpu->status&1); // add carry if set
-  ADC_update_status_register(oldA, toAdd); 
+  //cpu->A+=toAdd;
+  cpu->A+=(toAdd+(cpu->status&1));
+  //cpu->A+=(cpu->status&1); // add carry if set
+  ADC_update_status_register(oldA, toAdd ); 
 }
 
 void SBC(unsigned char toSubtract)
@@ -517,6 +525,8 @@ void STP(unsigned char* operand_ptr)
 
 void SLO(unsigned char* operand_ptr)
 {
+  ASL(operand_ptr);
+  ORA(*operand_ptr);
 }
 
 void SHX(unsigned char* operand_ptr)
@@ -569,11 +579,15 @@ void ARR(unsigned char* operand_ptr)
 
 void RRA(unsigned char* operand_ptr)
 {
+  ROR(operand_ptr);
+  ADC(*operand_ptr);
 }
 
 
 void SRE(unsigned char* operand_ptr)
 {
+  LSR(operand_ptr);
+  EOR(*operand_ptr);
 }
 
 void ALR(unsigned char* operand_ptr)
@@ -582,6 +596,8 @@ void ALR(unsigned char* operand_ptr)
 
 void RLA(unsigned char* operand_ptr)
 {
+  ROL(operand_ptr);
+  AND(*operand_ptr);
 }
 void SAX(unsigned char* operand_ptr)
 {
@@ -1080,7 +1096,7 @@ void set_opcodes()
 
   opcodes[0x23].name = "RLA";
   opcodes[0x23].action = RLA;
-  opcodes[0x23].address_mode = ZEROPAGE_X_ADDRESS_MODE;
+  opcodes[0x23].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
   opcodes[0x24].name = "BIT";
   opcodes[0x24].action = BIT;

@@ -68,9 +68,16 @@ SDL_Renderer* createRenderer(SDL_Window* win)
 
 }
 
-void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length) {
-     SDL_RenderClear(rend);
-
+SDL_Texture* createTexture(SDL_Renderer* rend)
+{
+return SDL_CreateTexture(
+        rend,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+256, 240);
+}
+void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length, SDL_Texture* texture) {
+    unsigned int* pixel_buffer=malloc(32*30*8*sizeof(unsigned int));
     int row_length = 32;   
     int row_num = 30;
     for(int q=0; q<row_length*row_num; q++)
@@ -78,21 +85,24 @@ void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char*
      int col = q < row_length ? q : q%row_length; 
      int name_table_index = 0x2000;
      int sprite_number = ppu_memory[name_table_index + q];
-     draw_sprite(1, col*8,(q/row_length)*8,sprite_number,ppu_memory,rend); 
+     draw_sprite(1, col*8,(q/row_length)*8,sprite_number,ppu_memory, pixel_buffer); 
     }
 
     for(int i=0;i<64; i++)
     {
       unsigned char sprite_index = i *4;
-      draw_sprite(0, sprite_data[sprite_index+3], sprite_data[sprite_index]+1, sprite_data[sprite_index+1], ppu_memory, rend);
+      draw_sprite(0, sprite_data[sprite_index+3], sprite_data[sprite_index]+1, sprite_data[sprite_index+1], ppu_memory, pixel_buffer);
     }
-
+    SDL_UpdateTexture(texture, NULL, pixel_buffer, 256 * sizeof(unsigned int));
+    SDL_RenderClear(rend);
+    SDL_RenderCopy(rend, texture, NULL, NULL);
     SDL_RenderPresent(rend);
+    free(pixel_buffer);
     // wait a few seconds
     SDL_Delay(50);   
 }
 
-void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
+/*void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
 {
     SDL_Window* win = createWindow();
     SDL_Renderer* rend = createRenderer(win);
@@ -102,20 +112,20 @@ void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
     SDL_Quit();
-}
+}*/
 
-void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, SDL_Renderer* rend)
+void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer)
 {
   for(int m=0; m<8; m++)
   {
      int sprite_index_offset = sprite_table * 0x1000;
      int sprite_index = sprite_index_offset + (sprite_number*16) + m;
      unsigned char* chr_data = &(ppu_memory[sprite_index]);
-     draw_chr_data(i, j +m, chr_data, rend);
+     draw_chr_data(i, j +m, chr_data, pixel_buffer);
   }
 }
 
-void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend, unsigned int* pixel_buffer)
+void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_buffer)
 {
   unsigned char chr_data_1 = chr_data[0];
   unsigned char chr_data_2 = chr_data[8];
@@ -138,8 +148,7 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend, un
         pixel_data = 0xFF00FFFF;
         break;
     }
-//    SDL_RenderDrawPoint(rend, i + 7 -n,j );
-    pixel_buffer[(j*32) + i + 7 -n]=pixel_data;  
+    pixel_buffer[(j*32*8) + i + 7 -n]=pixel_data;  
     chr_data_1>>=1;
     chr_data_2>>=1;
   }

@@ -2087,6 +2087,7 @@ void run_rom()
 {
   SDL_Window* win = createWindow();
   SDL_Renderer* rend = createRenderer(win);
+  SDL_Texture* text = createTexture(rend);
   set_opcodes();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
   cpu->cpu_memory[0x2002] = 128;
@@ -2228,7 +2229,7 @@ void run_rom()
     }
     if(draw_screen_count==0)
     {
-      updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE);
+      updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE, text);
       draw_screen_count=2400;
       NMI();
     }

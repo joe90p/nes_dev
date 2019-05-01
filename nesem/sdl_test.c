@@ -115,29 +115,31 @@ void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned cha
   }
 }
 
-void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend)
+void draw_chr_data(int i, int j, unsigned char* chr_data, SDL_Renderer* rend, unsigned int* pixel_buffer)
 {
   unsigned char chr_data_1 = chr_data[0];
   unsigned char chr_data_2 = chr_data[8];
   for(int n=0; n<8; n++)
   {
     unsigned char data = (chr_data_1&1) | ((chr_data_2<<1)&3);
+    unsigned int pixel_data= 0;
     switch(data)
     {
       case 0:
-        SDL_SetRenderDrawColor( rend, 255, 0, 0, 255);
+        pixel_data = 0xFF0000FF;
         break;
       case 1:
-        SDL_SetRenderDrawColor( rend, 0, 255, 0, 255);
+        pixel_data = 0x00FF00FF;
         break;
       case 2:
-        SDL_SetRenderDrawColor( rend, 0, 0, 255, 255);
+        pixel_data = 0x0000FFFF;
         break;
       case 3:
-        SDL_SetRenderDrawColor( rend, 255, 0, 255, 255);
+        pixel_data = 0xFF00FFFF;
         break;
     }
-    SDL_RenderDrawPoint(rend, i + 7 -n,j );
+//    SDL_RenderDrawPoint(rend, i + 7 -n,j );
+    pixel_buffer[(j*32) + i + 7 -n]=pixel_data;  
     chr_data_1>>=1;
     chr_data_2>>=1;
   }

@@ -76,8 +76,19 @@ return SDL_CreateTexture(
         SDL_TEXTUREACCESS_STREAMING,
 256, 240);
 }
+void createWindowAndRenderer(SDL_Window** wind, SDL_Renderer** rend)
+{
+  if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
+  {
+    printf("BIG error");
+  }
+  SDL_CreateWindowAndRenderer(PPU_SCREEN_X * 2, PPU_SCREEN_Y *2, SDL_WINDOW_SHOWN, wind, rend);
+  SDL_SetWindowTitle(*wind, "nesem by phil");
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+  SDL_RenderSetLogicalSize(*rend, PPU_SCREEN_X, PPU_SCREEN_Y);
+} 
 void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length, SDL_Texture* texture) {
-    unsigned int* pixel_buffer=malloc(32*30*8*sizeof(unsigned int));
+    unsigned int* pixel_buffer=malloc(256*240*sizeof(unsigned int));
     int row_length = 32;   
     int row_num = 30;
     for(int q=0; q<row_length*row_num; q++)

@@ -882,7 +882,7 @@ struct address* addresses;//[10];
 void set_opcodes()
 {
   opcodes = malloc(256 * sizeof(struct opcode));
-  addresses = malloc(10 * sizeof(struct address));
+  addresses = malloc(11 * sizeof(struct address));
   unsigned char IMMEDIATE_ADDRESS_MODE = 0;
   unsigned char ZEROPAGE_ADDRESS_MODE = 1;
   unsigned char ACCUMULATOR_ADDRESS_MODE = 2;
@@ -2085,8 +2085,9 @@ char starts_with(const char *pre, const char *str)
 
 void run_rom()
 {
-  SDL_Window* win = createWindow();
-  SDL_Renderer* rend = createRenderer(win);
+  SDL_Window* win =createWindow();
+  SDL_Renderer* rend =createRenderer(win);
+  //createWindowAndRenderer(&win, &rend);
   SDL_Texture* text = createTexture(rend);
   set_opcodes();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 

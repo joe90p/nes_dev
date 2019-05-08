@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include </home/phil/git/nes_dev/nesem/sdl_test.h>
+#include <time.h>
 
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
-//struct NES_IO* io;
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info);
 
 void run_rom();
@@ -882,7 +882,7 @@ struct address* addresses;//[10];
 void set_opcodes()
 {
   opcodes = malloc(256 * sizeof(struct opcode));
-  addresses = malloc(10 * sizeof(struct address));
+  addresses = malloc(11 * sizeof(struct address));
   unsigned char IMMEDIATE_ADDRESS_MODE = 0;
   unsigned char ZEROPAGE_ADDRESS_MODE = 1;
   unsigned char ACCUMULATOR_ADDRESS_MODE = 2;
@@ -1985,7 +1985,7 @@ void set_opcodes()
 
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
-    char* address_mode_info = (char*)malloc(10 * sizeof(char));
+    /*char* address_mode_info = (char*)malloc(10 * sizeof(char));
  
     if(program_counter_increment == 1)
     {
@@ -2000,7 +2000,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
     printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
-    free(address_mode_info);
+    free(address_mode_info);*/
 }
 
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
@@ -2085,8 +2085,11 @@ char starts_with(const char *pre, const char *str)
 
 void run_rom()
 {
-  SDL_Window* win = createWindow();
-  SDL_Renderer* rend = createRenderer(win);
+  
+  clock_t nmi_time = clock();
+  SDL_Window* win =createWindow();
+  SDL_Renderer* rend =createRenderer(win);
+  //createWindowAndRenderer(&win, &rend);
   SDL_Texture* text = createTexture(rend);
   set_opcodes();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
@@ -2102,7 +2105,8 @@ void run_rom()
   int arg1 = 0;
   int draw_screen_count = 2400;
   unsigned short breakpoint = 0;
-  while(keepRunning(&(io->controller1))==1)
+  //while(keepRunning(&(io->controller1))==1)
+  while(1==1)
   {
     char input[20];
     char raw_input[20];
@@ -2229,8 +2233,14 @@ void run_rom()
     }
     if(draw_screen_count==0)
     {
+   keepRunning(&(io->controller1));   
+      clock_t before = clock();
+      printf("trace: nmi_time %d\n", (clock() - nmi_time) * 1000 / CLOCKS_PER_SEC);
       updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE, text);
-      draw_screen_count=2400;
+      clock_t after = (clock() - before) * 1000 / CLOCKS_PER_SEC;
+      printf("trace: updateRenderer time %d\n", after);
+      nmi_time = clock();
+      draw_screen_count=25000;
       NMI();
     }
     

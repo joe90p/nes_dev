@@ -33,6 +33,7 @@ struct NES_PPU
 {
   unsigned char* ppu_memory;
   unsigned char* spr_ram;
+  unsigned char status;
 };
 void load_rom();
 unsigned char* ines_file_contents;

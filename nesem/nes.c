@@ -299,6 +299,11 @@ void LDA_ptr(unsigned char* toOr)
     controller_read=controller_read>>1;
 
   }
+  if(address==0x2002)
+  {
+    value_to_load = ppu->status;
+    ppu->status&=127;
+  }
   LDA(value_to_load);  
 }
 
@@ -666,6 +671,7 @@ void NMI()
   stack_push_short(cpu->PC) ;  
   stack_push_char(cpu->status|NES_BREAK_FLAG);
   cpu->status|=NES_INTERRUPT_DISABLE_FLAG;
+  ppu->status|=0x80;
   unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffa);
   cpu->PC=interrupt_vector;
 }
@@ -1985,7 +1991,7 @@ void set_opcodes()
 
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
-    /*char* address_mode_info = (char*)malloc(10 * sizeof(char));
+    char* address_mode_info = (char*)malloc(10 * sizeof(char));
  
     if(program_counter_increment == 1)
     {
@@ -2000,7 +2006,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
     printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
-    free(address_mode_info);*/
+    free(address_mode_info);
 }
 
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
@@ -2096,6 +2102,7 @@ void run_rom()
   cpu->cpu_memory[0x2002] = 128;
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
+  ppu->status = 0x80;
   for(int q=0;q<0x0100;q++)
   {
     cpu->cpu_memory[q]= 0x5B;

@@ -14,6 +14,7 @@
 #define COND_BRANCH_MASK  31 
 #define PRG_ROM_SIZE 0x4000
 #define CHR_ROM_SIZE 0x2000
+#define PPU_CONTROL_CPU_ADDRESS 0x2000
 struct NES_CPU
 {
   unsigned char* cpu_memory;
@@ -34,6 +35,7 @@ struct NES_PPU
   unsigned char* ppu_memory;
   unsigned char* spr_ram;
   unsigned char status;
+  unsigned char control;
 };
 void load_rom();
 unsigned char* ines_file_contents;

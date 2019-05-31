@@ -304,6 +304,10 @@ void LDA_ptr(unsigned char* toOr)
     value_to_load = ppu->status;
     ppu->status&=127;
   }
+  if(address==PPU_CONTROL_CPU_ADDRESS)
+  {
+    value_to_load = ppu->control;
+  }
   LDA(value_to_load);  
 }
 
@@ -393,7 +397,14 @@ void STA(unsigned short address)
   if(address==0x2007)
   {
     ppu->ppu_memory[ppu_write_address]=cpu->A;
-    ppu_write_address+=1;
+    if(ppu->control&4)
+    {
+      ppu_write_address+=32;
+    }
+    else
+    {
+      ppu_write_address+=1;
+    }
   }
   if(address==0x4016)
   {
@@ -409,6 +420,10 @@ void STA(unsigned short address)
     }
   }
   cpu->cpu_memory[address]=cpu->A;
+  if(address==PPU_CONTROL_CPU_ADDRESS)
+  {
+    ppu->control=cpu->A;
+  }
   if(address<0x2000)
   {
     unsigned short address_mirror_range = 0x0800; 
@@ -1991,7 +2006,7 @@ void set_opcodes()
 
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
-    char* address_mode_info = (char*)malloc(10 * sizeof(char));
+    /*char* address_mode_info = (char*)malloc(10 * sizeof(char));
  
     if(program_counter_increment == 1)
     {
@@ -2006,7 +2021,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
     printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
-    free(address_mode_info);
+    free(address_mode_info);*/
 }
 
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
@@ -2110,10 +2125,10 @@ void run_rom()
   int run_instructions_no_prompt = 0;
   char arg2 = ' ';
   int arg1 = 0;
-  int draw_screen_count = 2400;
+  int draw_screen_count = 29606;
   unsigned short breakpoint = 0;
-  //while(keepRunning(&(io->controller1))==1)
-  while(1==1)
+  while(keepRunning(&(io->controller1))==1)
+  //while(1==1)
   {
     char input[20];
     char raw_input[20];
@@ -2234,21 +2249,28 @@ void run_rom()
         }
       //}
     }
-    if((cpu->cpu_memory[0x2000]&128)==128)
+    draw_screen_count--; 
+    if(draw_screen_count==2260)
     {
-    draw_screen_count--;
-    }
-    if(draw_screen_count==0)
-    {
-   keepRunning(&(io->controller1));   
+      // V BLANK STARTS
+      //keepRunning(&(io->controller1));   
       clock_t before = clock();
       printf("trace: nmi_time %d\n", (clock() - nmi_time) * 1000 / CLOCKS_PER_SEC);
       updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE, text);
       clock_t after = (clock() - before) * 1000 / CLOCKS_PER_SEC;
       printf("trace: updateRenderer time %d\n", after);
       nmi_time = clock();
-      draw_screen_count=25000;
-      NMI();
+      ppu->status|=128;
+      if(ppu->control&128)
+      {
+        NMI();
+      }
+        
+    }
+    if(draw_screen_count==0)
+    {
+      draw_screen_count=29606;
+      ppu->status&=127;
     }
     
   } 

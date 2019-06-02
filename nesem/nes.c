@@ -286,9 +286,34 @@ void STA_ptr(unsigned char* toOr)
 }
 
 
+unsigned char get_value_to_load(unsigned char* operand_ptr)
+{
+  unsigned short address = operand_ptr - cpu->cpu_memory;
+  
+  unsigned char value_to_load = *operand_ptr;
+  if(address==0x4016)
+  {
+    //value_to_load = io->controller1&1;
+    //io->controller1=io->controller1>>1;
+    value_to_load = controller_read&1;
+    controller_read=controller_read>>1;
+
+  }
+  if(address==0x2002)
+  {
+    value_to_load = ppu->status;
+    ppu->status&=127;
+    ppu_write_address = 0;
+  }
+  if(address==PPU_CONTROL_CPU_ADDRESS)
+  {
+    value_to_load = ppu->control;
+  }
+  return value_to_load;
+}
 void LDA_ptr(unsigned char* toOr)
 {
-  unsigned short address = toOr - cpu->cpu_memory;
+  /*unsigned short address = toOr - cpu->cpu_memory;
   
   unsigned char value_to_load = *toOr;
   if(address==0x4016)
@@ -303,11 +328,13 @@ void LDA_ptr(unsigned char* toOr)
   {
     value_to_load = ppu->status;
     ppu->status&=127;
+    ppu_write_address = 0;
   }
   if(address==PPU_CONTROL_CPU_ADDRESS)
   {
     value_to_load = ppu->control;
-  }
+  }*/
+  unsigned char value_to_load = get_value_to_load(toOr);
   LDA(value_to_load);  
 }
 
@@ -372,31 +399,51 @@ void SBC(unsigned char toSubtract)
   ADC(255 - toSubtract);
 }
 
-void STA(unsigned short address)
+void store_value_at_address(unsigned char value, unsigned short address)
 {
+  if(address==PPU_CONTROL_CPU_ADDRESS)
+  {
+    ppu->control=value;
+    ppu->status&=224;
+    ppu->status|=value;
+  }
+  if(address==0x2001)
+  {
+    ppu->status&=224;
+    ppu->status|=value;
+  }
   if(address==0x2003)
   {
-    cpu_sprite_copy_address_low=cpu->A;
-    
+    cpu_sprite_copy_address_low=value;
+    ppu->status&=224;
+    ppu->status|=value;
   }
   if(address==0x4014)
   {
-    cpu_sprite_copy_address_high=cpu->A;
+    cpu_sprite_copy_address_high=value;
     unsigned short cpu_sprite_copy_address = get_short_from_chars( cpu_sprite_copy_address_high, cpu_sprite_copy_address_low);
     for(int i=0; i< 256; i++)
     {
       ppu->spr_ram[i]=cpu->cpu_memory[cpu_sprite_copy_address + i]; 
     }
+    ppu->status&=224;
+    ppu->status|=value;
   }
-
+  if(address==0x2005)
+  {
+    ppu->status&=224;
+    ppu->status|=value;
+  }
   if(address==0x2006)
   {
     ppu_write_address<<=8;
-    ppu_write_address|=cpu->A; 
+    ppu_write_address|=value; 
+    ppu->status&=224;
+    ppu->status|=value;
   }
   if(address==0x2007)
   {
-    ppu->ppu_memory[ppu_write_address]=cpu->A;
+    ppu->ppu_memory[ppu_write_address]=value;
     if(ppu->control&4)
     {
       ppu_write_address+=32;
@@ -405,25 +452,24 @@ void STA(unsigned short address)
     {
       ppu_write_address+=1;
     }
+    ppu->status&=224;
+    ppu->status|=value;
   }
   if(address==0x4016)
   {
-    if(cpu->A==1) {
+    if(value==1) {
       read_controller_reset_await = 1;
     }
     else {
-      if(cpu->A==0 && read_controller_reset_await) {
+      if(value==0 && read_controller_reset_await) {
         controller_read = io->controller1;
       }
       read_controller_reset_await = 0;
       io->controller1=0;
     }
   }
-  cpu->cpu_memory[address]=cpu->A;
-  if(address==PPU_CONTROL_CPU_ADDRESS)
-  {
-    ppu->control=cpu->A;
-  }
+  cpu->cpu_memory[address]=value;
+  
   if(address<0x2000)
   {
     unsigned short address_mirror_range = 0x0800; 
@@ -431,10 +477,16 @@ void STA(unsigned short address)
 
     for(unsigned char w=1;w<4;w++)
     {
-      cpu->cpu_memory[start_address + (w*address_mirror_range)]=cpu->A;
+      cpu->cpu_memory[start_address + (w*address_mirror_range)]=value;
     }
   }
 }
+
+void STA(unsigned short address)
+{
+  store_value_at_address((unsigned char)cpu->A, address);
+}
+
 void SAX_do(unsigned short address)
 {
   cpu->cpu_memory[address]=((unsigned char)cpu->A)&cpu->X;
@@ -492,23 +544,30 @@ void ROL(unsigned char* operand_ptr)
 
 void STX(unsigned char* operand_ptr)
 {
-  *operand_ptr = cpu->X;
+  //*operand_ptr = cpu->X;
+  unsigned short address = operand_ptr - cpu->cpu_memory;
+  store_value_at_address(cpu->X, address);
+  
 }
 
 void LDX(unsigned char* operand_ptr)
 {
-  cpu->X = *operand_ptr;
+  unsigned char value_to_load = get_value_to_load(operand_ptr);
+  cpu->X = value_to_load;
   set_negative_zero_flag(cpu->X);
 }
 
 void STY(unsigned char* operand_ptr)
 {
-  *operand_ptr = cpu->Y;
+  //*operand_ptr = cpu->Y;
+  unsigned short address = operand_ptr - cpu->cpu_memory;
+  store_value_at_address(cpu->X, address);
 }
 
 void LDY(unsigned char* operand_ptr)
 {
-  cpu->Y = *operand_ptr;
+  unsigned char value_to_load = get_value_to_load(operand_ptr);
+  cpu->Y = value_to_load;
   set_negative_zero_flag(*operand_ptr);
 }
 
@@ -2114,10 +2173,9 @@ void run_rom()
   SDL_Texture* text = createTexture(rend);
   set_opcodes();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
-  cpu->cpu_memory[0x2002] = 128;
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
-  ppu->status = 0x80;
+  ppu->status = 0x00;
   for(int q=0;q<0x0100;q++)
   {
     cpu->cpu_memory[q]= 0x5B;
@@ -2187,7 +2245,7 @@ void run_rom()
         }
         if(strcmp("print", input)==0)
         {
-          printf("cpu->X = %d (%x), cpu->Y = %d (%x), cpu->A = %d (%x), cpu->PC = %d (%x), cpu->status = %d (%x), breakpoint = %d (%x), cpu->cpu_memory[%x] = %d (%x) \n", cpu->X, cpu->X, cpu->Y, cpu->Y, cpu->A, cpu->A, cpu->PC, cpu->PC, cpu->status, cpu->status, breakpoint, breakpoint, arg1, cpu->cpu_memory[arg1], cpu->cpu_memory[arg1]);
+          printf("cpu->X = %d (%x), cpu->Y = %d (%x), cpu->A = %d (%x), cpu->PC = %d (%x), cpu->status = %d (%x), breakpoint = %d (%x), cpu->cpu_memory[%x] = %d (%x), ppu->status = %d (%x) \n", cpu->X, cpu->X, cpu->Y, cpu->Y, cpu->A, cpu->A, cpu->PC, cpu->PC, cpu->status, cpu->status, breakpoint, breakpoint, arg1, cpu->cpu_memory[arg1], cpu->cpu_memory[arg1], ppu->status, ppu->status);
           
         }
         if(strcmp("run", input)==0)

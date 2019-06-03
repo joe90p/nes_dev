@@ -2185,8 +2185,8 @@ void run_rom()
   int arg1 = 0;
   int draw_screen_count = 29606;
   unsigned short breakpoint = 0;
-  while(keepRunning(&(io->controller1))==1)
-  //while(1==1)
+  //while(keepRunning(&(io->controller1))==1)
+  while(1==1)
   {
     char input[20];
     char raw_input[20];
@@ -2327,6 +2327,10 @@ void run_rom()
     }
     if(draw_screen_count==0)
     {
+      if(keepRunning(&(io->controller1))==0)
+      {
+        break;
+      }
       draw_screen_count=29606;
       ppu->status&=127;
     }

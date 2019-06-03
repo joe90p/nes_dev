@@ -147,16 +147,16 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_bu
     switch(data)
     {
       case 0:
-        pixel_data = 0xFF0000FF;
+        pixel_data = 0xFFFF0000;
         break;
       case 1:
-        pixel_data = 0x00FF00FF;
+        pixel_data = 0xFF00FF00;
         break;
       case 2:
-        pixel_data = 0x0000FFFF;
+        pixel_data = 0xFF0000FF;
         break;
       case 3:
-        pixel_data = 0xFF00FFFF;
+        pixel_data = 0xFFFF00FF;
         break;
     }
     pixel_buffer[(j*32*8) + i + 7 -n]=pixel_data;  

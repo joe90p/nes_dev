@@ -13,6 +13,7 @@ void run_rom();
 static unsigned char read_controller_reset_await = 0;
 static unsigned char controller_read = 0;
 static unsigned short ppu_write_address;
+static unsigned char ppu_read_buffer = 0;
 static unsigned char cpu_sprite_copy_address_low;
 static unsigned char cpu_sprite_copy_address_high;
 unsigned char* get_immediate_operand_ptr()
@@ -286,30 +287,55 @@ void STA_ptr(unsigned char* toOr)
 }
 
 
-unsigned char get_value_to_load(unsigned char* operand_ptr)
+unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
 {
   unsigned short address = operand_ptr - cpu->cpu_memory;
   
   unsigned char value_to_load = *operand_ptr;
   if(address==0x4016)
   {
-    //value_to_load = io->controller1&1;
-    //io->controller1=io->controller1>>1;
     value_to_load = controller_read&1;
-    controller_read=controller_read>>1;
+    if(!peek)
+    {
+      controller_read=controller_read>>1;
+    }
 
   }
   if(address==0x2002)
   {
     value_to_load = ppu->status;
-    ppu->status&=127;
-    ppu_write_address = 0;
+    if(!peek)
+    {
+      ppu->status&=127;
+      ppu_write_address = 0;
+    }
   }
   if(address==PPU_CONTROL_CPU_ADDRESS)
   {
     value_to_load = ppu->control;
   }
+  if(address==0x2007)
+  {
+      unsigned char toReturn = ppu_read_buffer;
+      if(ppu_write_address<0x3f00)
+      {
+        ppu_read_buffer = ppu->ppu_memory[ppu_write_address];
+      }
+      else
+      {
+        ppu_read_buffer = ppu->ppu_memory[ppu_write_address - 0x1000];
+      }
+      return toReturn;  
+  }
   return value_to_load;
+}
+unsigned char peek_value(unsigned char* operand_ptr)
+{
+  get_value(operand_ptr, 1); 
+}
+unsigned char get_value_to_load(unsigned char* operand_ptr)
+{
+  get_value(operand_ptr, 0); 
 }
 void LDA_ptr(unsigned char* toOr)
 {
@@ -579,9 +605,10 @@ void DEC(unsigned char* operand_ptr)
 
 void BIT(unsigned char* operand_ptr)
 {
-  unsigned char data = *operand_ptr&cpu->A;
-  switch_status_flag(NES_NEGATIVE_FLAG, (*operand_ptr)&NES_NEGATIVE_FLAG);
-  switch_status_flag(NES_OVERFLOW_FLAG, (*operand_ptr)&NES_OVERFLOW_FLAG);
+  unsigned char value = peek_value(operand_ptr);
+  unsigned char data = value&cpu->A;
+  switch_status_flag(NES_NEGATIVE_FLAG, (value)&NES_NEGATIVE_FLAG);
+  switch_status_flag(NES_OVERFLOW_FLAG, (value)&NES_OVERFLOW_FLAG);
   switch_status_flag(NES_ZERO_FLAG, data==0);
 }
 
@@ -2065,7 +2092,8 @@ void set_opcodes()
 
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
-    /*char* address_mode_info = (char*)malloc(10 * sizeof(char));
+   
+    char* address_mode_info = (char*)malloc(10 * sizeof(char));
  
     if(program_counter_increment == 1)
     {
@@ -2080,7 +2108,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
       sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
     }
     printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
-    free(address_mode_info);*/
+    free(address_mode_info);
 }
 
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
@@ -2176,6 +2204,7 @@ void run_rom()
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
   ppu->status = 0x00;
+  cpu->A=0xfe;
   for(int q=0;q<0x0100;q++)
   {
     cpu->cpu_memory[q]= 0x5B;

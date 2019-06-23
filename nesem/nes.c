@@ -14,7 +14,7 @@ static unsigned char read_controller_reset_await = 0;
 static unsigned char controller_read = 0;
 static unsigned short ppu_write_address;
 static unsigned char ppu_read_buffer = 0;
-static unsigned char cpu_sprite_copy_address_low;
+static unsigned char oam_addr;
 static unsigned char cpu_sprite_copy_address_high;
 unsigned char* get_immediate_operand_ptr()
 {
@@ -314,6 +314,10 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
   {
     value_to_load = ppu->control;
   }
+  if(address==0x2004)
+  {
+    value_to_load = ppu->spr_ram[oam_addr];
+  }
   if(address==0x2007)
   {
       unsigned char toReturn = ppu_read_buffer;
@@ -440,17 +444,25 @@ void store_value_at_address(unsigned char value, unsigned short address)
   }
   if(address==0x2003)
   {
-    cpu_sprite_copy_address_low=value;
+    oam_addr=value;
+    ppu->status&=224;
+    ppu->status|=value;
+  }
+  if(address==0x2004)
+  {
+    ppu->spr_ram[oam_addr]=value;
+    oam_addr++;
     ppu->status&=224;
     ppu->status|=value;
   }
   if(address==0x4014)
   {
     cpu_sprite_copy_address_high=value;
-    unsigned short cpu_sprite_copy_address = get_short_from_chars( cpu_sprite_copy_address_high, cpu_sprite_copy_address_low);
+    unsigned short cpu_sprite_copy_address = get_short_from_chars( cpu_sprite_copy_address_high, 0);
+    
     for(int i=0; i< 256; i++)
     {
-      ppu->spr_ram[i]=cpu->cpu_memory[cpu_sprite_copy_address + i]; 
+      ppu->spr_ram[(unsigned char)(oam_addr + (unsigned char)i)]=cpu->cpu_memory[cpu_sprite_copy_address + i]; 
     }
     ppu->status&=224;
     ppu->status|=value;
@@ -585,9 +597,8 @@ void LDX(unsigned char* operand_ptr)
 
 void STY(unsigned char* operand_ptr)
 {
-  //*operand_ptr = cpu->Y;
   unsigned short address = operand_ptr - cpu->cpu_memory;
-  store_value_at_address(cpu->X, address);
+  store_value_at_address(cpu->Y, address);
 }
 
 void LDY(unsigned char* operand_ptr)
@@ -2092,7 +2103,7 @@ void set_opcodes()
 
 void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
 {
-   
+/*
     char* address_mode_info = (char*)malloc(10 * sizeof(char));
  
     if(program_counter_increment == 1)
@@ -2109,6 +2120,7 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
     }
     printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
     free(address_mode_info);
+*/
 }
 
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
@@ -2201,6 +2213,7 @@ void run_rom()
   SDL_Texture* text = createTexture(rend);
   set_opcodes();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
+  //cpu->PC = 0xc000;
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
   ppu->status = 0x00;

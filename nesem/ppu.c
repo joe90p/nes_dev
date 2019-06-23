@@ -1,7 +1,5 @@
-/**
- * hello3_image.c - Initializes SDL, loads an image, And displys it in a window
- */
-#include </home/phil/git/nes_dev/nesem/sdl_test.h>
+
+#include </home/phil/git/nes_dev/nesem/ppu.h>
 char keepRunning(char* controller)
 {
   SDL_Event event;
@@ -24,6 +22,7 @@ char keepRunning(char* controller)
       return 1;
   }
 }
+
 SDL_Window* createWindow() {
 
     // attempt to initialize graphics and timer system

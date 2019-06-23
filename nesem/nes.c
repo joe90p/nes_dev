@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include </home/phil/git/nes_dev/nesem/sdl_test.h>
+#include </home/phil/git/nes_dev/nesem/ppu.h>
 #include <time.h>
-
+#include </home/phil/git/nes_dev/nesem/cpu_addressing.h>
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
@@ -16,130 +16,6 @@ static unsigned short ppu_write_address;
 static unsigned char ppu_read_buffer = 0;
 static unsigned char oam_addr;
 static unsigned char cpu_sprite_copy_address_high;
-unsigned char* get_immediate_operand_ptr()
-{
-  return &cpu->cpu_memory[cpu->PC + 1];
-}
-
-unsigned char* get_zeropage_operand_ptr()
-{
-  unsigned char address = get_zeropage_address(cpu->cpu_memory[cpu->PC + 1]);
-  return &cpu->cpu_memory[address];
-}         
-
-unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_byte)
-{
-  return ((high_byte<<8) | low_byte);
-}
-
-unsigned char* get_accumulator_operand_ptr()
-{
-  return (unsigned char*)&cpu->A;
-}
-
-unsigned char* get_absolute_operand_ptr()
-{
-  unsigned short address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
-  return &cpu->cpu_memory[address];
-}
-
-unsigned char* get_zeropage_X_operand_ptr()
-{
-  unsigned char address = get_zeropage_X_address(cpu->cpu_memory[cpu->PC + 1]);
-  return &cpu->cpu_memory[address];
-}
-
-unsigned char* get_zeropage_Y_operand_ptr()
-{
-  unsigned char address = get_zeropage_Y_address(cpu->cpu_memory[cpu->PC + 1]);
-  return &cpu->cpu_memory[address];
-}
-
-unsigned char* get_dummy_operand_ptr()
-{
-  return &cpu->cpu_memory[0];
-}
-
-unsigned char* get_absolute_X_operand_ptr()
-{
-  unsigned short address = get_absolute_address_X(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
-  return &cpu->cpu_memory[address];
-}
-
-unsigned char* get_absolute_Y_operand_ptr()
-{
-  unsigned short address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
-  return &cpu->cpu_memory[address];
-}
-
-unsigned char* get_indexed_indirect_X_operand_ptr()
-{
-  unsigned short address = get_indexed_indirect_X(cpu->cpu_memory[cpu->PC + 1]);
-  return &cpu->cpu_memory[address];
-}
-
-unsigned char* get_indirect_indexed_Y_operand_ptr()
-{
-  unsigned short intermediate_address = get_absolute_address(0, cpu->cpu_memory[cpu->PC + 1]);
-  unsigned short address = get_indirect_indexed_Y(intermediate_address);
-  return &cpu->cpu_memory[address];
-}
-
-unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
-{
-  return get_address_input_upper_byte<<8 | get_address_input_lower_byte;
-}
-
-unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
-{
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->X;
-}
-
-unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
-{
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->Y;
-}
-
-unsigned short get_zeropage_address(unsigned char get_address_input)
-{
-  return get_absolute_address(0x00, get_address_input);
-}
-
-unsigned short get_zeropage_X_address(unsigned char get_address_input)
-{
-  return get_absolute_address_X(0x00, get_address_input);
-}
-
-unsigned short get_zeropage_Y_address(unsigned char get_address_input)
-{
-  return get_absolute_address_Y(0x00, get_address_input);
-}
-
-unsigned short get_indexed_indirect_X(unsigned char get_address_input)
-{
-  unsigned char indir_address = get_address_input + cpu->X; 
-  unsigned char indir_address_high = indir_address + 1;
-  return get_absolute_address(cpu->cpu_memory[indir_address_high], cpu->cpu_memory[indir_address]);
-}
-
-unsigned short get_indirect(unsigned short get_address_input)
-{ 
-  unsigned short address_high = get_address_input + 1;
-  if(get_address_input&0x00ff==0x00ff)
-  {
-    address_high=get_address_input&0xff00;
-  }
-   
-  return get_absolute_address(cpu->cpu_memory[address_high ], cpu->cpu_memory[get_address_input]);
-
-}
-
-unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
-{ 
-  unsigned char address_input_high = (unsigned char)get_address_input + 1;
-  return get_absolute_address(cpu->cpu_memory[address_input_high ], cpu->cpu_memory[get_address_input]) + cpu->Y;
-  //return get_indirect_indexed(get_address_input, cpu->Y);
-}
 
 void set_ppu_write_address(unsigned short address)
 {
@@ -301,7 +177,7 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
     }
 
   }
-  if(address==0x2002)
+  if(address==PPU_STATUS_CPU_ADDRESS)
   {
     value_to_load = ppu->status;
     if(!peek)
@@ -314,11 +190,11 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
   {
     value_to_load = ppu->control;
   }
-  if(address==0x2004)
+  if(address==PPU_OAM_DATA_CPU_ADDRESS)
   {
     value_to_load = ppu->spr_ram[oam_addr];
   }
-  if(address==0x2007)
+  if(address==PPU_DATA_CPU_ADDRESS)
   {
       unsigned char toReturn = ppu_read_buffer;
       if(ppu_write_address<0x3f00)
@@ -343,27 +219,6 @@ unsigned char get_value_to_load(unsigned char* operand_ptr)
 }
 void LDA_ptr(unsigned char* toOr)
 {
-  /*unsigned short address = toOr - cpu->cpu_memory;
-  
-  unsigned char value_to_load = *toOr;
-  if(address==0x4016)
-  {
-    //value_to_load = io->controller1&1;
-    //io->controller1=io->controller1>>1;
-    value_to_load = controller_read&1;
-    controller_read=controller_read>>1;
-
-  }
-  if(address==0x2002)
-  {
-    value_to_load = ppu->status;
-    ppu->status&=127;
-    ppu_write_address = 0;
-  }
-  if(address==PPU_CONTROL_CPU_ADDRESS)
-  {
-    value_to_load = ppu->control;
-  }*/
   unsigned char value_to_load = get_value_to_load(toOr);
   LDA(value_to_load);  
 }
@@ -414,18 +269,12 @@ void EOR(unsigned char toEor)
 void ADC(unsigned char toAdd)
 { 
   unsigned char oldA = cpu->A;
-  //cpu->A+=toAdd;
   cpu->A+=(toAdd+(cpu->status&1));
-  //cpu->A+=(cpu->status&1); // add carry if set
   ADC_update_status_register(oldA, toAdd ); 
 }
 
 void SBC(unsigned char toSubtract)
 {
-  //unsigned char oldA = cpu->A;
-  //cpu->A-=toSubtract;
-  //cpu->A-=(cpu->status&1); // subtract carry if set
-  //SBC_update_status_register(oldA); 
   ADC(255 - toSubtract);
 }
 
@@ -437,25 +286,25 @@ void store_value_at_address(unsigned char value, unsigned short address)
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x2001)
+  if(address==PPU_STATUS_CPU_ADDRESS)
   {
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x2003)
+  if(address==PPU_OAM_ADDRESS_CPU_ADDRESS)
   {
     oam_addr=value;
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x2004)
+  if(address==PPU_OAM_DATA_CPU_ADDRESS)
   {
     ppu->spr_ram[oam_addr]=value;
     oam_addr++;
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x4014)
+  if(address==PPU_OAM_DMA_CPU_ADDRESS)
   {
     cpu_sprite_copy_address_high=value;
     unsigned short cpu_sprite_copy_address = get_short_from_chars( cpu_sprite_copy_address_high, 0);
@@ -467,19 +316,19 @@ void store_value_at_address(unsigned char value, unsigned short address)
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x2005)
+  if(address==PPU_SCROLL_CPU_ADDRESS)
   {
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x2006)
+  if(address==PPU_ADDRESS_CPU_ADDRESS)
   {
     ppu_write_address<<=8;
     ppu_write_address|=value; 
     ppu->status&=224;
     ppu->status|=value;
   }
-  if(address==0x2007)
+  if(address==PPU_DATA_CPU_ADDRESS)
   {
     ppu->ppu_memory[ppu_write_address]=value;
     if(ppu->control&4)

@@ -10,15 +10,15 @@ CFLAGS := `sdl2-config --libs --cflags` -g -rdynamic -include nes.h -ggdb3 -O0 -
 HDRS :=
 TEST_HDRS := nes.h
 # add source files here
-SRCS := sdl_test.c nes.c main.c
-TEST_SRCS := sdl_test.c nes.c tests.c
+SRCS := cpu_addressing.c ppu.c nes.c main.c
+TEST_SRCS := ppu.c nes.c tests.c
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)
 TEST_OBJS := $(TEST_SRCS:.c=.o)
 
 # name of executable
-EXEC := game
+EXEC := phlem
 
 # default recipe
 all: $(EXEC)

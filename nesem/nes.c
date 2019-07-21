@@ -794,10 +794,9 @@ unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, un
 
 }
 
-void branch(char* name, unsigned char flag, unsigned char equalTo)
+void branch(unsigned char flag, unsigned char equalTo)
 {
   unsigned char offset = cpu->cpu_memory[cpu->PC+1];
-  print_instruction_info(2, "#%02x", name);
   if(!test_flag_and_branch(flag, equalTo, offset))
   {
     increment_PC(2);
@@ -805,51 +804,51 @@ void branch(char* name, unsigned char flag, unsigned char equalTo)
 }
 void BMI(unsigned char* c)
 {
-  branch("BMI", NES_NEGATIVE_FLAG, 1);
+  branch(NES_NEGATIVE_FLAG, 1);
 }
 
 void BPL(unsigned char* c)
 {
-  branch("BPL", NES_NEGATIVE_FLAG, 0);
+  branch(NES_NEGATIVE_FLAG, 0);
 }
 
 void BVS(unsigned char* c)
 {
-  branch("BMI", NES_OVERFLOW_FLAG, 1);
+  branch(NES_OVERFLOW_FLAG, 1);
 }
 
 void BVC(unsigned char* c)
 {
-  branch("BVC", NES_OVERFLOW_FLAG, 0);
+  branch(NES_OVERFLOW_FLAG, 0);
 }
 
 void BCS(unsigned char* c)
 {
-  branch("BCS", NES_CARRY_FLAG, 1);
+  branch(NES_CARRY_FLAG, 1);
 }
 
 void BCC(unsigned char* c)
 {
-  branch("BCC", NES_CARRY_FLAG, 0);
+  branch(NES_CARRY_FLAG, 0);
 }
 
 void BEQ(unsigned char* c)
 {
-  branch("BEQ", NES_CARRY_FLAG, 1);
+  branch(NES_ZERO_FLAG, 1);
 }
 
 void BNE(unsigned char* c)
 {
-  branch("BNE", NES_ZERO_FLAG, 0);
+  branch(NES_ZERO_FLAG, 0);
 }
 
-struct opcode* opcodes;// = malloc(256 * sizeof(struct opcode));
-struct address* addresses;//[10];
+struct opcode* opcodes;
+struct address* addresses;
 
 void set_opcodes()
 {
   opcodes = malloc(256 * sizeof(struct opcode));
-  addresses = malloc(11 * sizeof(struct address));
+  addresses = malloc(14 * sizeof(struct address));
   unsigned char IMMEDIATE_ADDRESS_MODE = 0;
   unsigned char ZEROPAGE_ADDRESS_MODE = 1;
   unsigned char ACCUMULATOR_ADDRESS_MODE = 2;
@@ -862,50 +861,73 @@ void set_opcodes()
   unsigned char ZEROPAGE_Y_ADDRESS_MODE = 9;
   unsigned char NONE_ADDRESS_MODE = 10;
   unsigned char ABSOLUTE_INDIRECT_ADDRESS_MODE = 11;
+  unsigned char BRANCH_DUMMY = 12;
+  unsigned char JUMP_DUMMY = 13;
   
   addresses[0].program_counter_increment = 2;
   addresses[0].get_operand_ptr = get_immediate_operand_ptr;
   addresses[0].address_info = "#%02x";
-  
+  addresses[0].inc_pc = 1;
+
   addresses[1].program_counter_increment = 2;
   addresses[1].get_operand_ptr = get_zeropage_operand_ptr;
   addresses[1].address_info = "$%02x";
+  addresses[1].inc_pc = 1;
  
   addresses[2].program_counter_increment = 1;
   addresses[2].get_operand_ptr = get_accumulator_operand_ptr;
   addresses[2].address_info = "A";
- 
+  addresses[2].inc_pc = 1;
+
   addresses[3].program_counter_increment = 3;
   addresses[3].get_operand_ptr = get_absolute_operand_ptr;
   addresses[3].address_info = "$%02x%02x";
-  
+  addresses[3].inc_pc = 1;
+ 
   addresses[4].program_counter_increment = 2;
   addresses[4].get_operand_ptr = get_zeropage_X_operand_ptr;
   addresses[4].address_info = "$%02x,X";
+  addresses[4].inc_pc = 1;
 
   addresses[5].program_counter_increment = 3;
   addresses[5].get_operand_ptr = get_absolute_X_operand_ptr;
   addresses[5].address_info = "$%02x%02x,X";
+  addresses[5].inc_pc = 1;
 
   addresses[6].program_counter_increment = 2;
   addresses[6].get_operand_ptr = get_indexed_indirect_X_operand_ptr;
   addresses[6].address_info = "($%02x,X)";
+  addresses[6].inc_pc = 1;
 
   addresses[7].program_counter_increment = 2;
   addresses[7].get_operand_ptr = get_indirect_indexed_Y_operand_ptr;
   addresses[7].address_info = "($%02x),Y";
+  addresses[7].inc_pc = 1;
 
   addresses[8].program_counter_increment = 3;
   addresses[8].get_operand_ptr = get_absolute_Y_operand_ptr;
   addresses[8].address_info = "$%02x%02x,Y";
+  addresses[8].inc_pc = 1;
 
   addresses[9].program_counter_increment = 2;
   addresses[9].get_operand_ptr = get_zeropage_Y_operand_ptr;
   addresses[9].address_info = "$%02x,Y";
+  addresses[9].inc_pc = 1;
 
   addresses[10].program_counter_increment = 1;
   addresses[10].get_operand_ptr = get_dummy_operand_ptr;
   addresses[10].address_info = "";
+  addresses[10].inc_pc = 1;
+
+  addresses[12].program_counter_increment = 2;
+  addresses[12].get_operand_ptr = get_zeropage_operand_ptr;
+  addresses[12].address_info = "$%02x";
+  addresses[12].inc_pc = 0;
+ 
+  addresses[13].program_counter_increment = 3;
+  addresses[13].get_operand_ptr = get_absolute_operand_ptr;
+  addresses[13].address_info = "$%02x%02x";
+  addresses[13].inc_pc = 0;
 
   for(int i=0; i<256; i++)
   {
@@ -979,7 +1001,7 @@ void set_opcodes()
 
   opcodes[0x10].name = "BPL";
   opcodes[0x10].action = BPL;
-  opcodes[0x10].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0x10].address_mode = BRANCH_DUMMY;
 
   opcodes[0x11].name = "ORA";
   opcodes[0x11].action = ORA_ptr;
@@ -1115,7 +1137,7 @@ void set_opcodes()
 
   opcodes[0x30].name = "BMI";
   opcodes[0x30].action = BMI;
-  opcodes[0x30].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0x30].address_mode = BRANCH_DUMMY;
 
   opcodes[0x31].name = "AND";
   opcodes[0x31].action = AND_ptr;
@@ -1227,7 +1249,7 @@ void set_opcodes()
 
   opcodes[0x4c].name = "JMP";
   opcodes[0x4c].action = JMP;
-  opcodes[0x4c].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x4c].address_mode = JUMP_DUMMY;
 
   opcodes[0x4d].name = "EOR";
   opcodes[0x4d].action = EOR_ptr;
@@ -1243,7 +1265,7 @@ void set_opcodes()
 
   opcodes[0x50].name = "BVC";
   opcodes[0x50].action = BVC;
-  opcodes[0x50].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0x50].address_mode = BRANCH_DUMMY;
 
   opcodes[0x51].name = "EOR";
   opcodes[0x51].action = EOR_ptr;
@@ -1372,7 +1394,7 @@ void set_opcodes()
 
   opcodes[0x70].name = "BVS";
   opcodes[0x70].action = BVS;
-  opcodes[0x70].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0x70].address_mode = BRANCH_DUMMY;
 
   opcodes[0x71].name = "ADC";
   opcodes[0x71].action = ADC_ptr;
@@ -1500,7 +1522,7 @@ void set_opcodes()
 
   opcodes[0x90].name = "BCC";
   opcodes[0x90].action = BCC;
-  opcodes[0x90].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0x90].address_mode = BRANCH_DUMMY;
 
   opcodes[0x91].name = "STA";
   opcodes[0x91].action = STA_ptr;
@@ -1628,7 +1650,7 @@ void set_opcodes()
 
   opcodes[0xb0].name = "BCS";
   opcodes[0xb0].action = BCS;
-  opcodes[0xb0].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0xb0].address_mode = BRANCH_DUMMY;
 
   opcodes[0xb1].name = "LDA";
   opcodes[0xb1].action = LDA_ptr;
@@ -1756,7 +1778,7 @@ void set_opcodes()
 
   opcodes[0xd0].name = "BNE";
   opcodes[0xd0].action = BNE;
-  opcodes[0xd0].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0xd0].address_mode = BRANCH_DUMMY;
 
   opcodes[0xd1].name = "CMP";
   opcodes[0xd1].action = CMP;
@@ -1884,7 +1906,7 @@ void set_opcodes()
 
   opcodes[0xf0].name = "BEQ";
   opcodes[0xf0].action = BEQ;
-  opcodes[0xf0].address_mode = ZEROPAGE_ADDRESS_MODE;
+  opcodes[0xf0].address_mode = BRANCH_DUMMY;
   
   opcodes[0xf1].name = "SBC";
   opcodes[0xf1].action = SBC_ptr;
@@ -1946,7 +1968,6 @@ void set_opcodes()
   opcodes[0xff].action = ISC;
   opcodes[0xff].address_mode = ABSOLUTE_X_ADDRESS_MODE;
 
-
 }
 
 
@@ -1974,12 +1995,8 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
 
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
 {
-    //char* opcode_info = (char*)malloc(10 * sizeof(char));
     char* address_info = addresses[addressing_mode].address_info;
-   
-    //strcpy(opcode_info, opcodes[opcode].name);
     print_instruction_info(program_counter_increment, address_info, opcodes[opcode].name);
-    //free(opcode_info);
 }
 
 void conditional_branch_instruction(unsigned char current_opcode)
@@ -2031,7 +2048,7 @@ void standard_instruction(unsigned char current_opcode)
   char program_counter_increment = addresses[address_mode].program_counter_increment;
   print_instruction_info_from_context( program_counter_increment,  address_mode, current_opcode);
   opcodes[current_opcode].action(operand_ptr);
-  if(strcmp("JMP", opcodes[current_opcode].name))
+  if(addresses[address_mode].inc_pc)
   {
     increment_PC(program_counter_increment);
   }
@@ -2058,7 +2075,6 @@ void run_rom()
   clock_t nmi_time = clock();
   SDL_Window* win =createWindow();
   SDL_Renderer* rend =createRenderer(win);
-  //createWindowAndRenderer(&win, &rend);
   SDL_Texture* text = createTexture(rend);
   set_opcodes();
   cpu->PC = get_short_from_cpu_memory(0xfffc); 
@@ -2179,24 +2195,7 @@ void run_rom()
     }
     if(!exceptional_instruction)
     { 
-      //if(opcodes[current_opcode].action)
-      //{
-        //unsigned char* dummy_ptr = 0;
-        //print_instruction_info(1, "", opcodes[current_opcode].name);
-        //opcodes[current_opcode].action(dummy_ptr);      
-        //increment_PC(1);
-      //}
-      //else
-      //{
-        if((current_opcode&COND_BRANCH_MASK)==16)
-        {
-          conditional_branch_instruction(current_opcode);
-        }
-        else
-        { 
-          standard_instruction(current_opcode);
-        }
-      //}
+      standard_instruction(current_opcode);
     }
     draw_screen_count--; 
     if(draw_screen_count==2260)

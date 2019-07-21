@@ -59,6 +59,7 @@ struct address
   char program_counter_increment;
   get_operand_ptr_type get_operand_ptr;
   char* address_info;
+  char inc_pc;
 };
 struct opcode
 {

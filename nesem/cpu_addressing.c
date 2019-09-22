@@ -1,5 +1,57 @@
 #include </home/phil/git/nes_dev/nesem/cpu_addressing.h>
 
+unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
+{
+  return get_address_input_upper_byte<<8 | get_address_input_lower_byte;
+}
+
+unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
+{
+  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->X;
+}
+
+unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
+{
+  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->Y;
+}
+
+unsigned short get_zeropage_address(unsigned char get_address_input)
+{
+  return get_absolute_address(0x00, get_address_input);
+}
+
+unsigned short get_zeropage_X_address(unsigned char get_address_input)
+{
+  return get_absolute_address_X(0x00, get_address_input);
+}
+
+unsigned short get_zeropage_Y_address(unsigned char get_address_input)
+{
+  return get_absolute_address_Y(0x00, get_address_input);
+}
+unsigned short get_indexed_indirect_X(unsigned char get_address_input)
+{
+  unsigned char indir_address = get_address_input + cpu->X; 
+  unsigned char indir_address_high = indir_address + 1;
+  return get_absolute_address(cpu->cpu_memory[indir_address_high], cpu->cpu_memory[indir_address]);
+}
+unsigned short get_indirect(unsigned short get_address_input)
+{ 
+  unsigned short address_high = get_address_input + 1;
+  if(get_address_input&0x00ff==0x00ff)
+  {
+    address_high=get_address_input&0xff00;
+  }
+   
+  return get_absolute_address(cpu->cpu_memory[address_high ], cpu->cpu_memory[get_address_input]);
+
+}
+
+unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
+{ 
+  unsigned char address_input_high = (unsigned char)get_address_input + 1;
+  return get_absolute_address(cpu->cpu_memory[address_input_high ], cpu->cpu_memory[get_address_input]) + cpu->Y;
+}
 unsigned char* get_immediate_operand_ptr()
 {
   return &cpu->cpu_memory[cpu->PC + 1];
@@ -11,10 +63,7 @@ unsigned char* get_zeropage_operand_ptr()
   return &cpu->cpu_memory[address];
 }         
 
-unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_byte)
-{
-  return ((high_byte<<8) | low_byte);
-}
+
 
 unsigned char* get_accumulator_operand_ptr()
 {
@@ -69,59 +118,8 @@ unsigned char* get_indirect_indexed_Y_operand_ptr()
   return &cpu->cpu_memory[address];
 }
 
-unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
+unsigned char* get_absolute_indirect_operand_ptr()
 {
-  return get_address_input_upper_byte<<8 | get_address_input_lower_byte;
+  unsigned short intermediate_address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
+  return &cpu->cpu_memory[get_indirect(intermediate_address)];
 }
-
-unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
-{
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->X;
-}
-
-unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
-{
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->Y;
-}
-
-unsigned short get_zeropage_address(unsigned char get_address_input)
-{
-  return get_absolute_address(0x00, get_address_input);
-}
-
-unsigned short get_zeropage_X_address(unsigned char get_address_input)
-{
-  return get_absolute_address_X(0x00, get_address_input);
-}
-
-unsigned short get_zeropage_Y_address(unsigned char get_address_input)
-{
-  return get_absolute_address_Y(0x00, get_address_input);
-}
-
-unsigned short get_indexed_indirect_X(unsigned char get_address_input)
-{
-  unsigned char indir_address = get_address_input + cpu->X; 
-  unsigned char indir_address_high = indir_address + 1;
-  return get_absolute_address(cpu->cpu_memory[indir_address_high], cpu->cpu_memory[indir_address]);
-}
-
-unsigned short get_indirect(unsigned short get_address_input)
-{ 
-  unsigned short address_high = get_address_input + 1;
-  if(get_address_input&0x00ff==0x00ff)
-  {
-    address_high=get_address_input&0xff00;
-  }
-   
-  return get_absolute_address(cpu->cpu_memory[address_high ], cpu->cpu_memory[get_address_input]);
-
-}
-
-unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
-{ 
-  unsigned char address_input_high = (unsigned char)get_address_input + 1;
-  return get_absolute_address(cpu->cpu_memory[address_input_high ], cpu->cpu_memory[get_address_input]) + cpu->Y;
-  //return get_indirect_indexed(get_address_input, cpu->Y);
-}
-

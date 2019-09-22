@@ -25,7 +25,7 @@ struct address* addresses;
 void set_opcodes()
 {
   opcodes = malloc(256 * sizeof(struct opcode));
-  addresses = malloc(14 * sizeof(struct address));
+  addresses = malloc(15 * sizeof(struct address));
   unsigned char IMMEDIATE_ADDRESS_MODE = 0;
   unsigned char ZEROPAGE_ADDRESS_MODE = 1;
   unsigned char ACCUMULATOR_ADDRESS_MODE = 2;
@@ -40,6 +40,7 @@ void set_opcodes()
   unsigned char ABSOLUTE_INDIRECT_ADDRESS_MODE = 11;
   unsigned char BRANCH_DUMMY = 12;
   unsigned char JUMP_DUMMY = 13;
+  unsigned char JSR_DUMMY = 14;
   
   addresses[0].program_counter_increment = 2;
   addresses[0].get_operand_ptr = get_immediate_operand_ptr;
@@ -96,6 +97,11 @@ void set_opcodes()
   addresses[10].address_info = "";
   addresses[10].inc_pc = 1;
 
+  addresses[11].program_counter_increment = 3;
+  addresses[11].get_operand_ptr = get_absolute_indirect_operand_ptr;
+  addresses[11].address_info = "($%02x%02x)";
+  addresses[11].inc_pc = 0;
+
   addresses[12].program_counter_increment = 2;
   addresses[12].get_operand_ptr = get_zeropage_operand_ptr;
   addresses[12].address_info = "$%02x";
@@ -105,6 +111,11 @@ void set_opcodes()
   addresses[13].get_operand_ptr = get_absolute_operand_ptr;
   addresses[13].address_info = "$%02x%02x";
   addresses[13].inc_pc = 0;
+
+  addresses[14].program_counter_increment = 1;
+  addresses[14].get_operand_ptr = get_absolute_operand_ptr;
+  addresses[14].address_info = "";
+  addresses[14].inc_pc = 0;
 
   for(int i=0; i<256; i++)
   {
@@ -250,7 +261,7 @@ void set_opcodes()
 
   opcodes[0x20].name = "JSR";
   opcodes[0x20].action = JSR;
-  opcodes[0x20].address_mode = ABSOLUTE_ADDRESS_MODE;
+  opcodes[0x20].address_mode = JSR_DUMMY;
 
   opcodes[0x21].name = "AND";
   opcodes[0x21].action = AND_ptr;
@@ -1385,10 +1396,10 @@ void run_rom()
     unsigned char exceptional_instruction = 0;
     switch(current_opcode)
     {
-      case 0x20:
+      /*case 0x20:
         JSR();
         exceptional_instruction= 1;
-        break;
+        break;*/
       case 0x60:
         RTS();
         exceptional_instruction= 1;
@@ -1397,10 +1408,10 @@ void run_rom()
         RTI();
         exceptional_instruction= 1;
         break;
-      case 0x6C:
+      /*case 0x6C:
         JMP_ind();
         exceptional_instruction=1;
-        break;
+        break;*/
     }
     if(!exceptional_instruction)
     { 

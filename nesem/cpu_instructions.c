@@ -1,4 +1,5 @@
 #include </home/phil/git/nes_dev/nesem/cpu_instructions.h>
+#include </home/phil/git/nes_dev/nesem/cpu_addressing.h>
 static unsigned char read_controller_reset_await = 0;
 static unsigned char controller_read = 0;
 static unsigned short ppu_write_address;
@@ -15,7 +16,10 @@ unsigned short get_ppu_write_address()
 {
   return ppu_write_address;
 }
-
+unsigned short get_short_from_chars(unsigned char high_byte, unsigned char low_byte)
+{
+  return ((high_byte<<8) | low_byte);
+}
 
 void switch_status_flag(char flag, char switch_on)
 {
@@ -586,13 +590,7 @@ void NMI()
   unsigned short interrupt_vector = get_short_from_cpu_memory(0xfffa);
   cpu->PC=interrupt_vector;
 }
-void JSR()
-{
-  stack_push_short(cpu->PC + 2);  
-  unsigned short newPC = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
-  print_instruction_info(3, "$%02x%02x", "JSR");
-  cpu->PC=newPC;
-}
+
 
 void RTI()
 {
@@ -605,13 +603,7 @@ void RTI()
   cpu->PC = stack_pull_short();  
 }
 
-void JMP_ind()
-{
-  unsigned short intermediate_address = get_absolute_address(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]);
-  unsigned short newPC = get_indirect(intermediate_address);
-  print_instruction_info(3, "$(%02x%02x)", "JMP");
-  cpu->PC=newPC;
-}
+
 
 void RTS()
 {
@@ -793,3 +785,10 @@ void BNE(unsigned char* c)
 }
 
 
+void JSR(unsigned char* operand_ptr)
+{
+  stack_push_short(cpu->PC + 2);  
+unsigned char* pc_0 = &cpu->cpu_memory[0];
+  unsigned char* count = operand_ptr - pc_0; 
+  cpu->PC = (unsigned short)count;
+}

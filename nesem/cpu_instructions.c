@@ -722,11 +722,13 @@ void get_data_at_address_do_opcode(short address, opcode_action_type opcode_acti
   opcode_action(data);
 }
 
-unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char offset)
+unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, unsigned char* newPC_ptr)
 {
   if((equalTo && (cpu->status&flag)) || (!equalTo && !(cpu->status&flag)))
   {
-    increment_PC(offset + 2);
+    unsigned short newPC = newPC_ptr - cpu->cpu_memory;
+    cpu->PC = newPC;
+    //increment_PC(offset + 2);
     return 1;
   }
   else
@@ -736,52 +738,51 @@ unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, un
 
 }
 
-void branch(unsigned char flag, unsigned char equalTo)
+void branch(unsigned char flag, unsigned char equalTo, unsigned char* newPC_ptr)
 {
-  unsigned char offset = cpu->cpu_memory[cpu->PC+1];
-  if(!test_flag_and_branch(flag, equalTo, offset))
+  if(!test_flag_and_branch(flag, equalTo, newPC_ptr))
   {
     increment_PC(2);
   } 
 }
 void BMI(unsigned char* c)
 {
-  branch(NES_NEGATIVE_FLAG, 1);
+  branch(NES_NEGATIVE_FLAG, 1, c);
 }
 
 void BPL(unsigned char* c)
 {
-  branch(NES_NEGATIVE_FLAG, 0);
+  branch(NES_NEGATIVE_FLAG, 0, c);
 }
 
 void BVS(unsigned char* c)
 {
-  branch(NES_OVERFLOW_FLAG, 1);
+  branch(NES_OVERFLOW_FLAG, 1, c);
 }
 
 void BVC(unsigned char* c)
 {
-  branch(NES_OVERFLOW_FLAG, 0);
+  branch(NES_OVERFLOW_FLAG, 0, c);
 }
 
 void BCS(unsigned char* c)
 {
-  branch(NES_CARRY_FLAG, 1);
+  branch(NES_CARRY_FLAG, 1, c);
 }
 
 void BCC(unsigned char* c)
 {
-  branch(NES_CARRY_FLAG, 0);
+  branch(NES_CARRY_FLAG, 0, c);
 }
 
 void BEQ(unsigned char* c)
 {
-  branch(NES_ZERO_FLAG, 1);
+  branch(NES_ZERO_FLAG, 1, c);
 }
 
 void BNE(unsigned char* c)
 {
-  branch(NES_ZERO_FLAG, 0);
+  branch(NES_ZERO_FLAG, 0, c);
 }
 
 

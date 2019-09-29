@@ -595,7 +595,7 @@ void NMI()
 void RTI()
 {
 
-  print_instruction_info(1, "", "RTI");
+  //print_instruction_info(1, "", "RTI");
 
   cpu->status =  stack_pull_char();
   switch_status_flag(32, 1);
@@ -608,7 +608,7 @@ void RTI()
 void RTS()
 {
   cpu->PC = stack_pull_short() + 1 ;  
-  print_instruction_info(1, "", "RTS");
+  //print_instruction_info(1, "", "RTS");
 }
 void PHP()
 {

@@ -36,19 +36,7 @@ typedef void (*opcode_action_type)(unsigned char a);
 void run_rom();
 typedef void (*opcode_action)(unsigned char* ptr);
 typedef unsigned char* (*get_operand_ptr_type)();
-struct address
-{
-  char program_counter_increment;
-  get_operand_ptr_type get_operand_ptr;
-  char* address_info;
-  char inc_pc;
-};
-struct opcode
-{
-  opcode_action action;
-  char* name;
-  unsigned char address_mode;
-};
+
 
 void load_rom();
 void increment_PC(signed char);

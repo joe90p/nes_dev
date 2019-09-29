@@ -10,7 +10,7 @@ CFLAGS := `sdl2-config --libs --cflags` -g -rdynamic -include nes.h -ggdb3 -O0 -
 HDRS :=
 TEST_HDRS := nes.h
 # add source files here
-SRCS := cpu_instructions.c cpu_addressing.c ppu.c nes.c main.c
+SRCS := cpu_instructions.c cpu_addressing.c ppu.c nes.c main.c opcode_init.c
 TEST_SRCS := ppu.c nes.c tests.c
 
 # generate names of object files

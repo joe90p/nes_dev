@@ -24,12 +24,12 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   
   (*addresses_ptr)[0].program_counter_increment = 2;
   (*addresses_ptr)[0].get_operand_ptr = get_immediate_operand_ptr;
-  (*addresses_ptr)[0].address_info = "#%02x";
+  (*addresses_ptr)[0].address_info = "#$%02X";
   (*addresses_ptr)[0].inc_pc = 1;
 
   (*addresses_ptr)[1].program_counter_increment = 2;
   (*addresses_ptr)[1].get_operand_ptr = get_zeropage_operand_ptr;
-  (*addresses_ptr)[1].address_info = "$%02x";
+  (*addresses_ptr)[1].address_info = "$%02X";
   (*addresses_ptr)[1].inc_pc = 1;
  
   (*addresses_ptr)[2].program_counter_increment = 1;
@@ -39,37 +39,37 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
 
   (*addresses_ptr)[3].program_counter_increment = 3;
   (*addresses_ptr)[3].get_operand_ptr = get_absolute_operand_ptr;
-  (*addresses_ptr)[3].address_info = "$%02x%02x";
+  (*addresses_ptr)[3].address_info = "$%02X%02X";
   (*addresses_ptr)[3].inc_pc = 1;
  
   (*addresses_ptr)[4].program_counter_increment = 2;
   (*addresses_ptr)[4].get_operand_ptr = get_zeropage_X_operand_ptr;
-  (*addresses_ptr)[4].address_info = "$%02x,X";
+  (*addresses_ptr)[4].address_info = "$%02X,X";
   (*addresses_ptr)[4].inc_pc = 1;
 
   (*addresses_ptr)[5].program_counter_increment = 3;
   (*addresses_ptr)[5].get_operand_ptr = get_absolute_X_operand_ptr;
-  (*addresses_ptr)[5].address_info = "$%02x%02x,X";
+  (*addresses_ptr)[5].address_info = "$%02X%02X,X";
   (*addresses_ptr)[5].inc_pc = 1;
 
   (*addresses_ptr)[6].program_counter_increment = 2;
   (*addresses_ptr)[6].get_operand_ptr = get_indexed_indirect_X_operand_ptr;
-  (*addresses_ptr)[6].address_info = "($%02x,X)";
+  (*addresses_ptr)[6].address_info = "($%02X,X)";
   (*addresses_ptr)[6].inc_pc = 1;
 
   (*addresses_ptr)[7].program_counter_increment = 2;
   (*addresses_ptr)[7].get_operand_ptr = get_indirect_indexed_Y_operand_ptr;
-  (*addresses_ptr)[7].address_info = "($%02x),Y";
+  (*addresses_ptr)[7].address_info = "($%02X),Y";
   (*addresses_ptr)[7].inc_pc = 1;
 
   (*addresses_ptr)[8].program_counter_increment = 3;
   (*addresses_ptr)[8].get_operand_ptr = get_absolute_Y_operand_ptr;
-  (*addresses_ptr)[8].address_info = "$%02x%02x,Y";
+  (*addresses_ptr)[8].address_info = "$%02X%02X,Y";
   (*addresses_ptr)[8].inc_pc = 1;
 
   (*addresses_ptr)[9].program_counter_increment = 2;
   (*addresses_ptr)[9].get_operand_ptr = get_zeropage_Y_operand_ptr;
-  (*addresses_ptr)[9].address_info = "$%02x,Y";
+  (*addresses_ptr)[9].address_info = "$%02X,Y";
   (*addresses_ptr)[9].inc_pc = 1;
 
   (*addresses_ptr)[10].program_counter_increment = 1;
@@ -79,17 +79,17 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
 
   (*addresses_ptr)[11].program_counter_increment = 3;
   (*addresses_ptr)[11].get_operand_ptr = get_absolute_indirect_operand_ptr;
-  (*addresses_ptr)[11].address_info = "($%02x%02x)";
+  (*addresses_ptr)[11].address_info = "($%02X%02X)";
   (*addresses_ptr)[11].inc_pc = 0;
 
-  (*addresses_ptr)[12].program_counter_increment = 2;
-  (*addresses_ptr)[12].get_operand_ptr = get_zeropage_operand_ptr;
-  (*addresses_ptr)[12].address_info = "$%02x";
+  (*addresses_ptr)[12].program_counter_increment = 3;
+  (*addresses_ptr)[12].get_operand_ptr = get_branch_operand_ptr;
+  (*addresses_ptr)[12].address_info = "$%04X";
   (*addresses_ptr)[12].inc_pc = 0;
  
   (*addresses_ptr)[13].program_counter_increment = 3;
   (*addresses_ptr)[13].get_operand_ptr = get_absolute_operand_ptr;
-  (*addresses_ptr)[13].address_info = "$%02x%02x";
+  (*addresses_ptr)[13].address_info = "$%02X%02X";
   (*addresses_ptr)[13].inc_pc = 0;
 
   (*addresses_ptr)[14].program_counter_increment = 1;
@@ -241,7 +241,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
 
   (*opcodes_ptr)[0x20].name = "JSR";
   (*opcodes_ptr)[0x20].action = JSR;
-  (*opcodes_ptr)[0x20].address_mode = JSR_DUMMY;
+  (*opcodes_ptr)[0x20].address_mode = JUMP_DUMMY;
 
   (*opcodes_ptr)[0x21].name = "AND";
   (*opcodes_ptr)[0x21].action = AND_ptr;

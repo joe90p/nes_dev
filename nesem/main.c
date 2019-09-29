@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 void handler(int sig) {
   void *array[10];
@@ -23,6 +24,13 @@ int main(int argc, char* argv[])
   ppu = malloc(sizeof(struct NES_PPU)); 
   io = malloc(sizeof(struct NES_IO));
   FILE* nes_file_ptr;
+  char is_test = 0;
+  if(argc>=3)
+  {
+    
+    char* test_mode_arg = argv[2];
+    is_test = !strcmp(test_mode_arg, "test");
+  }
   int nes_file_length; 
   nes_file_ptr = fopen(argv[1], "r");
   fseek(nes_file_ptr,0,SEEK_END);
@@ -33,7 +41,7 @@ int main(int argc, char* argv[])
   
   fclose(nes_file_ptr); 
   load_rom();
-  run_rom();
+  run_rom(is_test);
   return 0;
 }
 

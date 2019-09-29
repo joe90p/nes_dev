@@ -9,18 +9,14 @@
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;
-void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info);
-
-void run_rom();
 
 struct opcode* opcodes;
 struct address* addresses;
 
-//void set_opcodes(opcodes, addresses);
-
-void print_instruction_info(char program_counter_increment, char* address_info, char* opcode_info)
+void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
 {
-/*
+
+    char* address_info = addresses[addressing_mode].address_info;
     char* address_mode_info = (char*)malloc(10 * sizeof(char));
  
     if(program_counter_increment == 1)
@@ -33,64 +29,35 @@ void print_instruction_info(char program_counter_increment, char* address_info, 
     }
     if(program_counter_increment == 3)
     {
-      sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
+      if(addressing_mode==12) // branch
+      {
+        sprintf(address_mode_info,address_info, addresses[addressing_mode].get_operand_ptr() - cpu->cpu_memory);
+      }
+      else
+      {
+        sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
+      }
     }
-    printf("%02X %s %s\nA:%X  X:%X  Y:%X  P:%X  SP:%X  \n", cpu->PC, opcode_info, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
+    printf("%02X %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X \n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
     free(address_mode_info);
-*/
+
 }
 
-void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
-{
-    char* address_info = addresses[addressing_mode].address_info;
-    print_instruction_info(program_counter_increment, address_info, opcodes[opcode].name);
-}
-
-void conditional_branch_instruction(unsigned char current_opcode)
-{
-  unsigned char branch_context = (current_opcode&192)>>6;
-  unsigned char equalTo = (current_opcode&32)>>5;
-
-  unsigned char offset = cpu->cpu_memory[cpu->PC+1];
-  char* opcode_info;
-  char flag;
-  switch(branch_context)
-  {
-    case 0:
-      flag=NES_NEGATIVE_FLAG;
-      opcode_info=equalTo ? "BMI" : "BPL";
-      break;
-    case 1:
-      flag=NES_OVERFLOW_FLAG;
-      opcode_info=equalTo ? "BVS" : "BVC";
-      break;
-    case 2:
-      flag=NES_CARRY_FLAG;
-      opcode_info=equalTo ? "BCS" : "BCC";
-      break;
-    case 3:
-      flag=NES_ZERO_FLAG;
-      opcode_info=equalTo ? "BEQ" : "BNE";
-      break;
-  }
-  print_instruction_info(2, "#%02x", opcode_info);
-  if(!test_flag_and_branch(flag, equalTo, offset))
-  {
-    increment_PC(2);
-  }
-}
 
 void increment_PC(signed char increment)
 {
   cpu->PC+=increment;
 }
 
-void standard_instruction(unsigned char current_opcode)
+void standard_instruction(unsigned char current_opcode, char is_test)
 {
   unsigned char address_mode =  opcodes[current_opcode].address_mode;
   unsigned char* operand_ptr = addresses[address_mode].get_operand_ptr();
   char program_counter_increment = addresses[address_mode].program_counter_increment;
-  print_instruction_info_from_context( program_counter_increment,  address_mode, current_opcode);
+  if(is_test)
+  {
+    print_instruction_info_from_context( program_counter_increment,  address_mode, current_opcode);
+  }
   opcodes[current_opcode].action(operand_ptr);
   if(addresses[address_mode].inc_pc)
   {
@@ -149,7 +116,7 @@ void load_rom()
   //draw(ppu->ppu_memory, ppu->spr_ram, CHR_ROM_SIZE); 
 
 }
-void run_rom()
+void run_rom(char is_test)
 {
   
   clock_t nmi_time = clock();
@@ -157,17 +124,27 @@ void run_rom()
   SDL_Renderer* rend =createRenderer(win);
   SDL_Texture* text = createTexture(rend);
   set_opcodes(&opcodes, &addresses);
-  cpu->PC = get_short_from_cpu_memory(0xfffc); 
-  //cpu->PC = 0xc000;
+  if(is_test)
+  {
+    cpu->PC = 0xc000;
+  }
+  else
+  {
+    cpu->PC = get_short_from_cpu_memory(0xfffc); 
+  }
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
   ppu->status = 0x00;
-  cpu->A=0xfe;
+  cpu->A=0x00;
   for(int q=0;q<0x0100;q++)
   {
     cpu->cpu_memory[q]= 0x5B;
   }
   int run_instructions_no_prompt = 0;
+  if(is_test)
+  {
+    run_instructions_no_prompt = 8991;
+  }
   char arg2 = ' ';
   int arg1 = 0;
   int draw_screen_count = 29606;
@@ -180,6 +157,10 @@ void run_rom()
     clear(input, 20);
     if(run_instructions_no_prompt==0 || breakpoint==cpu->PC)
     { 
+      if(is_test)
+      {
+        break;
+      }
       while (strcmp("run", input))
       {
         printf("> ");
@@ -253,7 +234,7 @@ void run_rom()
       run_instructions_no_prompt--;
     }
     unsigned char current_opcode = cpu->cpu_memory[cpu->PC];
-    standard_instruction(current_opcode);
+    standard_instruction(current_opcode, is_test);
     draw_screen_count--; 
     if(draw_screen_count==2260)
     {

@@ -33,7 +33,7 @@ struct NES_CPU* cpu;
 struct NES_PPU* ppu;
 struct NES_IO* io;
 typedef void (*opcode_action_type)(unsigned char a); 
-void run_rom();
+void run_rom(char is_test);
 typedef void (*opcode_action)(unsigned char* ptr);
 typedef unsigned char* (*get_operand_ptr_type)();
 

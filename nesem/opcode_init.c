@@ -1020,7 +1020,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xe2].action = NOP;
   (*opcodes_ptr)[0xe2].address_mode = IMMEDIATE_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xe3].name = "ISC";
+  (*opcodes_ptr)[0xe3].name = "ISB";
   (*opcodes_ptr)[0xe3].action = ISC;
   (*opcodes_ptr)[0xe3].address_mode = INDEXED_INDIRECT_X_ADDRESS_MODE;
 
@@ -1036,7 +1036,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xe6].action = INC;
   (*opcodes_ptr)[0xe6].address_mode = ZEROPAGE_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xe7].name = "ISC";
+  (*opcodes_ptr)[0xe7].name = "ISB";
   (*opcodes_ptr)[0xe7].action = ISC;
   (*opcodes_ptr)[0xe7].address_mode = ZEROPAGE_ADDRESS_MODE;
 
@@ -1068,7 +1068,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xee].action = INC;
   (*opcodes_ptr)[0xee].address_mode = ABSOLUTE_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xef].name = "ISC";
+  (*opcodes_ptr)[0xef].name = "ISB";
   (*opcodes_ptr)[0xef].action = ISC;
   (*opcodes_ptr)[0xef].address_mode = ABSOLUTE_ADDRESS_MODE;
 
@@ -1084,7 +1084,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xf2].action = STP;
   (*opcodes_ptr)[0xf2].address_mode = NONE_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xf3].name = "ISC";
+  (*opcodes_ptr)[0xf3].name = "ISB";
   (*opcodes_ptr)[0xf3].action = ISC;
   (*opcodes_ptr)[0xf3].address_mode = INDIRECT_INDEXED_Y_ADDRESS_MODE;
 
@@ -1100,7 +1100,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xf6].action = INC;
   (*opcodes_ptr)[0xf6].address_mode = ZEROPAGE_X_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xf7].name = "ISC";
+  (*opcodes_ptr)[0xf7].name = "ISB";
   (*opcodes_ptr)[0xf7].action = ISC;
   (*opcodes_ptr)[0xf7].address_mode = ZEROPAGE_X_ADDRESS_MODE;
   
@@ -1116,7 +1116,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xfa].action = NOP;
   (*opcodes_ptr)[0xfa].address_mode = NONE_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xfb].name = "ISC";
+  (*opcodes_ptr)[0xfb].name = "ISB";
   (*opcodes_ptr)[0xfb].action = ISC;
   (*opcodes_ptr)[0xfb].address_mode = ABSOLUTE_Y_ADDRESS_MODE;
 
@@ -1132,7 +1132,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   (*opcodes_ptr)[0xfe].action = INC;
   (*opcodes_ptr)[0xfe].address_mode = ABSOLUTE_X_ADDRESS_MODE;
   
-  (*opcodes_ptr)[0xff].name = "ISC";
+  (*opcodes_ptr)[0xff].name = "ISB";
   (*opcodes_ptr)[0xff].action = ISC;
   (*opcodes_ptr)[0xff].address_mode = ABSOLUTE_X_ADDRESS_MODE;
 

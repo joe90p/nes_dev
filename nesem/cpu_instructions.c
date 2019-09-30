@@ -612,7 +612,7 @@ void RTS()
 }
 void PHP()
 {
-  stack_push_char(cpu->status);
+  stack_push_char(cpu->status|0x30);
 }
 void PHA()
 {

@@ -2,17 +2,29 @@
 
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {
-  return get_address_input_upper_byte<<8 | get_address_input_lower_byte;
+  unsigned short newAddress =  get_address_input_upper_byte<<8 | get_address_input_lower_byte;
+  return newAddress;
 }
 
+unsigned short get_absolute_address_indexed(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte, unsigned char index)
+{
+  unsigned short newAddress =  get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + index;
+  unsigned char newAddress_upper =  ((unsigned char*)(&newAddress))[1];
+  if(newAddress_upper != get_address_input_upper_byte)
+  {
+    //increment cycles by 1 - page boundary crossed 
+    cpu->cycles+=1;
+  }
+  return newAddress;
+}
 unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->X;
+    return get_absolute_address_indexed(get_address_input_upper_byte, get_address_input_lower_byte, cpu->X);
 }
 
 unsigned short get_absolute_address_Y(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {
-  return get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + cpu->Y;
+  return get_absolute_address_indexed(get_address_input_upper_byte, get_address_input_lower_byte, cpu->Y);
 }
 
 unsigned short get_zeropage_address(unsigned char get_address_input)
@@ -50,7 +62,7 @@ unsigned short get_indirect(unsigned short get_address_input)
 unsigned short get_indirect_indexed_Y(unsigned short get_address_input)
 { 
   unsigned char address_input_high = (unsigned char)get_address_input + 1;
-  return get_absolute_address(cpu->cpu_memory[address_input_high ], cpu->cpu_memory[get_address_input]) + cpu->Y;
+  return get_absolute_address_indexed(cpu->cpu_memory[address_input_high ],cpu->cpu_memory[get_address_input] , cpu->Y);
 }
 unsigned char* get_immediate_operand_ptr()
 {

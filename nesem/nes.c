@@ -12,7 +12,8 @@ struct NES_CPU* cpu;
 
 struct opcode* opcodes;
 struct address* addresses;
-
+unsigned int master_cycle = 0;
+unsigned int cpu_cycle = 0;
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
 {
 
@@ -38,7 +39,7 @@ void print_instruction_info_from_context(char program_counter_increment, char ad
         sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
       }
     }
-    printf("%04X %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X \n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer);
+    printf("%04X %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X CYC: %d\n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer, cpu_cycle);
     free(address_mode_info);
 
 }
@@ -63,6 +64,8 @@ void standard_instruction(unsigned char current_opcode, char is_test)
   {
     increment_PC(program_counter_increment);
   }
+  cpu->cycles+=(opcodes[current_opcode].cycles);
+  cpu_cycle=((cpu->cycles)*3);
 }
 
 void clear(char* pointer, int length)
@@ -234,7 +237,11 @@ void run_rom(char is_test)
       run_instructions_no_prompt--;
     }
     unsigned char current_opcode = cpu->cpu_memory[cpu->PC];
-    standard_instruction(current_opcode, is_test);
+    if(master_cycle>=cpu_cycle)
+    {
+      standard_instruction(current_opcode, is_test);
+    }
+    master_cycle++;
     draw_screen_count--; 
     if(draw_screen_count==2260)
     {

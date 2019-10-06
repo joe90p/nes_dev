@@ -13,5 +13,6 @@ struct opcode
   opcode_action action;
   char* name;
   unsigned char address_mode;
+  unsigned char cycles;
 };
 void set_opcodes(struct opcode** opcodes, struct address** addresses);

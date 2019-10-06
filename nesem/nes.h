@@ -15,6 +15,7 @@ struct NES_CPU
   unsigned short PC;
   unsigned char old_PC;
   unsigned char stack_pointer;
+  unsigned int cycles;
 }; 
 struct NES_IO
 {

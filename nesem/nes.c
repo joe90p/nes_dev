@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include </home/phil/git/nes_dev/nesem/ppu.h>
+#include <ppu.h>
 #include <time.h>
-#include </home/phil/git/nes_dev/nesem/cpu_addressing.h>
-#include </home/phil/git/nes_dev/nesem/cpu_instructions.h>
-#include </home/phil/git/nes_dev/nesem/opcode_init.h>
+#include <cpu_addressing.h>
+#include <cpu_instructions.h>
+#include <opcode_init.h>
 void load_rom();
 unsigned char* ines_file_contents;
 struct NES_CPU* cpu;

@@ -1,4 +1,4 @@
-#include </home/phil/git/nes_dev/nesem/cpu_addressing.h>
+#include <cpu_addressing.h>
 
 unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {

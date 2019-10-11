@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include </home/phil/git/nes_dev/nesem/opcode_init.h>
+#include <opcode_init.h>
 
 
 void set_opcode(struct opcode** opcode_ptr, unsigned char opcode, char* name, opcode_action action, unsigned char address_mode, unsigned char cycles)

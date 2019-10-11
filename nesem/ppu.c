@@ -1,5 +1,5 @@
 
-#include </home/phil/git/nes_dev/nesem/ppu.h>
+#include <ppu.h>
 char keepRunning(char* controller)
 {
   SDL_Event event;

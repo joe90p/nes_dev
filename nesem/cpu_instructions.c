@@ -1,5 +1,5 @@
-#include </home/phil/git/nes_dev/nesem/cpu_instructions.h>
-#include </home/phil/git/nes_dev/nesem/cpu_addressing.h>
+#include <cpu_instructions.h>
+#include <cpu_addressing.h>
 static unsigned char read_controller_reset_await = 0;
 static unsigned char controller_read = 0;
 static unsigned short ppu_write_address;

@@ -4,10 +4,10 @@
 CC := gcc
 
 # set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -g -rdynamic -include nes.h -ggdb3 -O0 --std=c99 -Wno-char-subscripts  -lm
+CFLAGS := `sdl2-config --libs --cflags` -g -rdynamic -include nes.h -ggdb3 -O0 --std=c99 -Wno-char-subscripts  -lm -Iinclude
 
 # add header files here
-HDRS :=
+HDRS := 
 TEST_HDRS := nes.h
 # add source files here
 SRCS := cpu_instructions.c cpu_addressing.c ppu.c nes.c main.c opcode_init.c
@@ -24,7 +24,7 @@ EXEC := phlem
 all: $(EXEC)
 
 # recipe for building the final executable
-$(EXEC): $(OBJS) $(TEST_HDRS) Makefile
+$(EXEC): $(OBJS) $(HDRS) Makefile
 	$(CC) -o $@ $(OBJS) $(CFLAGS)
 
 test: $(TEST_OBJS) $(HDRS) Makefile

@@ -727,8 +727,14 @@ unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, un
   if((equalTo && (cpu->status&flag)) || (!equalTo && !(cpu->status&flag)))
   {
     unsigned short newPC = newPC_ptr - cpu->cpu_memory;
+    cpu->cycles+=1;
+    unsigned char newAddress_upper =  ((unsigned char*)(&newPC))[1];
+    unsigned char current_upper    =  ((unsigned char*)(&(cpu->PC)))[1];
+    if(newAddress_upper!=current_upper)
+    {
+      cpu->cycles+=1;
+    }
     cpu->PC = newPC;
-    //increment_PC(offset + 2);
     return 1;
   }
   else

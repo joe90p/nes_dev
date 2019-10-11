@@ -39,7 +39,7 @@ void print_instruction_info_from_context(char program_counter_increment, char ad
         sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
       }
     }
-    printf("%04X %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X CYC: %d\n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer, cpu_cycle);
+    printf("%04X  %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X CYC: %d\n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer, cpu_cycle);
     free(address_mode_info);
 
 }

@@ -17,6 +17,12 @@ unsigned short get_absolute_address_indexed(unsigned char get_address_input_uppe
   }
   return newAddress;
 }
+unsigned short get_zp_address_indexed(unsigned char get_address_input_lower_byte, unsigned char index)
+{
+  unsigned short newAddress =  get_absolute_address(0x00, get_address_input_lower_byte)  + index;
+  
+  return newAddress;
+}
 unsigned short get_absolute_address_X(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte)
 {
     return get_absolute_address_indexed(get_address_input_upper_byte, get_address_input_lower_byte, cpu->X);
@@ -34,12 +40,12 @@ unsigned short get_zeropage_address(unsigned char get_address_input)
 
 unsigned short get_zeropage_X_address(unsigned char get_address_input)
 {
-  return get_absolute_address_X(0x00, get_address_input);
+  return get_zp_address_indexed(get_address_input, cpu->X);
 }
 
 unsigned short get_zeropage_Y_address(unsigned char get_address_input)
 {
-  return get_absolute_address_Y(0x00, get_address_input);
+  return get_zp_address_indexed(get_address_input, cpu->Y);
 }
 unsigned short get_indexed_indirect_X(unsigned char get_address_input)
 {

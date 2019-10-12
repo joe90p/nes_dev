@@ -295,7 +295,7 @@ void set_opcodes(struct opcode** opcodes_ptr, struct address** addresses_ptr)
   set_opcode(opcodes_ptr, 0xb6, "LDX", LDX, ZEROPAGE_Y_ADDRESS_MODE, 4);
   set_opcode(opcodes_ptr, 0xb7, "LAX", LAX, ZEROPAGE_Y_ADDRESS_MODE, 2);
   set_opcode(opcodes_ptr, 0xb8, "CLV", CLV, NONE_ADDRESS_MODE, 2);
-  set_opcode(opcodes_ptr, 0xb9, "LDA", LDA_ptr, ABSOLUTE_Y_ADDRESS_MODE, 3);
+  set_opcode(opcodes_ptr, 0xb9, "LDA", LDA_ptr, ABSOLUTE_Y_ADDRESS_MODE, 4);
   set_opcode(opcodes_ptr, 0xba, "TSX", TSX, NONE_ADDRESS_MODE, 2);
   set_opcode(opcodes_ptr, 0xbb, "LAS", LAS, ABSOLUTE_Y_ADDRESS_MODE, 2);
   set_opcode(opcodes_ptr, 0xbc, "LDY", LDY, ABSOLUTE_X_ADDRESS_MODE, 3);

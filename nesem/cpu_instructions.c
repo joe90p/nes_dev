@@ -732,7 +732,7 @@ unsigned char test_flag_and_branch(unsigned char flag, unsigned char equalTo, un
     unsigned char current_upper    =  ((unsigned char*)(&(cpu->PC)))[1];
     if(newAddress_upper!=current_upper)
     {
-      cpu->cycles+=1;
+      //cpu->cycles+=1;
     }
     cpu->PC = newPC;
     return 1;

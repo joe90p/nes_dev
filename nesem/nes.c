@@ -39,7 +39,7 @@ void print_instruction_info_from_context(char program_counter_increment, char ad
         sprintf(address_mode_info,address_info, cpu->cpu_memory[cpu->PC + 2], cpu->cpu_memory[cpu->PC + 1]);
       }
     }
-    printf("%04X  %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X CYC: %d\n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer, cpu_cycle);
+    printf("%04X  %s %s\nA:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3d\n", cpu->PC, opcodes[opcode].name, address_mode_info, (unsigned char)cpu->A, cpu->X, cpu->Y, cpu->status, cpu->stack_pointer, cpu_cycle);
     free(address_mode_info);
 
 }
@@ -65,7 +65,9 @@ void standard_instruction(unsigned char current_opcode, char is_test)
     increment_PC(program_counter_increment);
   }
   cpu->cycles+=(opcodes[current_opcode].cycles);
-  cpu_cycle=((cpu->cycles)*3);
+  cpu_cycle=(cpu_cycle + ((cpu->cycles)*3))%341;
+  //cpu_cycle= (cpu_cycle > 341) ? cpu_cycle%341 : cpu_cycle;
+  cpu->cycles=0;
 }
 
 void clear(char* pointer, int length)

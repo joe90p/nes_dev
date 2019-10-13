@@ -13,4 +13,6 @@ unsigned char* get_indexed_indirect_X_operand_ptr();
 unsigned char* get_indirect_indexed_Y_operand_ptr();
 unsigned char* get_absolute_indirect_operand_ptr();
 unsigned char* get_branch_operand_ptr();
+unsigned char* get_absolute_X_nocycle_operand_ptr();
+unsigned char* get_absolute_Y_nocycle_operand_ptr();
 #endif

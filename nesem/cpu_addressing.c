@@ -6,16 +6,20 @@ unsigned short get_absolute_address(unsigned char get_address_input_upper_byte, 
   return newAddress;
 }
 
-unsigned short get_absolute_address_indexed(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte, unsigned char index)
+unsigned short get_absolute_address_indexed_cycle(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte, unsigned char index, unsigned char cycle_on_page_cross)
 {
   unsigned short newAddress =  get_absolute_address(get_address_input_upper_byte, get_address_input_lower_byte)  + index;
   unsigned char newAddress_upper =  ((unsigned char*)(&newAddress))[1];
-  if(newAddress_upper != get_address_input_upper_byte)
+  if(cycle_on_page_cross && (newAddress_upper != get_address_input_upper_byte))
   {
     //increment cycles by 1 - page boundary crossed 
     cpu->cycles+=1;
   }
   return newAddress;
+}
+unsigned short get_absolute_address_indexed(unsigned char get_address_input_upper_byte, unsigned char get_address_input_lower_byte, unsigned char index)
+{
+  return get_absolute_address_indexed_cycle(get_address_input_upper_byte, get_address_input_lower_byte, index, 1);
 }
 unsigned short get_zp_address_indexed(unsigned char get_address_input_lower_byte, unsigned char index)
 {
@@ -127,6 +131,16 @@ unsigned char* get_absolute_X_operand_ptr()
 unsigned char* get_absolute_Y_operand_ptr()
 {
   unsigned short address = get_absolute_address_Y(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC + 1]); 
+  return &cpu->cpu_memory[address];
+}
+unsigned char* get_absolute_X_nocycle_operand_ptr()
+{
+  unsigned short address = get_absolute_address_indexed_cycle(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC+1], cpu->X, 0);
+  return &cpu->cpu_memory[address];
+}
+unsigned char* get_absolute_Y_nocycle_operand_ptr()
+{
+  unsigned short address = get_absolute_address_indexed_cycle(cpu->cpu_memory[cpu->PC+2], cpu->cpu_memory[cpu->PC+1], cpu->Y, 0);
   return &cpu->cpu_memory[address];
 }
 

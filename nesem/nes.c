@@ -149,6 +149,7 @@ void run_rom(char is_test)
   if(is_test)
   {
     run_instructions_no_prompt = 8991;
+    //run_instructions_no_prompt = 9000;
   }
   char arg2 = ' ';
   int arg1 = 0;
@@ -239,11 +240,15 @@ void run_rom(char is_test)
       run_instructions_no_prompt--;
     }
     unsigned char current_opcode = cpu->cpu_memory[cpu->PC];
-    if(master_cycle>=cpu_cycle)
-    {
+    //if(master_cycle>=cpu_cycle)
+    //{
       standard_instruction(current_opcode, is_test);
-    }
-    master_cycle++;
+    //}
+    /*else
+    {
+      printf("blahh");
+    }*/
+    //master_cycle++;
     draw_screen_count--; 
     if(draw_screen_count==2260)
     {

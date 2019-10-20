@@ -46,6 +46,7 @@ SDL_Window* createWindow() {
     return win;
 }
 
+unsigned int* pixel_buffer_2;
 SDL_Renderer* createRenderer(SDL_Window* win)
 {
     // create a renderer, which sets up the graphics hardware
@@ -63,6 +64,7 @@ SDL_Renderer* createRenderer(SDL_Window* win)
 
 
     SDL_SetRenderDrawColor( rend, 255, 0, 0, 255);
+    pixel_buffer_2=malloc(256*240*sizeof(unsigned int));
     return rend;
 
 }
@@ -86,54 +88,33 @@ void createWindowAndRenderer(SDL_Window** wind, SDL_Renderer** rend)
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(*rend, PPU_SCREEN_X, PPU_SCREEN_Y);
 } 
-void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length, SDL_Texture* texture) {
-    unsigned int* pixel_buffer=malloc(256*240*sizeof(unsigned int));
-    int row_length = 32;   
-    int row_num = 30;
-    for(int q=0; q<row_length*row_num; q++)
-    {
-     int col = q < row_length ? q : q%row_length; 
-     int name_table_index = 0x2000;
-     int sprite_number = ppu_memory[name_table_index + q];
-     draw_sprite(1, col*8,(q/row_length)*8,sprite_number,ppu_memory, pixel_buffer); 
-    }
+void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer)
+{
+     int sprite_index_offset = sprite_table * 0x1000;
+     int sprite_index = sprite_index_offset + (sprite_number*16) + (j%8);
+     unsigned char* chr_data = &(ppu_memory[sprite_index]);
+     draw_chr_data(i, j, chr_data, pixel_buffer);
+}
 
-    for(int i=0;i<64; i++)
-    {
-      unsigned char sprite_index = i *4;
-      draw_sprite(0, sprite_data[sprite_index+3], sprite_data[sprite_index]+1, sprite_data[sprite_index+1], ppu_memory, pixel_buffer);
-    }
-    SDL_UpdateTexture(texture, NULL, pixel_buffer, 256 * sizeof(unsigned int));
+void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
+  if(ppu_cycle <=257 && ((ppu_cycle-1)%8)==0)
+  {
+    int nt_byte = (ppu_cycle - 1) /8; 
+    int name_table_index = 0x2000;
+    int q = ((scanline/8)*32) + nt_byte;
+    int sprite_number = ppu_memory[name_table_index + q];
+    draw_sprite_2(1, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2); 
+  }
+}
+
+void updateRenderer_3(SDL_Renderer* rend, SDL_Texture* texture) {
+
+    SDL_UpdateTexture(texture, NULL, pixel_buffer_2, 256 * sizeof(unsigned int));
     SDL_RenderClear(rend);
     SDL_RenderCopy(rend, texture, NULL, NULL);
     SDL_RenderPresent(rend);
-    free(pixel_buffer);
-    // wait a few seconds
-    //SDL_Delay(50);   
 }
 
-/*void draw(unsigned char* ppu_memory,unsigned char* sprite_data, int chr_length)
-{
-    SDL_Window* win = createWindow();
-    SDL_Renderer* rend = createRenderer(win);
-    updateRenderer(rend,ppu_memory,sprite_data,chr_length); 
-    
-    // clean up resources before exiting
-    SDL_DestroyRenderer(rend);
-    SDL_DestroyWindow(win);
-    SDL_Quit();
-}*/
-
-void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer)
-{
-  for(int m=0; m<8; m++)
-  {
-     int sprite_index_offset = sprite_table * 0x1000;
-     int sprite_index = sprite_index_offset + (sprite_number*16) + m;
-     unsigned char* chr_data = &(ppu_memory[sprite_index]);
-     draw_chr_data(i, j +m, chr_data, pixel_buffer);
-  }
-}
 
 void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_buffer)
 {
@@ -144,6 +125,7 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_bu
     unsigned char data = (chr_data_1&1) | ((chr_data_2<<1)&3);
     unsigned int pixel_data= 0;
     switch(data)
+
     {
       case 0:
         pixel_data = 0xFFFF0000;

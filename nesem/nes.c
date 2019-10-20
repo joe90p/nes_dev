@@ -13,6 +13,7 @@ struct NES_CPU* cpu;
 struct opcode* opcodes;
 struct address* addresses;
 unsigned int master_cycle = 0;
+unsigned int scanline = 0;
 unsigned int cpu_cycle = 0;
 void print_instruction_info_from_context(char program_counter_increment, char addressing_mode, unsigned char opcode)
 {
@@ -232,31 +233,38 @@ void run_rom(char is_test)
         }
         
       }
-      run_instructions_no_prompt--; 
       clear(input, 20 ); 
     }
-    else
-    {
-      run_instructions_no_prompt--;
-    }
+
     unsigned char current_opcode = cpu->cpu_memory[cpu->PC];
-    //if(master_cycle>=cpu_cycle)
-    //{
-      standard_instruction(current_opcode, is_test);
-    //}
-    /*else
+    if(master_cycle>=cpu_cycle)
     {
-      printf("blahh");
-    }*/
-    //master_cycle++;
+      standard_instruction(current_opcode, is_test);
+      run_instructions_no_prompt--; 
+    }
+    if(scanline < 240)
+    {
+      updateRenderer_2(scanline, master_cycle, ppu->ppu_memory);
+    }
+    master_cycle++;
     draw_screen_count--; 
-    if(draw_screen_count==2260)
+    if(master_cycle==341)
+    {
+      master_cycle=0;
+      scanline++;
+    }
+    if(scanline==262)
+    {
+      scanline=0;
+    }
+    if(scanline==241 && master_cycle==1)
     {
       // V BLANK STARTS
       //keepRunning(&(io->controller1));   
       clock_t before = clock();
       printf("trace: nmi_time %d\n", (clock() - nmi_time) * 1000 / CLOCKS_PER_SEC);
-      updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE, text);
+      //updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE, text);
+      updateRenderer_3(rend,text);
       clock_t after = (clock() - before) * 1000 / CLOCKS_PER_SEC;
       printf("trace: updateRenderer time %d\n", after);
       nmi_time = clock();

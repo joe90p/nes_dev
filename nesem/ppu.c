@@ -88,22 +88,40 @@ void createWindowAndRenderer(SDL_Window** wind, SDL_Renderer** rend)
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(*rend, PPU_SCREEN_X, PPU_SCREEN_Y);
 } 
-void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer)
+void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer, unsigned char section)
 {
      int sprite_index_offset = sprite_table * 0x1000;
-     int sprite_index = sprite_index_offset + (sprite_number*16) + (j%8);
+     int sprite_index = sprite_index_offset + (sprite_number*16) + section;
      unsigned char* chr_data = &(ppu_memory[sprite_index]);
      draw_chr_data(i, j, chr_data, pixel_buffer);
 }
 
 void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
-  if(ppu_cycle <=257 && ((ppu_cycle-1)%8)==0)
+  unsigned char* sprite_data = ppu->spr_ram;
+  if(ppu_cycle <=257  )
   {
-    int nt_byte = (ppu_cycle - 1) /8; 
-    int name_table_index = 0x2000;
-    int q = ((scanline/8)*32) + nt_byte;
-    int sprite_number = ppu_memory[name_table_index + q];
-    draw_sprite_2(1, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2); 
+    if(((ppu_cycle-1)%8)==0)
+    {
+      int nt_byte = (ppu_cycle - 1) /8; 
+      int name_table_index = 0x2000;
+      int q = ((scanline/8)*32) + nt_byte;
+      int sprite_number = ppu_memory[name_table_index + q];
+      draw_sprite_2(1, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8); 
+    }
+
+  }
+  if(ppu_cycle==258)
+  {
+    for(int i=0;i<64; i++)
+    {
+      unsigned char sprite_index = i *4;
+      if(scanline>=sprite_data[sprite_index]+1 && scanline<=sprite_data[sprite_index]+8 )
+      {
+        unsigned char section = scanline -  sprite_data[sprite_index] -1;
+        draw_sprite_2(0, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section);
+      }
+
+    }
   }
 }
 

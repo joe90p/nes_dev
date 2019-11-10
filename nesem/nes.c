@@ -45,7 +45,6 @@ void print_instruction_info_from_context(char program_counter_increment, char ad
 
 }
 
-
 void increment_PC(signed char increment)
 {
   cpu->PC+=increment;

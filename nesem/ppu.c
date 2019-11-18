@@ -161,12 +161,12 @@ void createWindowAndRenderer(SDL_Window** wind, SDL_Renderer** rend)
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(*rend, PPU_SCREEN_X, PPU_SCREEN_Y);
 } 
-void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer, unsigned char section, unsigned char pallette)
+void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer, unsigned char section, unsigned char pallette, unsigned char sprite_attribute)
 {
      int sprite_index_offset = sprite_table * 0x1000;
      int sprite_index = sprite_index_offset + (sprite_number*16) + section;
      unsigned char* chr_data = &(ppu_memory[sprite_index]);
-     draw_chr_data(i, j, chr_data, pixel_buffer, pallette);
+     draw_chr_data(i, j, chr_data, pixel_buffer, pallette, sprite_attribute);
 }
 
 void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
@@ -180,11 +180,11 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
       int q = ((scanline/8)*32) + nt_byte;
       int sprite_number = ppu_memory[name_table_index + q];
       unsigned char attribute_index = ((ppu_cycle-1)/32) + 8*(scanline/32);
-      unsigned char quadrant = ((ppu_cycle/16)+2)%2+(2*(((scanline/16)+2)%2));
+      unsigned char quadrant = ((((ppu_cycle-1)/16)+2)%2+(2*(((scanline/16)+2)%2)))*2;
       unsigned char attribute_byte = ppu_memory[0x23c0 + attribute_index];
       unsigned char mask = 3<<quadrant;
-      unsigned char pallette = (attribute_byte&mask)>>quadrant;
-      draw_sprite_2(1, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette);
+      unsigned char pallette = ((((attribute_byte&mask)>>quadrant)&3)<<2);
+      draw_sprite_2(1, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0);
       
     }
 
@@ -197,7 +197,9 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
       if(scanline>=sprite_data[sprite_index]+1 && scanline<=sprite_data[sprite_index]+8 )
       {
         unsigned char section = scanline -  sprite_data[sprite_index] -1;
-        draw_sprite_2(0, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section, 0);
+        unsigned char sprite_attribute =  sprite_data[sprite_index+2];
+        unsigned char pallette = ((sprite_attribute&3)<<2)+16;
+        draw_sprite_2(0, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section, pallette, sprite_attribute);
       }
 
     }
@@ -214,34 +216,23 @@ void updateRenderer_3(SDL_Renderer* rend, SDL_Texture* texture) {
 
 
 
-void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_buffer, unsigned char pallette)
+void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_buffer, unsigned char pallette, unsigned char sprite_attribute)
 {
   unsigned char chr_data_1 = chr_data[0];
   unsigned char chr_data_2 = chr_data[8];
+  
   for(int n=0; n<8; n++)
   {
     unsigned char data = (chr_data_1&1) | ((chr_data_2<<1)&3);
     unsigned int pixel_data= 0;
-    /*switch(data)
-
+    if(!(pallette&16 && data==0))
     {
-      case 0:
-        pixel_data = 0xFFFF0000;
-        break;
-      case 1:
-        pixel_data = 0xFF00FF00;
-        break;
-      case 2:
-        pixel_data = 0xFF0000FF;
-        break;
-      case 3:
-        pixel_data = 0xFFFF00FF;
-        break;
-    }*/
-    unsigned char nes_color = ppu->ppu_memory[0x3f01 + (4*pallette) + data];
-    pixel_data = nescolormap[nes_color];
-    pixel_buffer[(j*32*8) + i + 7 -n]=pixel_data;  
-    chr_data_1>>=1;
+      unsigned char nes_color = ppu->ppu_memory[0x3f00 + pallette + data ];
+      pixel_data = nescolormap[nes_color];
+      unsigned char pos = sprite_attribute&64 ? n : 7 -n;
+      pixel_buffer[(j*32*8) + i + pos]=pixel_data;  
+    }
+        chr_data_1>>=1;
     chr_data_2>>=1;
   }
 }

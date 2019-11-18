@@ -9,7 +9,7 @@
 #define PPU_SCREEN_X 256
 #define PPU_SCREEN_Y 240
 void draw_sprite(int sprite_table, int i, int j, int sprite_number, unsigned char* chr_data, unsigned int* pixel_buffer);
-void draw_chr_data(int i, int j, unsigned char* chr_data,  unsigned int* pixel_buffer, unsigned char pallette);
+void draw_chr_data(int i, int j, unsigned char* chr_data,  unsigned int* pixel_buffer, unsigned char pallette, unsigned char sptite_attribute);
 void updateRenderer(SDL_Renderer* rend, unsigned char* ppu_memory, unsigned char* sprite_data, int chr_length, SDL_Texture* texture);
 void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory);
 void updateRenderer_3(SDL_Renderer* rend, SDL_Texture* texture);

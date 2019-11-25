@@ -1,5 +1,44 @@
 
 #include <ppu.h>
+
+void setController()
+{
+  SDL_PumpEvents();
+  const Uint8* state = SDL_GetKeyboardState(NULL);
+  io->controller1=0;
+  if(state[SDL_SCANCODE_K])
+  {
+    io->controller1|=1;
+  }
+  if(state[SDL_SCANCODE_L])
+  {
+    io->controller1|=2;
+  }
+  if(state[SDL_SCANCODE_G])
+  {
+    io->controller1|=4;
+  }
+  if(state[SDL_SCANCODE_H])
+  {
+    io->controller1|=8;
+  }
+  if(state[SDL_SCANCODE_W])
+  {
+    io->controller1|=16;
+  }
+  if(state[SDL_SCANCODE_S])
+  {
+    io->controller1|=32;
+  }
+  if(state[SDL_SCANCODE_A])
+  {
+    io->controller1|=64;
+  }
+  if(state[SDL_SCANCODE_D])
+  {
+    io->controller1|=128;
+  }
+}
 char keepRunning(char* controller)
 {
   SDL_Event event;
@@ -9,15 +48,15 @@ char keepRunning(char* controller)
   switch(event.type) {
     case SDL_QUIT:
       return 0;
-    case SDL_KEYDOWN:
+    /*case SDL_KEYDOWN:
       switch(event.key.keysym.sym)
       {
         case SDLK_w:
            *controller=(*controller)|8;
-           //*controller=8;
+           *controller=8;
           break;  
       }  
-      return 1;
+      return 1;*/
     default:
       return 1;
   }

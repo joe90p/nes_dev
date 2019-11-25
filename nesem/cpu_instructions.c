@@ -303,6 +303,7 @@ void store_value_at_address(unsigned char value, unsigned short address)
     }
     else {
       if(value==0 && read_controller_reset_await) {
+        setController();
         controller_read = io->controller1;
       }
       read_controller_reset_await = 0;

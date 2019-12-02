@@ -210,6 +210,7 @@ void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned c
 
 void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
   unsigned char* sprite_data = ppu->spr_ram;
+  unsigned char ppu_status = cpu->cpu_memory[0x2000];
   if(ppu_cycle <=257  )
   {
     if(((ppu_cycle-1)%8)==0)
@@ -223,7 +224,7 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
       unsigned char attribute_byte = ppu_memory[0x23c0 + attribute_index];
       unsigned char mask = 3<<quadrant;
       unsigned char pallette = ((((attribute_byte&mask)>>quadrant)&3)<<2);
-      draw_sprite_2(1, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0);
+      draw_sprite_2((ppu_status&16)>>4, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0);
       
     }
 
@@ -238,7 +239,7 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
         unsigned char section = scanline -  sprite_data[sprite_index] -1;
         unsigned char sprite_attribute =  sprite_data[sprite_index+2];
         unsigned char pallette = ((sprite_attribute&3)<<2)+16;
-        draw_sprite_2(0, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section, pallette, sprite_attribute);
+        draw_sprite_2((ppu_status&8)>>3, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section, pallette, sprite_attribute);
       }
 
     }
@@ -266,7 +267,9 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_bu
     unsigned int pixel_data= 0;
     if(!(pallette&16 && data==0))
     {
-      unsigned char nes_color = ppu->ppu_memory[0x3f00 + pallette + data ];
+      unsigned short palette_offset = pallette + data;
+      unsigned short address = (palette_offset%4==0) ? 0x3f00 : (0x3f00 + palette_offset );
+      unsigned char nes_color = ppu->ppu_memory[address];
       pixel_data = nescolormap[nes_color];
       unsigned char pos = sprite_attribute&64 ? n : 7 -n;
       pixel_buffer[(j*32*8) + i + pos]=pixel_data;  

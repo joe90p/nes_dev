@@ -20,6 +20,7 @@ struct NES_CPU
 struct NES_IO
 {
   unsigned char controller1;
+  unsigned char controller2;
 };
 struct NES_PPU
 {

@@ -2,6 +2,8 @@
 #include <cpu_addressing.h>
 static unsigned char read_controller_reset_await = 0;
 static unsigned char controller_read = 0;
+static unsigned char read_controller_2_reset_await = 0;
+static unsigned char controller_2_read = 0;
 static unsigned short ppu_write_address;
 static unsigned char ppu_read_buffer = 0;
 static unsigned char oam_addr;
@@ -133,6 +135,15 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
     }
 
   }
+  if(address==0x4017)
+  {
+    value_to_load = controller_2_read&1;
+    if(!peek)
+    {
+      controller_2_read=controller_2_read>>1;
+    }
+
+  }
   if(address==PPU_STATUS_CPU_ADDRESS)
   {
     value_to_load = ppu->status;
@@ -159,7 +170,29 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
       }
       else
       {
-        ppu_read_buffer = ppu->ppu_memory[ppu_write_address - 0x1000];
+        //ppu_read_buffer = ppu->ppu_memory[ppu_write_address - 0x1000];
+        if(ppu_write_address<0x4000){
+
+          if(ppu_write_address>0x3f20)
+          {
+            char test = 0;
+          }
+          unsigned short relativeAddress = 0x3f00 + (ppu_write_address - 0x3f00)%0x20;
+          if(relativeAddress%4==0)
+          {
+            relativeAddress=0x3f00;
+          }
+          toReturn = ppu->ppu_memory[relativeAddress];
+          ppu_read_buffer = ppu->ppu_memory[relativeAddress-0x1000];
+        }
+      }
+      if(ppu->control&4)
+      {
+        ppu_write_address+=32;
+      }
+      else
+      {
+        ppu_write_address+=1;
       }
       return toReturn;  
   }
@@ -284,7 +317,19 @@ void store_value_at_address(unsigned char value, unsigned short address)
   }
   if(address==PPU_DATA_CPU_ADDRESS)
   {
-    ppu->ppu_memory[ppu_write_address]=value;
+    if(ppu_write_address>=0x3f00 && ppu_write_address<0x4000)
+    {
+      unsigned short relativeAddress = 0x3f00 + (ppu_write_address - 0x3f00)%0x20;
+      if(relativeAddress%4==0)
+      {
+        ppu->ppu_memory[0x3f00]=value;
+      }
+      ppu->ppu_memory[relativeAddress]=value;
+    } 
+    else
+    {
+      ppu->ppu_memory[ppu_write_address]=value;
+    }
     if(ppu->control&4)
     {
       ppu_write_address+=32;
@@ -298,16 +343,30 @@ void store_value_at_address(unsigned char value, unsigned short address)
   }
   if(address==0x4016)
   {
-    if(value==1) {
+    if(value&1) {
       read_controller_reset_await = 1;
     }
     else {
-      if(value==0 && read_controller_reset_await) {
+      if((value&1)==0 && read_controller_reset_await) {
         setController();
         controller_read = io->controller1;
       }
       read_controller_reset_await = 0;
       io->controller1=0;
+    }
+  }
+  if(address==0x4017)
+  {
+    if(value&1) {
+      read_controller_2_reset_await = 2;
+    }
+    else {
+      if((value&1)==0 && read_controller_2_reset_await) {
+        setController();
+        controller_2_read = io->controller2;
+      }
+      read_controller_2_reset_await = 0;
+      io->controller2=0;
     }
   }
   cpu->cpu_memory[address]=value;

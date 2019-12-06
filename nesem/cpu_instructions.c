@@ -8,6 +8,7 @@ static unsigned short ppu_write_address;
 static unsigned char ppu_read_buffer = 0;
 static unsigned char oam_addr;
 static unsigned char cpu_sprite_copy_address_high;
+static unsigned char ppu_address_latch=0;
 
 void set_ppu_write_address(unsigned short address)
 {
@@ -151,6 +152,7 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
     {
       ppu->status&=127;
       ppu_write_address = 0;
+      ppu_address_latch=0;
     }
   }
   if(address==PPU_CONTROL_CPU_ADDRESS)
@@ -273,6 +275,10 @@ void store_value_at_address(unsigned char value, unsigned short address)
     ppu->status&=224;
     ppu->status|=value;
   }
+  if(address==PPU_MASK_CPU_ADDRESS)
+  {
+    ppu->mask=value;
+  }
   if(address==PPU_STATUS_CPU_ADDRESS)
   {
     ppu->status&=224;
@@ -305,13 +311,34 @@ void store_value_at_address(unsigned char value, unsigned short address)
   }
   if(address==PPU_SCROLL_CPU_ADDRESS)
   {
+    if(ppu_address_latch)
+    {
+      ppu->y_tile=(value&248)>>3;
+      ppu->y_fine=value&7;
+      ppu_address_latch=0;
+    }
+    else
+    {
+      ppu->x_tile=(value&248)>>3;
+      ppu->x_fine=value&7;
+      ppu_address_latch=1;
+    }
     ppu->status&=224;
     ppu->status|=value;
   }
   if(address==PPU_ADDRESS_CPU_ADDRESS)
   {
-    ppu_write_address<<=8;
-    ppu_write_address|=value; 
+    unsigned char* write_address_ptr = (unsigned char*)&ppu_write_address;
+    /*if(ppu_address_latch)
+    {
+    }
+    else
+    {
+    }*/
+    write_address_ptr[ppu_address_latch==0 ? 1 : 0]=value;
+    ppu_address_latch = ppu_address_latch==0 ? 1 : 0;
+    //ppu_write_address<<=8;
+    //ppu_write_address|=value; 
     ppu->status&=224;
     ppu->status|=value;
   }

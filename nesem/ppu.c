@@ -86,6 +86,7 @@ SDL_Window* createWindow() {
 }
 
 unsigned int* pixel_buffer_2;
+unsigned char* background_raw;
 unsigned int* nescolormap;
 
 void setnescolormap(unsigned int** nescolormap)
@@ -177,6 +178,7 @@ SDL_Renderer* createRenderer(SDL_Window* win)
     SDL_SetRenderDrawColor( rend, 255, 0, 0, 255);
     setnescolormap(&nescolormap);
     pixel_buffer_2=malloc(256*240*sizeof(unsigned int));
+    background_raw=malloc(256*240*sizeof(unsigned int));
     return rend;
 
 }
@@ -200,23 +202,27 @@ void createWindowAndRenderer(SDL_Window** wind, SDL_Renderer** rend)
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(*rend, PPU_SCREEN_X, PPU_SCREEN_Y);
 } 
-void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer, unsigned char section, unsigned char pallette, unsigned char sprite_attribute)
+void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned char* ppu_memory, unsigned int* pixel_buffer, unsigned char section, unsigned char pallette, unsigned char sprite_attribute, unsigned char isSprite0, unsigned char isBackground)
 {
      int sprite_index_offset = sprite_table * 0x1000;
      int sprite_index = sprite_index_offset + (sprite_number*16) + section;
      unsigned char* chr_data = &(ppu_memory[sprite_index]);
-     draw_chr_data(i, j, chr_data, pixel_buffer, pallette, sprite_attribute);
+     draw_chr_data(i, j, chr_data, pixel_buffer, pallette, sprite_attribute, isSprite0, isBackground);
 }
 
 void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
   unsigned char* sprite_data = ppu->spr_ram;
   unsigned char ppu_status = cpu->cpu_memory[0x2000];
+  if(ppu_cycle==0 && scanline==0)
+  {
+    ppu->status&=~64;
+  }
   if(ppu_cycle <=257  )
   {
-    if(((ppu_cycle-1)%8)==0)
+    if(((ppu_cycle-1)%8)==0 && ppu->mask&8)
     {
       int nt_byte = (ppu_cycle - 1) /8; 
-      int name_table_index = 0x2000;
+      int name_table_index = 0x2000 + ppu->x_tile;
       int q = ((scanline/8)*32) + nt_byte;
       int sprite_number = ppu_memory[name_table_index + q];
       unsigned char attribute_index = ((ppu_cycle-1)/32) + 8*(scanline/32);
@@ -224,12 +230,12 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
       unsigned char attribute_byte = ppu_memory[0x23c0 + attribute_index];
       unsigned char mask = 3<<quadrant;
       unsigned char pallette = ((((attribute_byte&mask)>>quadrant)&3)<<2);
-      draw_sprite_2((ppu_status&16)>>4, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0);
+      draw_sprite_2((ppu_status&16)>>4, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0, 0, 1);
       
     }
 
   }
-  if(ppu_cycle==258)
+  if(ppu_cycle==258 && ppu->mask&16)
   {
     for(int i=0;i<64; i++)
     {
@@ -239,7 +245,7 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
         unsigned char section = scanline -  sprite_data[sprite_index] -1;
         unsigned char sprite_attribute =  sprite_data[sprite_index+2];
         unsigned char pallette = ((sprite_attribute&3)<<2)+16;
-        draw_sprite_2((ppu_status&8)>>3, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section, pallette, sprite_attribute);
+        draw_sprite_2((ppu_status&8)>>3, sprite_data[sprite_index+3], scanline, sprite_data[sprite_index+1], ppu_memory, pixel_buffer_2,section, pallette, sprite_attribute, i==0, 0);
       }
 
     }
@@ -256,7 +262,7 @@ void updateRenderer_3(SDL_Renderer* rend, SDL_Texture* texture) {
 
 
 
-void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_buffer, unsigned char pallette, unsigned char sprite_attribute)
+void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_buffer, unsigned char pallette, unsigned char sprite_attribute, unsigned char isSprite0, unsigned char isBackground)
 {
   unsigned char chr_data_1 = chr_data[0];
   unsigned char chr_data_2 = chr_data[8];
@@ -264,6 +270,10 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_bu
   for(int n=0; n<8; n++)
   {
     unsigned char data = (chr_data_1&1) | ((chr_data_2<<1)&3);
+    if(isBackground)
+    {
+      background_raw[(j*32*8) + i + n]=data;
+    }
     unsigned int pixel_data= 0;
     if(!(pallette&16 && data==0))
     {
@@ -272,6 +282,12 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_bu
       unsigned char nes_color = ppu->ppu_memory[address];
       pixel_data = nescolormap[nes_color];
       unsigned char pos = sprite_attribute&64 ? n : 7 -n;
+      if(isSprite0) {
+        if(!(ppu->status&64) && ppu->mask&8 && data && background_raw[(j*32*8) + i + pos])
+        {
+          ppu->status|=64;
+        }
+      }
       pixel_buffer[(j*32*8) + i + pos]=pixel_data;  
     }
         chr_data_1>>=1;

@@ -28,6 +28,11 @@ struct NES_PPU
   unsigned char* spr_ram;
   unsigned char status;
   unsigned char control;
+  unsigned char x_tile;
+  unsigned char x_fine;
+  unsigned char y_tile;
+  unsigned char y_fine;
+  unsigned char mask;
 };
 void load_rom();
 unsigned char* ines_file_contents;

@@ -88,7 +88,6 @@ SDL_Window* createWindow() {
 unsigned int* pixel_buffer_2;
 unsigned char* background_raw;
 unsigned int* nescolormap;
-
 void setnescolormap(unsigned int** nescolormap)
 {
   (*nescolormap) = malloc(64 * sizeof(unsigned int));
@@ -210,7 +209,8 @@ void draw_sprite_2(int sprite_table, int i, int j, int sprite_number, unsigned c
      draw_chr_data(i, j, chr_data, pixel_buffer, pallette, sprite_attribute, isSprite0, isBackground);
 }
 
-void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
+void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory)
+{
   unsigned char* sprite_data = ppu->spr_ram;
   unsigned char ppu_status = cpu->cpu_memory[0x2000];
   if(ppu_cycle==0 && scanline==0)
@@ -219,18 +219,33 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory){
   }
   if(ppu_cycle <=257  )
   {
+
     if(((ppu_cycle-1)%8)==0 && ppu->mask&8)
     {
-      int nt_byte = (ppu_cycle - 1) /8; 
-      int name_table_index = 0x2000 + ppu->x_tile;
-      int q = ((scanline/8)*32) + nt_byte;
-      int sprite_number = ppu_memory[name_table_index + q];
-      unsigned char attribute_index = ((ppu_cycle-1)/32) + 8*(scanline/32);
-      unsigned char quadrant = ((((ppu_cycle-1)/16)+2)%2+(2*(((scanline/16)+2)%2)))*2;
-      unsigned char attribute_byte = ppu_memory[0x23c0 + attribute_index];
+      int pos = (ppu_cycle - 1) /8; 
+     
+      unsigned short name_table_index = ppu->nt==0 ? 0x2000 : 0x2400;
+      int q = ((scanline/8)*32);
+      int nt_byte=0;
+      int attribute_add = 0;
+      if(pos < (32-ppu->x_tile))
+      {
+        nt_byte=pos + ppu->x_tile;
+        attribute_add = (ppu->x_tile*8);
+      }
+      else
+      {
+        name_table_index = ppu->nt==0 ? 0x2400 : 0x2000;
+        nt_byte=pos-32+ppu->x_tile;
+        attribute_add = (ppu->x_tile*8)-256;
+      }
+      int sprite_number = ppu_memory[name_table_index + q + nt_byte];
+      unsigned char attribute_index = ((ppu_cycle-1+attribute_add)/32) + 8*(scanline/32);
+      unsigned char quadrant = (((ppu_cycle-1+attribute_add)/16)%2+(2*((scanline/16)%2)))*2;
+      unsigned char attribute_byte = ppu_memory[name_table_index + 0x03c0 + attribute_index];
       unsigned char mask = 3<<quadrant;
       unsigned char pallette = ((((attribute_byte&mask)>>quadrant)&3)<<2);
-      draw_sprite_2((ppu_status&16)>>4, nt_byte*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0, 0, 1);
+      draw_sprite_2((ppu_status&16)>>4, pos*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0, 0, 1);
       
     }
 
@@ -289,6 +304,10 @@ void draw_chr_data(int i, int j, unsigned char* chr_data, unsigned int* pixel_bu
         }
       }
       pixel_buffer[(j*32*8) + i + pos]=pixel_data;  
+    }
+    else
+    {
+      int hjk = 0;
     }
         chr_data_1>>=1;
     chr_data_2>>=1;

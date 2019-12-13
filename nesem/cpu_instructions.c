@@ -172,13 +172,7 @@ unsigned char get_value(unsigned char* operand_ptr, unsigned char peek)
       }
       else
       {
-        //ppu_read_buffer = ppu->ppu_memory[ppu_write_address - 0x1000];
         if(ppu_write_address<0x4000){
-
-          if(ppu_write_address>0x3f20)
-          {
-            char test = 0;
-          }
           unsigned short relativeAddress = 0x3f00 + (ppu_write_address - 0x3f00)%0x20;
           if(relativeAddress%4==0)
           {
@@ -271,6 +265,7 @@ void store_value_at_address(unsigned char value, unsigned short address)
 {
   if(address==PPU_CONTROL_CPU_ADDRESS)
   {
+    ppu->nt=value&3;
     ppu->control=value;
     ppu->status&=224;
     ppu->status|=value;
@@ -335,8 +330,18 @@ void store_value_at_address(unsigned char value, unsigned short address)
     else
     {
     }*/
+    if(ppu_address_latch==0)
+    {
+      ppu->nt=((value&12)>>2);
+      ppu->y_tile|=((value&3)<<3);
+    }
+    else
+    {
+      ppu->x_tile=(value&31);
+    }
     write_address_ptr[ppu_address_latch==0 ? 1 : 0]=value;
     ppu_address_latch = ppu_address_latch==0 ? 1 : 0;
+    
     //ppu_write_address<<=8;
     //ppu_write_address|=value; 
     ppu->status&=224;
@@ -347,7 +352,7 @@ void store_value_at_address(unsigned char value, unsigned short address)
     if(ppu_write_address>=0x3f00 && ppu_write_address<0x4000)
     {
       unsigned short relativeAddress = 0x3f00 + (ppu_write_address - 0x3f00)%0x20;
-      if(relativeAddress%4==0)
+      if(relativeAddress%0x10==0)
       {
         ppu->ppu_memory[0x3f00]=value;
       }

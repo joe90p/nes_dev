@@ -33,6 +33,7 @@ struct NES_PPU
   unsigned char y_tile;
   unsigned char y_fine;
   unsigned char mask;
+  unsigned char nt;
 };
 void load_rom();
 unsigned char* ines_file_contents;

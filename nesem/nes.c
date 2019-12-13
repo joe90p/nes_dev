@@ -129,14 +129,14 @@ void run_rom(char is_test)
   SDL_Renderer* rend =createRenderer(win);
   SDL_Texture* text = createTexture(rend);
   set_opcodes(&opcodes, &addresses);
-  if(is_test)
+  /*if(is_test)
   {
     cpu->PC = 0xc000;
-  }
-  else
-  {
+  }*/
+  //else
+  //{
     cpu->PC = get_short_from_cpu_memory(0xfffc); 
-  }
+  //}
   cpu->stack_pointer = 0xfd;
   cpu->status = 0x24;
   ppu->status = 0x00;
@@ -146,11 +146,11 @@ void run_rom(char is_test)
     cpu->cpu_memory[q]= 0x5B;
   }
   int run_instructions_no_prompt = 0;
-  if(is_test)
+  /*if(is_test)
   {
     run_instructions_no_prompt = 8991;
     //run_instructions_no_prompt = 9000;
-  }
+  }*/
   char arg2 = ' ';
   int arg1 = 0;
   int draw_screen_count = 29606;
@@ -163,10 +163,10 @@ void run_rom(char is_test)
     clear(input, 20);
     if(run_instructions_no_prompt==0 || breakpoint==cpu->PC)
     { 
-      if(is_test)
+      /*if(is_test)
       {
         break;
-      }
+      }*/
       while (strcmp("run", input))
       {
         printf("> ");
@@ -262,6 +262,7 @@ void run_rom(char is_test)
       //keepRunning(&(io->controller1));   
       clock_t before = clock();
       printf("trace: nmi_time %d\n", (clock() - nmi_time) * 1000 / CLOCKS_PER_SEC);
+      //printf("nt index %d\n", ppu->nt);
       //updateRenderer(rend,ppu->ppu_memory,ppu->spr_ram,CHR_ROM_SIZE, text);
       updateRenderer_3(rend,text);
       clock_t after = (clock() - before) * 1000 / CLOCKS_PER_SEC;

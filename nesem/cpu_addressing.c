@@ -87,8 +87,8 @@ unsigned char* get_zeropage_operand_ptr()
 
 unsigned char* get_branch_operand_ptr()
 {
-  signed char offset = cpu->cpu_memory[cpu->PC +1] + 2;
-  unsigned short address = cpu->PC + offset; 
+  signed char offset = cpu->cpu_memory[cpu->PC +1];
+  unsigned short address = cpu->PC + offset + 2; 
   return &cpu->cpu_memory[address];
 }
 

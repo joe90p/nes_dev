@@ -651,7 +651,8 @@ void stack_push_short(unsigned short to_push)
 
 unsigned char stack_pull_char()
 {
-  unsigned char value =  cpu->cpu_memory[STACK_BOTTOM+(cpu->stack_pointer) +1];
+  unsigned char index = (cpu->stack_pointer) +1;
+  unsigned char value =  cpu->cpu_memory[STACK_BOTTOM+index];
   cpu->stack_pointer+=1;
   return value;
 }

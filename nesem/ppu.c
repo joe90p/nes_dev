@@ -245,7 +245,7 @@ void updateRenderer_2(int scanline, int ppu_cycle,unsigned char* ppu_memory)
       unsigned char attribute_byte = ppu_memory[name_table_index + 0x03c0 + attribute_index];
       unsigned char mask = 3<<quadrant;
       unsigned char pallette = ((((attribute_byte&mask)>>quadrant)&3)<<2);
-      draw_sprite_2((ppu_status&16)>>4, pos*8,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0, 0, 1);
+      draw_sprite_2((ppu_status&16)>>4, (pos*8)-ppu->x_fine,scanline,sprite_number,ppu_memory, pixel_buffer_2,scanline%8, pallette, 0, 0, 1);
       
     }
 

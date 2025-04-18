@@ -8,7 +8,6 @@
 #include <opcode_init.h>
 void load_rom();
 unsigned char* ines_file_contents;
-struct NES_CPU* cpu;
 
 struct opcode* opcodes;
 struct address* addresses;

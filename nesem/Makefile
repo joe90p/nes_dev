@@ -4,7 +4,7 @@
 CC := gcc
 
 # set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -g -rdynamic -include nes.h -ggdb3 -O0 --std=c99 -Wno-char-subscripts  -lm -Iinclude
+CFLAGS := `sdl2-config --libs --cflags` -g -rdynamic -include include/nes.h -ggdb3 -O0 --std=c99 -Wno-char-subscripts  -lm -Iinclude
 
 # add header files here
 HDRS := 

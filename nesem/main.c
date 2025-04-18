@@ -6,6 +6,11 @@
 #include <unistd.h>
 #include <string.h>
 
+struct NES_CPU* cpu;
+struct NES_PPU* ppu;
+struct NES_IO* io;
+
+
 void handler(int sig) {
   void *array[10];
   size_t size;
